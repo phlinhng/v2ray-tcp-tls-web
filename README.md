@@ -12,7 +12,7 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/phlinhng/v2ray-
 3. TCP+TLS is not capable with cloudflare free CDN plan as WSS does.
 
 # Note
-`tls-shunt-proxy` can proxify websocket traffic but it is not capable with CDN (and may not add support to this feature in forseeable future) so there is no benefit to use `tls-shunt-proxy` with ws. Please check [phlinhng/v2ray-tcp-tls-web](https://github.com/phlinhng/v2ray-tcp-tls-web) instead if you prefer to set v2Ray in WS+TLS+WEB mode.
+`tls-shunt-proxy` can proxify websocket traffic but it is not capable with CDN (and may not add support to this feature in forseeable future) so there is no benefit to use `tls-shunt-proxy` with ws. Please check [phlinhng/v2ray-caddy-cf](https://github.com/phlinhng/v2ray-caddy-cf) instead if you prefer to set v2Ray in WS+TLS+WEB mode.
 
 # Credit
 + [Project V](https://www.v2ray.com/)
