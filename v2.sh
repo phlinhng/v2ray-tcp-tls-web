@@ -33,7 +33,7 @@ sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" config.yaml
 
 # copy template for dummy web pages
 mkdir -p /var/www/html
-/bin/cp -f templated-industrious/. /var/www/html
+/bin/cp -rf templated-industrious/. /var/www/html
 
 # set crontab to auto update geoip.dat and geosite.dat
 (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | crontab -
