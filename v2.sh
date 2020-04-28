@@ -63,10 +63,3 @@ uri="$(echo "${json}" | base64)"
 printf "vmess://${uri}"
 
 exit 0
-
-
-
-
-
-
-
