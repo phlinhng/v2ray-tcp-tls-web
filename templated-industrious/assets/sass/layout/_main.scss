@@ -1,0 +1,19 @@
+/* Main */
+
+	#main {
+		.content {
+			background: _palette(bg);
+			border-radius: _size(border-radius);
+			box-shadow: 0px 0px 4px 1px _palette(border-lt);
+			margin-bottom: _size(element-margin);
+			padding: 3rem;
+
+			@include breakpoint('<=medium') {
+				padding: 2rem;
+			}
+
+			@include breakpoint('<=xsmall') {
+				padding: 1.5rem;
+			}
+		}
+	}

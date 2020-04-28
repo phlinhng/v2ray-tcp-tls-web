@@ -1,0 +1,77 @@
+/* Footer */
+
+	#footer {
+		@include color(accent2);
+		@include padding(8rem, 0);
+
+		a {
+			color: _palette(accent2, fg);
+			text-decoration: none;
+
+			&:hover {
+				color: _palette(accent1, bg);
+			}
+		}
+
+		.content {
+			@include vendor('display', 'flex');
+
+			section {
+				width: 25%;
+
+				&:first-child {
+					width: 50%;
+					padding-right: _size(element-margin) * 2;
+				}
+
+				&:last-child {
+					padding-left: _size(element-margin) * 2;
+				}
+			}
+		}
+
+		.copyright {
+			border-top: 1px solid;
+			font-size: 0.8rem;
+			opacity: 0.5;
+			padding: _size(element-margin) 0;
+			text-align: center;
+		}
+
+		@include breakpoint('<=large') {
+			@include padding(4rem, 0);
+		}
+
+		@include breakpoint('<=medium') {
+			.content {
+				@include vendor('flex-wrap', 'wrap');
+
+				section {
+					width: 50%;
+
+					&:first-child {
+						width: 100%;
+						padding-right: 0;
+					}
+				}
+			}
+		}
+
+		@include breakpoint('<=small') {
+			@include padding(3rem, 0);
+
+			.content {
+				section {
+					width: 100%;
+
+					&:last-child {
+						padding-left: 0;
+					}
+				}
+			}
+		}
+
+		@include breakpoint('<=xsmall') {
+			@include padding(2rem, 0);
+		}
+	}

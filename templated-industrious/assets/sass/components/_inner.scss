@@ -1,0 +1,11 @@
+/* Inner */
+
+	.inner {
+		margin: 0 auto;
+		width: _size(inner-width);
+		max-width: calc(100% - 6rem);
+
+		@include breakpoint('<=xsmall') {
+			max-width: calc(100% - 3rem);
+		}
+	}

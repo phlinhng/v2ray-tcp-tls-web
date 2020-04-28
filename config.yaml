@@ -1,0 +1,16 @@
+listen: 0.0.0.0:443
+vhosts:
+    # 将 example.com 改为你的域名
+  - name: FAKEDOMAIN
+    tlsoffloading: true
+    managedcert: true
+    alpn: h2,http/1.1
+    # 如果不需要兼容 tls12, 可改为 tls13
+    protocols: tls12,tls13
+    http:
+      handler: fileServer
+      # /var/www/html 是静态网站目录
+      args: /var/www/html
+    default:
+      handler: proxyPass
+      args: 127.0.0.1:35666

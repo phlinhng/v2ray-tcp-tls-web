@@ -1,0 +1,92 @@
+/* Testimonials */
+
+	.testimonials {
+		margin: (_size(element-margin) * 1.25) 0;
+		width: 100%;
+
+		@include flexgrid((
+			columns:			3,
+			gutters:			3rem,
+			vertical-align:		stretch,
+		));
+
+		.content {
+			border-radius: _size(border-radius);
+			height: 100%;
+			padding: 3rem;
+
+			.author {
+				@include vendor('display','flex');
+				@include vendor('align-items','center');
+
+				blockquote {
+					margin: 0;
+				}
+
+				.image {
+					margin-right: 2rem;
+					width: 20%;
+
+					img {
+						border-radius: 100%;
+						max-width: 100%;
+					}
+				}
+			}
+
+			.credit {
+				font-size: 0.75rem;
+			}
+
+			p {
+				&:last-child {
+					margin: 0;
+				}
+			}
+		}
+
+		> div {
+			> :last-child {
+				margin-bottom: 0;
+			}
+		}
+
+		@include breakpoint('<=medium') {
+			@include flexgrid-resize((
+				columns:		2,
+				gutters:		2rem,
+				prev-columns:	3
+			));
+
+			.content {
+				padding: 2rem;
+			}
+		}
+
+		@include breakpoint('<=small') {
+			@include flexgrid-resize((
+				columns:		1,
+				gutters:		2rem,
+				prev-columns:	(3, 2)
+			));
+		}
+	}
+
+	@mixin color-testimonials($p: null) {
+		$highlight: _palette($p, highlight);
+
+		.testimonials {
+			.content {
+				background: _palette($p, bg);
+				box-shadow: 0px 0px 4px 1px _palette($p, border-lt);
+
+				.credit {
+					strong {
+						color: _palette($highlight,bg);
+					}
+				}
+			}
+		}
+	}
+
+	@include color-testimonials;
