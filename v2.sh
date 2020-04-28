@@ -57,14 +57,14 @@ systemctl restart nginx
 cd ..
 rm -rf v2ray-tcp-tls-web
 
-echo ""
-echo "${V2_DOMAIN}:443"
-echo "${uuid} (aid: 0)"
-echo ""
+printf ""
+printf "${V2_DOMAIN}:443"
+printf "${uuid} (aid: 0)"
+printf ""
 
 json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
 
-uri="$(echo "${json}" | base64)"
+uri="$(printf "${json}" | base64)"
 printf "vmess://${uri}"
 printf "\n"
 
