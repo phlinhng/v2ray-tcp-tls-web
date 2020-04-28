@@ -61,5 +61,6 @@ json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\
 
 uri="$(echo "${json}" | base64)"
 printf "vmess://${uri}"
+printf "\n"
 
 exit 0
