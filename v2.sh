@@ -10,7 +10,8 @@ read -p "解析到本VPS的域名: " V2_DOMAIN
 # install requirements
 # uuid-runtime: for uuid generating
 # coreutils: for base64 command
-apt-get install curl git uuid-runtime coreutils wget -y
+# nginx: for redirecting http to https to make dummy site look more real
+apt-get install curl git uuid-runtime coreutils wget nginx -y
 
 # install v2ray
 bash <(curl -L -s https://install.direct/go.sh)
@@ -26,10 +27,12 @@ cd v2ray-tcp-tls-web
 uuid=$(uuidgen)
 sed -i "s/FAKEUUID/${uuid}/g" config.json
 sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" config.yaml
+sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" default
 
 # copy cofig files to respective path
 /bin/cp -f config.json /etc/v2ray
 /bin/cp -f config.yaml /etc/tls-shunt-proxy
+/bin/cp -f default /etc/nginx/sites-available
 
 # copy template for dummy web pages
 mkdir -p /var/www/html
@@ -47,6 +50,8 @@ systemctl enable v2ray
 systemctl start v2ray
 systemctl enable tls-shunt-proxy
 systemctl start tls-shunt-proxy
+systemctl enable nginx
+systemctl restart nginx
 
 # remove installation files
 cd ..
