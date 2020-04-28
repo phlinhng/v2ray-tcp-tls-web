@@ -36,7 +36,7 @@ sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" default
 
 # copy template for dummy web pages
 mkdir -p /var/www/html
-/bin/cp -f templated-industrious/. /var/www/html
+/bin/cp -rf templated-industrious/. /var/www/html
 
 # set crontab to auto update geoip.dat and geosite.dat
 (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | crontab -
@@ -55,7 +55,7 @@ systemctl restart nginx
 
 # remove installation files
 cd ..
-rm -rf v2ray-caddy-cf
+rm -rf v2ray-tcp-tls-web
 
 echo ""
 echo "${V2_DOMAIN}:443"
@@ -66,12 +66,6 @@ json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\
 
 uri="$(echo "${json}" | base64)"
 printf "vmess://${uri}"
+printf "\n"
 
 exit 0
-
-
-
-
-
-
-
