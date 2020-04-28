@@ -1,6 +1,6 @@
 server {
 	listen 80 default_server;
 	listen [::]:80 default_server;
-	server_name FAKEDOMAIN
+	server_name FAKEDOMAIN;
 	return 301 https://FAKEDOMAIN$request_uri;
 }
