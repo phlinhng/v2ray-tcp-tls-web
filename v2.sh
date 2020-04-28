@@ -50,7 +50,7 @@ systemctl start tls-shunt-proxy
 
 # remove installation files
 cd ..
-rm -rf v2ray-caddy-cf
+rm -rf v2ray-tcp-tls-web
 
 echo ""
 echo "${V2_DOMAIN}:443"
