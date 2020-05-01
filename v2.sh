@@ -57,10 +57,10 @@ systemctl restart nginx
 cd ..
 rm -rf v2ray-tcp-tls-web
 
-printf ""
-printf "${V2_DOMAIN}:443"
-printf "${uuid} (aid: 0)"
-printf ""
+printf "\n"
+printf "${V2_DOMAIN}:443\n"
+printf "${uuid} (aid: 0)\n"
+printf "\n"
 
 json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
 
