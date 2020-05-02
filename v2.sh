@@ -65,11 +65,7 @@ printf "\n"
 json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
 
 uri="$(printf "${json}" | base64)"
-#tmp_filename="vmesslink${uuid}.txt"
 printf "vmess://${uri}" | tr -d '\n'
-#printf "vmess://${uri}" >> "${tmp_filename}"
-#cat "${tmp_filename}"
-#rm "${tmp_filename}"
 printf "\n"
 
 exit 0
