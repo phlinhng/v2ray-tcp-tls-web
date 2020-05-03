@@ -164,9 +164,11 @@ rm_v2ray() {
   ${sudoCmd} deluser tls-shunt-proxy
 
   # remove nginx
-  ${sudoCmd} ${systemPackage} install purge nginx -y
+  ${sudoCmd} ${systemPackage} purge nginx -y
   ${sudoCmd} rm -rf /etc/nginx
-  colorEcho ${GREEN} "卸载TCP+TLS+WEB成功!\n"
+  colorEcho ${GREEN} "卸载TCP+TLS+WEB成功!"
+  
+  exit 0
 }
 
 generate_link() {
