@@ -171,7 +171,7 @@ rm_v2ray() {
 
   # remove nginx
   ${sudoCmd} ${systemPackage} purge nginx -y
-  ${sudoCmd} ${systemPackage} autoremove
+  ${sudoCmd} ${systemPackage} autoremove -y
   ${sudoCmd} systemctl stop nginx
   ${sudoCmd} systemctl disable nginx
   ${sudoCmd} rm -f /etc/systemd/system/nginx.service
