@@ -179,13 +179,17 @@ generate_link() {
     ${sudoCmd} rm -f /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription)
   fi
 
-  read -p "输入节点名称: " V2_DOMAIN
-
   #${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
   V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
 
-  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  read -p "输入节点名称[留空则使用默认值]: " remark
+
+  if [ -z "${remark}" ]; then
+    remark="${V2_DOMAIN}:443"
+  fi
+
+  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
 
   uri="$(printf "${json}" | base64)"
   vmess="vmess://${uri}"
