@@ -176,8 +176,8 @@ generate_link() {
 
 menu() {
   clear
-  colorEcho ${BLUE} "v2Ray TCP+TLS+WEB automated script v0.1"
-  colorEcho ${BLUE} "author: phlinhng"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v0.1"
+  colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
   PS3="选择操作[输入任意值退出]: "
