@@ -155,8 +155,8 @@ rm_v2ray() {
   # remove tls-shunt-server
   ${sudoCmd} systemctl stop tls-shunt-proxy
   ${sudoCmd} systemctl disable tls-shunt-proxy.service
-  ${sudoCmd} rm /etc/systemd/system/tls-shunt-proxy.service
-  ${sudoCmd} rm /etc/systemd/system/tls-shunt-proxy.service # and symlinks that might be related
+  ${sudoCmd} rm -f /etc/systemd/system/tls-shunt-proxy.service
+  ${sudoCmd} rm -f /etc/systemd/system/tls-shunt-proxy.service # and symlinks that might be related
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
   ${sudoCmd} rm -rf /usr/local/bin/tls-shunt-proxy
@@ -167,7 +167,7 @@ rm_v2ray() {
   ${sudoCmd} ${systemPackage} purge nginx -y
   ${sudoCmd} rm -rf /etc/nginx
   colorEcho ${GREEN} "卸载TCP+TLS+WEB成功!"
-  
+
   exit 0
 }
 
