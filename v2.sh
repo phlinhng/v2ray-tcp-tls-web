@@ -92,6 +92,7 @@ install_v2ray() {
 
   # install tls-shunt-proxy
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
+    ${sudoCmd} rm -rf /etc/tls-shunt-proxy
     curl -L -s https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
   fi
 
