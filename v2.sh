@@ -195,7 +195,7 @@ generate_link() {
   vmess="vmess://${uri}"
   sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
-  randomName= $(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16) #random file name for subscription
+  randomName=$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16) #random file name for subscription
   printf "${randomName}" | ${sudoCmd} tee /etc/v2ray/subscription >/dev/null
   printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/${randomName} >/dev/null
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n'
