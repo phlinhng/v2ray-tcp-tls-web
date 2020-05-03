@@ -52,6 +52,9 @@ display_vmess() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
+  elif [ ! -f "/etc/nginx/sites-available/default" ]; then
+    colorEcho ${RED} "web server配置文件不存在"
+    return 1
   fi
 
   #${sudoCmd} ${systemPackage} install coreutils jq -y
@@ -94,7 +97,7 @@ install_v2ray() {
   # install tls-shunt-proxy
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
     curl -L -s https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
-    colorEcho ${GREEN} "tls-shunt-proxy is installed."
+    colorEcho ${GREEN} "tls-shunt-proxy is i"
   fi
 
   cd $(mktemp -d)
@@ -190,6 +193,9 @@ rm_v2ray() {
 generate_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
+    return 1
+  elif [ ! -f "/etc/nginx/sites-available/default" ]; then
+    colorEcho ${RED} "web server配置文件不存在"
     return 1
   fi
 
