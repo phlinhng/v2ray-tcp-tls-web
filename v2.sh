@@ -138,7 +138,7 @@ install_v2ray() {
 }
 
 rm_v2ray() {
-  if [ ! -d "/usr/bin/v2ray" || ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
+  if [ ! -d "/usr/bin/v2ray" ] || [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
     return 1
   fi
 
