@@ -138,7 +138,7 @@ install_v2ray() {
 }
 
 rm_v2ray() {
-  if [ ! -d "/usr/bin/v2ray" || ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
+  if [ ! -d "/usr/bin/v2ray" ]; then
     return 1
   fi
 
@@ -162,7 +162,6 @@ rm_v2ray() {
   ${sudoCmd} ${systemPackage} install purge nginx -y
   ${sudoCmd} rm -rf /etc/nginx
   colorEcho ${GREEN} "卸载TCP+TLS+WEB成功!\n"
-  exit 0
 }
 
 generate_link() {
