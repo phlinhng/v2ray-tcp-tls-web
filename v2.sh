@@ -181,26 +181,26 @@ menu() {
   echo ""
 
   PS3="选择操作[输入任意值退出]: "
-  options=("1. 安装TCP+TLS+WEB" "2. 更新v2Ray-core" "3. 卸载TCP+TLS+WEB" "4. 显示vmess链接" "5. 生成订阅" "6. 退出")
+  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "生成订阅" "退出")
   select opt in "${options[@]}"
   do
     case $opt in
-      "1. 安装TCP+TLS+WEB")
+      "安装TCP+TLS+WEB")
         install_v2ray
         ;;
-      "2. 更新v2Ray-core")
+      "更新v2Ray-core")
         get_v2ray
         ;;
-      "3. 卸载TCP+TLS+WEB")
+      "卸载TCP+TLS+WEB")
         rm_v2ray
         ;;
-      "4. 显示vmess链接")
+      "显示vmess链接")
         display_vmess
         ;;
-      "5. 生成订阅")
+      "生成订阅")
         generate_link
         ;;
-      "6. 退出")
+      "退出")
         break
         ;;
       *) break;;
