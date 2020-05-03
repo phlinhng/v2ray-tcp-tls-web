@@ -49,7 +49,7 @@ elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
 fi
 
 display_vmess() {
-  if [ ! -d "/usr/bin/v2ray"]; then
+  if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
   fi
@@ -85,12 +85,12 @@ install_v2ray() {
   ${sudoCmd} ${systemPackage} install curl git coreutils wget nginx ntp -y
 
   # install v2ray-core
-  if [ ! -d "/usr/bin/v2ray"]; then
+  if [ ! -d "/usr/bin/v2ray" ]; then
     get_v2ray
   fi
 
   # install tls-shunt-proxy
-  if [ ! -f "/usr/local/bin/tls-shunt-proxy"]; then
+  if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
     ${sudoCmd} bash <(curl -L -s https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh)
   fi
 
@@ -132,7 +132,8 @@ install_v2ray() {
   cd ..
   rm -rf v2ray-tcp-tls-web
 
-  colorEcho ${GREEN} "安装TCP+TLS+WEB成功!\n"
+  colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
+  echo ""
   display_vmess
 }
 
@@ -161,7 +162,7 @@ rm_v2ray() {
 }
 
 generate_link() {
-  if [ ! -d "/usr/bin/v2ray"]; then
+  if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
   fi
@@ -169,6 +170,8 @@ generate_link() {
   if [ -f "/etc/v2ray/subscription" ]; then
     ${sudoCmd} rm -f /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription)
   fi
+
+  read -p "输入节点名称: " V2_DOMAIN
 
   ${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
