@@ -180,7 +180,7 @@ menu() {
   colorEcho ${BLUE} "author: phlinhng"
   echo ""
 
-  PS3="选择操作: "
+  PS3="选择操作[输入任意值退出]: "
   options=("1. 安装TCP+TLS+WEB" "2. 更新v2Ray-core" "3. 卸载TCP+TLS+WEB" "4. 显示vmess链接" "5. 生成订阅" "6. 退出")
   select opt in "${options[@]}"
   do
