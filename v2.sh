@@ -103,6 +103,8 @@ install_v2ray() {
   # prevent some bug
   ${sudoCmd} rm -rf /etc/tls-shunt-proxy
   ${sudoCmd} mkdir -p /etc/tls-shunt-proxy
+  ${sudoCmd} rm -rf /etc/nginx/sites-available
+  ${sudoCmd} mkdir -p /etc/nginx/sites-available
 
   # create config files
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
@@ -111,9 +113,9 @@ install_v2ray() {
   sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" default
 
   # copy cofig files to respective path
-  ${sudoCmd} /bin/cp -f config.json /etc/v2ray
-  ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy
-  ${sudoCmd} /bin/cp -f default /etc/nginx/sites-available
+  ${sudoCmd} /bin/cp -f config.json /etc/v2ray/config.json
+  ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy/config.yaml
+  ${sudoCmd} /bin/cp -f default /etc/nginx/sites-available/default
 
   # copy template for dummy web pages
   ${sudoCmd} mkdir -p /var/www/html
