@@ -55,8 +55,8 @@ display_vmess() {
   fi
 
   #${sudoCmd} ${systemPackage} install coreutils jq -y
-  uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
-  V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
+  uuid="$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')"
+  V2_DOMAIN="$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')"
 
   echo ""
   echo "${V2_DOMAIN}:443"
@@ -195,7 +195,7 @@ generate_link() {
   vmess="vmess://${uri}"
   sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
-  randomName=$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16) #random file name for subscription
+  randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   printf "${randomName}" | ${sudoCmd} tee /etc/v2ray/subscription >/dev/null
   printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/${randomName} >/dev/null
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n'
