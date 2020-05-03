@@ -11,7 +11,8 @@ read -p "解析到本VPS的域名: " V2_DOMAIN
 # uuid-runtime: for uuid generating
 # coreutils: for base64 command
 # nginx: for redirecting http to https to make dummy site look more real
-apt-get install curl git uuid-runtime coreutils wget nginx -y
+# ntp: time syncronise service
+apt-get install curl git uuid-runtime coreutils wget nginx ntp -y
 
 # install v2ray
 bash <(curl -L -s https://install.direct/go.sh)
