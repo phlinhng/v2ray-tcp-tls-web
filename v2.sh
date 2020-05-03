@@ -152,7 +152,7 @@ rm_v2ray() {
   ${sudoCmd} ${systemPackage} install curl -y
 
   # remove v2ray
-  curl -sL https://install.direct/go.sh | ${sudoCmd} bash --remove
+  curl -sL https://install.direct/go.sh | ${sudoCmd} bash -s --remove
 
   # remove tls-shunt-server
   ${sudoCmd} systemctl stop tls-shunt-proxy
