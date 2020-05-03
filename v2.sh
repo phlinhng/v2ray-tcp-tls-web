@@ -54,7 +54,7 @@ display_vmess() {
     return 1
   fi
 
-  ${sudoCmd} ${systemPackage} install coreutils jq -y
+  #${sudoCmd} ${systemPackage} install coreutils jq -y
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
   V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
 
@@ -83,7 +83,8 @@ install_v2ray() {
   # coreutils: for base64 command
   # nginx: for redirecting http to https to make dummy site look more real
   # ntp: time syncronise service
-  ${sudoCmd} ${systemPackage} install curl git coreutils wget nginx ntp -y
+  # jq: json toolkits
+  ${sudoCmd} ${systemPackage} install curl git coreutils wget nginx ntp jq -y
 
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
@@ -92,13 +93,16 @@ install_v2ray() {
 
   # install tls-shunt-proxy
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
-    ${sudoCmd} rm -rf /etc/tls-shunt-proxy
     curl -L -s https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
   fi
 
   cd $(mktemp -d)
   git clone https://github.com/phlinhng/v2ray-tcp-tls-web.git
   cd v2ray-tcp-tls-web
+
+  # prevent some bug
+  ${sudoCmd} rm -rf /etc/tls-shunt-proxy
+  ${sudoCmd} mkdir -p /etc/tls-shunt-proxy
 
   # create config files
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
@@ -177,7 +181,7 @@ generate_link() {
 
   read -p "输入节点名称: " V2_DOMAIN
 
-  ${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
+  #${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
   V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
 
