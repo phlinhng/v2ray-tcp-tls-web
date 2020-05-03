@@ -152,7 +152,9 @@ rm_v2ray() {
   ${sudoCmd} ${systemPackage} install curl -y
 
   # remove v2ray
-  curl -sL https://install.direct/go.sh | ${sudoCmd} bash -s --remove
+  # Notice the two dashes (--) which are telling bash to not process anything following it as arguments to bash.
+  # https://stackoverflow.com/questions/4642915/passing-parameters-to-bash-when-executing-a-script-fetched-by-curl
+  curl -sL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 
   # remove tls-shunt-server
   ${sudoCmd} systemctl stop tls-shunt-proxy
