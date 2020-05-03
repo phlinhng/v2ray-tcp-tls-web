@@ -48,6 +48,26 @@ elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
   exit 0
 fi
 
+display_vmess() {
+  if [ ! -d "/usr/bin/v2ray"]; then
+    colorEcho ${RED} "尚末安装v2Ray"
+    return 1
+  fi
+
+  ${sudoCmd} ${systemPackage} install coreutils jq -y
+  uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
+  V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
+
+  echo "${V2_DOMAIN}:443"
+  echo "${uuid} (aid: 0)\n"
+
+  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+
+  uri="$(printf "${json}" | base64)"
+  echo "vmess://${uri}" | tr -d '\n'
+  printf "\n"
+}
+
 get_v2ray() {
   ${sudoCmd} ${systemPackage} install curl -y
   # install v2ray
@@ -139,28 +159,10 @@ rm_v2ray() {
   exit 0
 }
 
-display_vmess() {
-  if [ ! -d "/usr/bin/v2ray"]; then
-    colorEcho ${RED} "尚末安装v2Ray"
-    break
-  fi
-  ${sudoCmd} ${systemPackage} install coreutils jq -y
-  uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
-  V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
-
-  echo "${V2_DOMAIN}:443"
-  echo "${uuid} (aid: 0)\n"
-
-  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-
-  uri="$(printf "${json}" | base64)"
-  echo "vmess://${uri}" | tr -d '\n'
-}
-
 generate_link() {
   if [ ! -d "/usr/bin/v2ray"]; then
     colorEcho ${RED} "尚末安装v2Ray"
-    break
+    return 1
   fi
 
   if [ -f "/etc/v2ray/subscription" ]; then
@@ -181,6 +183,7 @@ generate_link() {
   printf "${randomName}" | ${sudoCmd} tee /etc/v2ray/subscription >/dev/null
   printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/${randomName} >/dev/null
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n'
+  printf "\n"
 }
 
 menu() {
