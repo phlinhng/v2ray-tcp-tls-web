@@ -58,6 +58,7 @@ display_vmess() {
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
   V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
 
+  echo ""
   echo "${V2_DOMAIN}:443"
   echo "${uuid} (aid: 0)"
   echo ""
@@ -91,7 +92,7 @@ install_v2ray() {
 
   # install tls-shunt-proxy
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
-    ${sudoCmd} bash <(curl -L -s https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh)
+    curl -L -s https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
   fi
 
   cd $(mktemp -d)
@@ -133,7 +134,6 @@ install_v2ray() {
   rm -rf v2ray-tcp-tls-web
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
-  echo ""
   display_vmess
 }
 
