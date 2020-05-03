@@ -140,6 +140,10 @@ rm_v2ray() {
 }
 
 display_vmess() {
+  if [ ! -d "/usr/bin/v2ray"]; then
+    colorEcho ${RED} "尚末安装v2Ray"
+    break
+  fi
   ${sudoCmd} ${systemPackage} install coreutils jq -y
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
   V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
@@ -154,6 +158,11 @@ display_vmess() {
 }
 
 generate_link() {
+  if [ ! -d "/usr/bin/v2ray"]; then
+    colorEcho ${RED} "尚末安装v2Ray"
+    break
+  fi
+
   if [ -f "/etc/v2ray/subscription" ]; then
     ${sudoCmd} rm -f /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription)
   fi
