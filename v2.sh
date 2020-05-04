@@ -97,7 +97,7 @@ install_v2ray() {
   # install tls-shunt-proxy
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
     curl -L -s https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
-    colorEcho ${GREEN} "tls-shunt-proxy is i"
+    colorEcho ${GREEN} "tls-shunt-proxy is installed."
   fi
 
   cd $(mktemp -d)
@@ -227,7 +227,7 @@ generate_link() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v0.1"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v0.2"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
