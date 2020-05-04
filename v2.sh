@@ -98,6 +98,41 @@ get_v2ray() {
   curl -L -s https://install.direct/go.sh | ${sudoCmd} bash
 }
 
+generate_link() {
+  if [ ! -d "/usr/bin/v2ray" ]; then
+    colorEcho ${RED} "尚末安装v2Ray"
+    return 1
+  elif [ ! -f "/etc/nginx/sites-available/default" ]; then
+    colorEcho ${RED} "web server配置文件不存在"
+    return 1
+  fi
+
+  if [ -f "/etc/v2ray/subscription" ]; then
+    ${sudoCmd} rm -f /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription)
+  fi
+
+  #${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
+  uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
+  V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
+
+  read -p "输入节点名称[留空则使用默认值]: " remark
+
+  if [ -z "${remark}" ]; then
+    remark="${V2_DOMAIN}:443"
+  fi
+
+  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+
+  uri="$(printf "${json}" | base64)"
+  vmess="vmess://${uri}"
+  sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
+
+  randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
+  printf "${randomName}" | ${sudoCmd} tee /etc/v2ray/subscription >/dev/null
+  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/${randomName} >/dev/null
+  echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
+}
+
 install_v2ray() {
   read -p "解析到本VPS的域名: " V2_DOMAIN
 
@@ -170,7 +205,7 @@ install_v2ray() {
 
   read -p "生成订阅链接 (yes/no)? " linkConfirm
   case "${linkConfirm}" in
-    y|Y|[yY][eE][sS] ) show_menu ;;
+    y|Y|[yY][eE][sS] ) generate_link ;;
     * ) break;;
   esac
 }
@@ -227,40 +262,7 @@ rm_v2ray() {
   exit 0
 }
 
-generate_link() {
-  if [ ! -d "/usr/bin/v2ray" ]; then
-    colorEcho ${RED} "尚末安装v2Ray"
-    return 1
-  elif [ ! -f "/etc/nginx/sites-available/default" ]; then
-    colorEcho ${RED} "web server配置文件不存在"
-    return 1
-  fi
 
-  if [ -f "/etc/v2ray/subscription" ]; then
-    ${sudoCmd} rm -f /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription)
-  fi
-
-  #${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
-  uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
-  V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
-
-  read -p "输入节点名称[留空则使用默认值]: " remark
-
-  if [ -z "${remark}" ]; then
-    remark="${V2_DOMAIN}:443"
-  fi
-
-  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-
-  uri="$(printf "${json}" | base64)"
-  vmess="vmess://${uri}"
-  sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
-
-  randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
-  printf "${randomName}" | ${sudoCmd} tee /etc/v2ray/subscription >/dev/null
-  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/${randomName} >/dev/null
-  echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
-}
 
 update_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
