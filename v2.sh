@@ -253,14 +253,15 @@ update_link() {
   fi
 
   if [ -f "/etc/v2ray/subscription" ]; then
+    subFileName="$(${sudoCmd} cat /etc/v2ray/subscription)"
     uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
     V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
-    currentRemark="$(cat /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription) | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+    currentRemark="$(cat /var/www/html/${subFileName} | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
 
     read -p "输入节点名称[留空则使用现有值 ${currentRemark}]: " remark
 
     if [ -z "${remark}" ]; then
-      remark=currentRemark
+      remark="${currentRemark}"
     fi
 
     json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
@@ -269,8 +270,8 @@ update_link() {
     vmess="vmess://${uri}"
     sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
-    printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription) >/dev/null
-    echo "https://${V2_DOMAIN}/$(${sudoCmd} cat /etc/v2ray/subscription)" | tr -d '\n' && printf "\n"
+    printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/${subFileName} >/dev/null
+    echo "https://${V2_DOMAIN}/${subFileName}" | tr -d '\n' && printf "\n"
 
     colorEcho ${GREEN} "更新订阅完成"
   else
