@@ -14,11 +14,11 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/phlinhng/v2ray-
 ## Note
 `tls-shunt-proxy` can proxify websocket traffic but it is not capable with CDN (and may not add support to this feature in forseeable future) so there is no benefit to use `tls-shunt-proxy` with ws. Please check [phlinhng/v2ray-caddy-cf](https://github.com/phlinhng/v2ray-caddy-cf) instead if you prefer to set v2Ray in WS+TLS+WEB mode.
 
-## Related work
+# Related work
 + [phlinhng/v2ray-caddy-cf](https://github.com/phlinhng/v2ray-caddy-cf): automated script for v2Ray (WS+TLS+Web)
 + [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor/): subscription manager
 
-## Credit
+# Credit
 + [Project V](https://www.v2ray.com/)
 + [TLS 分流器](https://github.com/liberal-boy/tls-shunt-proxy)
 + [templated.co/industrious](https://templated.co/industrious)
