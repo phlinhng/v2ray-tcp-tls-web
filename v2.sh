@@ -59,12 +59,13 @@ show_menu() {
   echo "6) 更新订阅"
   echo "7) 安装加速脚本"
   echo "8) 设置Swap"
+  echo ""
 }
 
 continue_prompt() {
   read -p "继续其他操作 (yes/no)? " choice
   case "${choice}" in
-    y|Y|[yY][eE][sS] ) show_menu && echo "";;
+    y|Y|[yY][eE][sS] ) show_menu ;;
     * ) exit 0;;
   esac
 }
