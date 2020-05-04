@@ -218,6 +218,7 @@ rm_v2ray() {
   colorEcho ${GREEN} "Removed nginx successfully."
   colorEcho ${GREEN} "卸载TCP+TLS+WEB成功!"
 
+  exit 0
 }
 
 generate_link() {
@@ -344,7 +345,7 @@ menu() {
     case "${opt}" in
       "安装TCP+TLS+WEB") install_v2ray && continue_prompt ;;
       "更新v2Ray-core") get_v2ray && continue_prompt ;;
-      "卸载TCP+TLS+WEB") rm_v2ray && break ;;
+      "卸载TCP+TLS+WEB") rm_v2ray ;;
       "显示vmess链接") display_vmess && continue_prompt ;;
       "生成订阅") generate_link && continue_prompt ;;
       "更新订阅") update_link && continue_prompt ;;
