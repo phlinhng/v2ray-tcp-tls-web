@@ -167,6 +167,12 @@ install_v2ray() {
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
   display_vmess
+
+  read -p "生成订阅链接 (yes/no)? " linkConfirm
+  case "${linkConfirm}" in
+    y|Y|[yY][eE][sS] ) show_menu ;;
+    * ) break;;
+  esac
 }
 
 rm_v2ray() {
@@ -333,7 +339,7 @@ set_swap() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v0.3"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v0.3.1"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
