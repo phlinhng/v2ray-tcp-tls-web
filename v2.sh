@@ -48,6 +48,27 @@ elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
   exit 0
 fi
 
+# a trick to redisplay menu option
+show_menu() {
+  echo ""
+  echo "1) 安装TCP+TLS+WEB"
+  echo "2) 更新v2Ray-core"
+  echo "3) 卸载TCP+TLS+WEB"
+  echo "4) 显示vmess链接"
+  echo "5) 生成订阅"
+  echo "6) 更新订阅"
+  echo "7) 安装加速脚本"
+  echo "8) 设置Swap"
+}
+
+continue_prompt() {
+  read -p "继续其他操作 (yes/no)? " choice
+  case "${choice}" in
+    y|Y|[yY][eE][sS] ) show_menu && echo "";;
+    * ) exit 0;;
+  esac
+}
+
 display_vmess() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
@@ -187,7 +208,6 @@ rm_v2ray() {
   ${sudoCmd} rm -rf /etc/nginx
   colorEcho ${GREEN} "卸载TCP+TLS+WEB成功!"
 
-  exit 0
 }
 
 generate_link() {
@@ -226,34 +246,99 @@ generate_link() {
   printf "\n"
 }
 
+update_link() {
+  if [ ! -d "/usr/bin/v2ray" ]; then
+    colorEcho ${RED} "尚末安装v2Ray"
+    return 1
+  elif [ ! -f "/etc/nginx/sites-available/default" ]; then
+    colorEcho ${RED} "web server配置文件不存在"
+    return 1
+  fi
+
+  if [ -f "/etc/v2ray/subscription" ]; then
+    uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
+    V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
+    currentRemark="$(cat /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription) | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+
+    read -p "输入节点名称[留空则使用现有值 ${currentRemark}]: " remark
+
+    if [ -z "${remark}" ]; then
+      remark=currentRemark
+    fi
+
+    json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+
+    uri="$(printf "${json}" | base64)"
+    vmess="vmess://${uri}"
+    sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
+
+    printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription) >/dev/null
+    echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n'
+
+    colorEcho ${GREEN} "更新订阅完成"
+  else
+    generate_link
+  fi
+
+}
+
+get_netSpeed() {
+  ${sudoCmd} ${systemPackage} install wget -y
+  cd $(mktemp -d)
+  wget -N --no-check-certificate "https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh"
+  chmod +x tcp.sh
+  ${sudoCmd} ./tcp.sh
+}
+
+set_swap() {
+  if free | awk '/^Swap:/ {exit !$2}'; then
+    # allocate space
+    ${sudoCmd} fallocate -l 1G /swapfile
+
+    # set permission
+    ${sudoCmd} chmod 600 /swapfile
+
+    # make swap
+    ${sudoCmd} mkswap /swapfile
+
+    # enable swap
+    ${sudoCmd} swapon /swapfile
+
+    # make swap permanent
+    printf "/swapfile swap swap defaults 0 0" | ${sudoCmd} tee -a /etc/fstab  >/dev/null
+
+    # set swap percentage
+    ${sudoCmd} sysctl vm.swappiness=10
+    printf "vm.swappiness=10" | ${sudoCmd} tee -a /etc/sysctl.conf >/dev/null
+
+    free -h
+    colorEcho ${GREEN} "设置Swap成功"
+  else
+    free -h
+    colorEcho ${BLUE} "己有Swap 无需设置"
+  fi
+
+}
+
 menu() {
   colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v0.1"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
-  PS3="选择操作[输入任意值退出]: "
-  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "生成订阅" "退出")
+  PS3="选择操作[输入任意值或按Ctrl+C退出]: "
+  COLUMNS=12
+  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "生成订阅" "更新订阅" "安装加速脚本" "设置Swap")
   select opt in "${options[@]}"
   do
-    case $opt in
-      "安装TCP+TLS+WEB")
-        install_v2ray
-        ;;
-      "更新v2Ray-core")
-        get_v2ray
-        ;;
-      "卸载TCP+TLS+WEB")
-        rm_v2ray
-        ;;
-      "显示vmess链接")
-        display_vmess
-        ;;
-      "生成订阅")
-        generate_link
-        ;;
-      "退出")
-        break
-        ;;
+    case "${opt}" in
+      "安装TCP+TLS+WEB") install_v2ray && continue_prompt;;
+      "更新v2Ray-core") get_v2ray && continue_prompt;;
+      "卸载TCP+TLS+WEB") rm_v2ray && break;;
+      "显示vmess链接") display_vmess && continue_prompt;;
+      "生成订阅") generate_link && continue_prompt;;
+      "更新订阅") update_link && continue_prompt;;
+      "安装加速脚本") get_netSpeed && continue_prompt;;
+      "设置Swap") set_swap && continue_prompt;;
       *) break;;
     esac
   done
