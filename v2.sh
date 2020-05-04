@@ -335,7 +335,7 @@ menu() {
       "显示vmess链接") display_vmess && continue_prompt;;
       "生成订阅") generate_link && continue_prompt;;
       "更新订阅") update_link && continue_prompt;;
-      "安装加速脚本") get_netSpeed && continue_prompt;;
+      "安装加速脚本") get_netSpeed && break;;
       "设置Swap") set_swap && continue_prompt;;
       *) break;;
     esac
