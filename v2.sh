@@ -92,12 +92,6 @@ display_vmess() {
   echo "vmess://${uri}" | tr -d '\n' && printf "\n"
 }
 
-get_v2ray() {
-  ${sudoCmd} ${systemPackage} install curl -y
-  # install v2ray
-  curl -L -s https://install.direct/go.sh | ${sudoCmd} bash
-}
-
 generate_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
@@ -131,6 +125,12 @@ generate_link() {
   printf "${randomName}" | ${sudoCmd} tee /etc/v2ray/subscription >/dev/null
   printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/${randomName} >/dev/null
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
+}
+
+get_v2ray() {
+  ${sudoCmd} ${systemPackage} install curl -y
+  # install v2ray
+  curl -L -s https://install.direct/go.sh | ${sudoCmd} bash
 }
 
 install_v2ray() {
@@ -262,8 +262,6 @@ rm_v2ray() {
 
   exit 0
 }
-
-
 
 update_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
