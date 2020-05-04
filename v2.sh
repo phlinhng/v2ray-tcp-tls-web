@@ -106,7 +106,9 @@ install_v2ray() {
   # nginx: for redirecting http to https to make dummy site look more real
   # ntp: time syncronise service
   # jq: json toolkits
-  ${sudoCmd} ${systemPackage} install curl git coreutils wget nginx ntp jq -y
+  ${sudoCmd} ${systemPackage} update
+  ${sudoCmd} ${systemPackage} install curl git coreutils wget ntp jq -y
+  ${sudoCmd} ${systemPackage} install nginx -fy
 
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
@@ -197,6 +199,7 @@ rm_v2ray() {
   colorEcho ${GREEN} "Removed tls-shunt-proxy successfully."
 
   # remove nginx
+  # https://askubuntu.com/questions/361902/how-to-install-nginx-after-removed-it-manually
   colorEcho ${BLUE} "Shutting down nginx service."
   ${sudoCmd} systemctl stop nginx
   ${sudoCmd} systemctl disable nginx
@@ -207,10 +210,11 @@ rm_v2ray() {
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
   colorEcho ${BLUE} "Purging nginx and dependencies."
-  ${sudoCmd} ${systemPackage} purge nginx nginx-common -y
-  ${sudoCmd} ${systemPackage} autoremove -y
+  ${sudoCmd} ${systemPackage} autoremove nginx
+  ${sudoCmd} ${systemPackage} --purge remove nginx
+  ${sudoCmd} ${systemPackage} autoremove && ${sudoCmd} ${systemPackage} autoclean
   colorEcho ${BLUE} "Removing nginx files."
-  ${sudoCmd} rm -rf /etc/nginx
+  ${sudoCmd} find / | grep nginx | ${sudoCmd} xargs rm -rf
   colorEcho ${GREEN} "Removed nginx successfully."
   colorEcho ${GREEN} "卸载TCP+TLS+WEB成功!"
 
