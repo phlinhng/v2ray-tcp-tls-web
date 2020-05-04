@@ -116,7 +116,7 @@ install_v2ray() {
   # install tls-shunt-proxy
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
     curl -L -s https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
-    colorEcho ${GREEN} "tls-shunt-proxy is i"
+    colorEcho ${GREEN} "tls-shunt-proxy is installed."
   fi
 
   cd $(mktemp -d)
@@ -181,20 +181,23 @@ rm_v2ray() {
   ${sudoCmd} rm -rf /etc/v2ray
 
   # remove tls-shunt-server
+  colorEcho ${BLUE} "Shutting down tls-shunt-proxy service."
   ${sudoCmd} systemctl stop tls-shunt-proxy
   ${sudoCmd} systemctl disable tls-shunt-proxy
   ${sudoCmd} rm -f /etc/systemd/system/tls-shunt-proxy.service
   ${sudoCmd} rm -f /etc/systemd/system/tls-shunt-proxy.service # and symlinks that might be related
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
+  colorEcho ${BLUE} "Removing tls-shunt-proxy files."
   ${sudoCmd} rm -rf /usr/local/bin/tls-shunt-proxy
   ${sudoCmd} rm -rf /etc/ssl/tls-shunt-proxy
+  colorEcho ${BLUE} "Removing tls-shunt-proxy user & group."
   ${sudoCmd} deluser tls-shunt-proxy
   ${sudoCmd} delgroup --only-if-empty tls-shunt-proxy
+  colorEcho ${GREEN} "Removed tls-shunt-proxy successfully."
 
   # remove nginx
-  ${sudoCmd} ${systemPackage} purge nginx -y
-  ${sudoCmd} ${systemPackage} autoremove -y
+  colorEcho ${BLUE} "Shutting down nginx service."
   ${sudoCmd} systemctl stop nginx
   ${sudoCmd} systemctl disable nginx
   ${sudoCmd} rm -f /etc/systemd/system/nginx.service
@@ -203,7 +206,12 @@ rm_v2ray() {
   ${sudoCmd} rm -f /lib/systemd/system/nginx.service # and symlinks that might be related
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
+  colorEcho ${BLUE} "Purging nginx and dependencies."
+  ${sudoCmd} ${systemPackage} purge nginx nginx-common -y
+  ${sudoCmd} ${systemPackage} autoremove -y
+  colorEcho ${BLUE} "Removing nginx files."
   ${sudoCmd} rm -rf /etc/nginx
+  colorEcho ${GREEN} "Removed nginx successfully."
   colorEcho ${GREEN} "卸载TCP+TLS+WEB成功!"
 
 }
