@@ -289,7 +289,7 @@ get_netSpeed() {
 }
 
 set_swap() {
-  if free | awk '/^Swap:/ {exit !$2}'; then
+  if [[ $(cat /proc/swaps | wc -l) -gt 1 ]]; then
     # allocate space
     ${sudoCmd} fallocate -l 1G /swapfile
 
@@ -319,7 +319,7 @@ set_swap() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v0.1"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v0.3"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
@@ -329,14 +329,14 @@ menu() {
   select opt in "${options[@]}"
   do
     case "${opt}" in
-      "安装TCP+TLS+WEB") install_v2ray && continue_prompt;;
-      "更新v2Ray-core") get_v2ray && continue_prompt;;
-      "卸载TCP+TLS+WEB") rm_v2ray && break;;
-      "显示vmess链接") display_vmess && continue_prompt;;
-      "生成订阅") generate_link && continue_prompt;;
-      "更新订阅") update_link && continue_prompt;;
-      "安装加速脚本") get_netSpeed && break;;
-      "设置Swap") set_swap && continue_prompt;;
+      "安装TCP+TLS+WEB") install_v2ray && continue_prompt ;;
+      "更新v2Ray-core") get_v2ray && continue_prompt ;;
+      "卸载TCP+TLS+WEB") rm_v2ray && break ;;
+      "显示vmess链接") display_vmess && continue_prompt ;;
+      "生成订阅") generate_link && continue_prompt ;;
+      "更新订阅") update_link && continue_prompt ;;
+      "安装加速脚本") get_netSpeed && break ;;
+      "设置Swap") set_swap && continue_prompt ;;
       *) break;;
     esac
   done
