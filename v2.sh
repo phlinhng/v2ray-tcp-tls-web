@@ -289,7 +289,7 @@ get_netSpeed() {
 }
 
 set_swap() {
-  if [[ $(cat /proc/swaps | wc -l) -gt 1 ]]; then
+  if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
     # allocate space
     ${sudoCmd} fallocate -l 1G /swapfile
 
