@@ -258,7 +258,7 @@ update_link() {
   if [ -f "/etc/v2ray/subscription" ]; then
     uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
     V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
-    currentRemark="$(cat /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription) | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+    currentRemark="$(cat /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription) | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
 
     read -p "输入节点名称[留空则使用现有值 ${currentRemark}]: " remark
 
