@@ -18,7 +18,7 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/phlinhng/v2ray-
 
 # Related work
 + [@phlinhng/v2ray-caddy-cf](https://github.com/phlinhng/v2ray-caddy-cf): automated script for v2Ray (WS+TLS+Web)
-+ [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor/): subscription manager
++ [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor): subscription manager
 
 # Credit
 + [Project V](https://www.v2ray.com/)
