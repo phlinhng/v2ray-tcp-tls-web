@@ -138,11 +138,12 @@ install_v2ray() {
 
   # install requirements
   # coreutils: for base64 command
+  # uuid-runtime: for uuid generating
   # nginx: for redirecting http to https to make dummy site look more real
   # ntp: time syncronise service
   # jq: json toolkits
   ${sudoCmd} ${systemPackage} update
-  ${sudoCmd} ${systemPackage} install curl git coreutils wget ntp jq -y
+  ${sudoCmd} ${systemPackage} install curl git coreutils wget ntp jq uuid-runtime -y
   ${sudoCmd} ${systemPackage} install nginx -fy
 
   # install v2ray-core
