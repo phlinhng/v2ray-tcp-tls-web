@@ -82,7 +82,6 @@ display_vmess() {
   uuid="$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')"
   V2_DOMAIN="$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')"
 
-  echo ""
   echo "${V2_DOMAIN}:443"
   echo "${uuid} (aid: 0)"
   echo ""
@@ -90,8 +89,7 @@ display_vmess() {
   json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
 
   uri="$(printf "${json}" | base64)"
-  echo "vmess://${uri}" | tr -d '\n'
-  printf "\n"
+  echo "vmess://${uri}" | tr -d '\n' && printf "\n"
 }
 
 get_v2ray() {
@@ -242,8 +240,7 @@ generate_link() {
   randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   printf "${randomName}" | ${sudoCmd} tee /etc/v2ray/subscription >/dev/null
   printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/${randomName} >/dev/null
-  echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n'
-  printf "\n"
+  echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
 }
 
 update_link() {
@@ -256,9 +253,10 @@ update_link() {
   fi
 
   if [ -f "/etc/v2ray/subscription" ]; then
+    subFileName="$(${sudoCmd} cat /etc/v2ray/subscription)"
     uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
     V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
-    currentRemark="$(cat /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription) | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+    currentRemark="$(cat /var/www/html/${subFileName} | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
 
     read -p "输入节点名称[留空则使用现有值 ${currentRemark}]: " remark
 
@@ -273,7 +271,7 @@ update_link() {
     sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
     printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription) >/dev/null
-    echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n'
+    echo "https://${V2_DOMAIN}/${subFileName}" | tr -d '\n' && printf "\n"
 
     colorEcho ${GREEN} "更新订阅完成"
   else
