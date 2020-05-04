@@ -232,6 +232,7 @@ menu() {
   echo ""
 
   PS3="选择操作[输入任意值退出]: "
+  COLUMNS=12
   options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "生成订阅" "退出")
   select opt in "${options[@]}"
   do
