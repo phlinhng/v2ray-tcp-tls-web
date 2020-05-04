@@ -59,7 +59,6 @@ show_menu() {
   echo "6) 更新订阅"
   echo "7) 安装加速脚本"
   echo "8) 设置Swap"
-  echo ""
 }
 
 continue_prompt() {
