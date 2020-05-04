@@ -210,9 +210,9 @@ rm_v2ray() {
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
   colorEcho ${BLUE} "Purging nginx and dependencies."
-  ${sudoCmd} ${systemPackage} autoremove nginx
+  ${sudoCmd} ${systemPackage} autoremove nginx -y
   ${sudoCmd} ${systemPackage} --purge remove nginx
-  ${sudoCmd} ${systemPackage} autoremove && ${sudoCmd} ${systemPackage} autoclean
+  ${sudoCmd} ${systemPackage} autoremove -y && ${sudoCmd} ${systemPackage} autoclean -y
   colorEcho ${BLUE} "Removing nginx files."
   ${sudoCmd} find / | grep nginx | ${sudoCmd} xargs rm -rf
   colorEcho ${GREEN} "Removed nginx successfully."
