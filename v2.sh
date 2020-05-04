@@ -174,10 +174,10 @@ rm_v2ray() {
   ${sudoCmd} delgroup --only-if-empty tls-shunt-proxy
 
   # remove nginx
-  ${sudoCmd} ${systemPackage} purge nginx -y
-  ${sudoCmd} ${systemPackage} autoremove -y
   ${sudoCmd} systemctl stop nginx
   ${sudoCmd} systemctl disable nginx
+  ${sudoCmd} ${systemPackage} purge nginx nginx-common -y
+  ${sudoCmd} ${systemPackage} autoremove -y
   ${sudoCmd} rm -f /etc/systemd/system/nginx.service
   ${sudoCmd} rm -f /etc/systemd/system/nginx.service # and symlinks that might be related
   ${sudoCmd} rm -f /lib/systemd/system/nginx.service
