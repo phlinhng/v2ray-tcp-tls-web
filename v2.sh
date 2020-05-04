@@ -294,6 +294,7 @@ get_netSpeed() {
   wget -N --no-check-certificate "https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh"
   chmod +x tcp.sh
   ${sudoCmd} ./tcp.sh
+  exit 0
 }
 
 set_swap() {
@@ -343,7 +344,7 @@ menu() {
       "显示vmess链接") display_vmess && continue_prompt ;;
       "生成订阅") generate_link && continue_prompt ;;
       "更新订阅") update_link && continue_prompt ;;
-      "安装加速脚本") get_netSpeed && break ;;
+      "安装加速脚本") get_netSpeed;;
       "设置Swap") set_swap && continue_prompt ;;
       *) break;;
     esac
