@@ -10,5 +10,7 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/phlinhng/v2ray-
 [ ] Show installation(is installed/not installed) status on script startup
 [ ] Show current subscriton link if existed in `display_vmess`
 [ ] Integrate [tindy2013/subconverter](https://github.com/tindy2013/subconverter)
-[ ] (under consideration) use random webpage template
+[ ] Integrate [9seconds/mtg](https://github.com/9seconds/mtg)
+[ ] Switch to docker nginx
 [ ] Add CentOS Support
+[ ] (under consideration) use random webpage template
