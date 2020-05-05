@@ -208,10 +208,10 @@ install_v2ray() {
   ${sudoCmd} /bin/cp -f ./config_template/Caddyfile /usr/local/etc/Caddyfile
 
   # choose and copy a random  template for dummy web pages
-  # https://stackoverflow.com/questions/701505/best-way-to-choose-a-random-file-from-a-directory-in-a-shell-script
-  files=(./web_template/*)
+  template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
+  wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template} -O template.zip
   ${sudoCmd} mkdir -p /var/www/html
-  ${sudoCmd} unzip "%s\n" "${files[RANDOM % ${#files[@]}]}" -d /var/www/html
+  ${sudoCmd} unzip template.zip -d /var/www/html
 
   # set crontab to auto update geoip.dat and geosite.dat
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
@@ -320,15 +320,14 @@ install_mtproto() {
     curl -sSL https://get.docker.com/ | ${sudoCmd} bash
 
     # generate random header from txt files
-    # FAKE_TLS_HEADER=
-    # generate secret
+    FAKE_TLS_HEADER="$(curl -s https://raw.githubusercontent.com/phlinhng/my-scripts/master/text/mainland_cdn.txt | shuf -n 1)"
     secret="$(${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c "${FAKE_TLS_HEADER}")"
 
     # start mtproto ## reference https://raw.githubusercontent.com/9seconds/mtg/master/run.sh
     ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 3128:3128 nineseconds/mtg:latest run "${secret}"
 
-    printf "${FAKE_TLS_HEADER}" | tr  -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/mtproto-header
-    printf "${secret}" | tr  -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/mtproto-secret
+    printf "${FAKE_TLS_HEADER}" | tr  -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/mtproto-header >/dev/null
+    printf "${secret}" | tr  -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/mtproto-secret >/dev/null
 
     # set iptables for security
     # only allow localhost to access port 3128
