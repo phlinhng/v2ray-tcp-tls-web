@@ -42,7 +42,7 @@ colorEcho() {
   echo -e "\033[${1}${@:2}\033[0m" 1>& 2
 }
 
-if [ ! -d /usr/sbin/aliyun-service ]; then
+if [ ! -f /usr/sbin/aliyun-service ]; then
   colorEcho ${YELLOW} "未检测到阿里云相关服务"
   exit 1
 else

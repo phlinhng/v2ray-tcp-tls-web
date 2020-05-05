@@ -3,14 +3,18 @@ automated script for v2Ray (TCP+TLS+Web)
 
 ## Usage
 ```
-wget -O-  https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/v2.sh | bash -
+curl -ssL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/install.sh | bash
+```
+The above command will download the script, save it to `/usr/local/bin/v2script`, make it excutable and start it. To run the script again once installed, just use the following command:
+```
+v2script
 ```
 
 ## TODO
-+ [ ] Show installation(is installed/not installed) status on script startup
-+ [ ] Show current subscriton link if existed in `display_vmess`
++ [x] Show installation(is installed/not installed) status on script startup
++ [x] Show current subscriton link if existed in `display_vmess`
 + [ ] Integrate [tindy2013/subconverter](https://github.com/tindy2013/subconverter)
 + [ ] Integrate [9seconds/mtg](https://github.com/9seconds/mtg)
-+ [ ] Switch to docker nginx
++ [x] Switch to docker ~~nginx~~ caddy
 + [ ] Add CentOS Support
 + [ ] (under consideration) use random webpage template
