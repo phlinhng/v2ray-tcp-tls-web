@@ -12,9 +12,9 @@ v2script
 
 ## TODO
 + [x] Show installation(is installed/not installed) status on script startup
-+ [x] Show current subscriton link if existed in `display_vmess`
++ [x] Show current subscriton link if existed
 + [ ] Integrate [tindy2013/subconverter](https://github.com/tindy2013/subconverter)
 + [ ] Integrate [9seconds/mtg](https://github.com/9seconds/mtg)
 + [x] Switch to docker ~~nginx~~ caddy
 + [ ] Add CentOS Support
-+ [ ] (under consideration) use random webpage template
++ [x] use random webpage template

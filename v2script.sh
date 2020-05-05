@@ -148,8 +148,9 @@ install_v2ray() {
   # uuid-runtime: for uuid generating
   # ntp: time syncronise service
   # jq: json toolkits
+  # unzip: to decompress web templates
   ${sudoCmd} ${systemPackage} update
-  ${sudoCmd} ${systemPackage} install curl git coreutils wget ntp jq uuid-runtime -y
+  ${sudoCmd} ${systemPackage} install curl git coreutils wget ntp jq uuid-runtime unzip -y
 
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
@@ -194,8 +195,10 @@ install_v2ray() {
   ${sudoCmd} /bin/cp -f ./config_template/Caddyfile /usr/local/etc/Caddyfile
 
   # copy template for dummy web pages
+  # https://stackoverflow.com/questions/701505/best-way-to-choose-a-random-file-from-a-directory-in-a-shell-script
+  files=(./web_template/*)
   ${sudoCmd} mkdir -p /var/www/html
-  ${sudoCmd} /bin/cp -rf web_template/templated-industrious/. /var/www/html
+  ${sudoCmd} unzip "%s\n" "${files[RANDOM % ${#files[@]}]}" -d /var/www/html
 
   # set crontab to auto update geoip.dat and geosite.dat
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
