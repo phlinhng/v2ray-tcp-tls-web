@@ -363,10 +363,10 @@ install_mtproto() {
     ${sudoCmd} systemctl restart tls-shunt-proxy
     
     colorEcho ${GREEN} "电报代理设置成功!"
-    #show mtproto link
-
+    echo ""
+    echo "tg://proxy?server=$(${sudoCmd} cat /usr/local/etc/v2script/tls-header)&port=443&secret=$(${sudoCmd} cat /usr/local/etc/v2script/mtproto-secret)"
   else
-    #show mtproto link
+    echo "tg://proxy?server=$(${sudoCmd} cat /usr/local/etc/v2script/tls-header)&port=443&secret=$(${sudoCmd} cat /usr/local/etc/v2script/mtproto-secret)"
   fi
 }
 
@@ -385,8 +385,15 @@ check_status() {
     colorEcho ${YELLO} "尚未生成"
   fi
 
+  printf "电报代理:　 "
+  if [ ! -f "/usr/local/etc/v2script/mtproto-header" ] && [ ! -f "/usr/local/etc/v2script/mtproto-secret" ]; then
+    colorEcho ${YELLOW} "tg://proxy?server=$(${sudoCmd} cat /usr/local/etc/v2script/tls-header)&port=443&secret=$(${sudoCmd} cat /usr/local/etc/v2script/mtproto-secret)"
+  else
+    colorEcho ${YELLOW} "未设置"
+  fi
+
   echo ""
-  printf "Swap状态: "
+  printf "Swap状态:        "
   if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
     colorEcho ${GREEN} "己开启"
   else
