@@ -3,6 +3,9 @@
 # /usr/local/etc/v2script ##config path
 # /usr/local/etc/v2script/tls-header ##domain for v2Ray
 # /usr/local/etc/v2script/subscription ##filename of main subscription
+# /usr/local/etc/v2script/Caddyfile ##config of caddy
+# /usr/local/etc/v2script/mtproto-header  ##domain for mtproto
+# /usr/local/etc/v2script/mtproto-secret  ##secret for mtproto
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
@@ -63,9 +66,10 @@ show_menu() {
   echo "3) 卸载TCP+TLS+WEB"
   echo "4) 显示vmess链接"
   echo "5) 管理订阅"
-  echo "6) 安装加速脚本"
-  echo "7) 设置Swap"
-  echo "8) 卸载阿里云盾"
+  echo "6) 设置电报代理"
+  echo "7) 安装加速脚本"
+  echo "8) 设置Swap"
+  echo "9) 卸载阿里云盾"
 }
 
 continue_prompt() {
@@ -113,8 +117,8 @@ generate_link() {
   fi
 
   #${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
-  uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
-  V2_DOMAIN=$(${sudoCmd} cat /usr/local/etc/v2script/tls-header | tr -d '\n')
+  uuid="$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')"
+  V2_DOMAIN="$(${sudoCmd} cat /usr/local/etc/v2script/tls-header | tr -d '\n')"
 
   read -p "输入节点名称[留空则使用默认值]: " remark
 
@@ -125,7 +129,6 @@ generate_link() {
   json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
 
   uri="$(printf "${json}" | base64)"
-  vmess="vmess://${uri}"
   sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
   randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
@@ -161,6 +164,13 @@ install_v2ray() {
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
     curl -sSL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
     colorEcho ${GREEN} "tls-shunt-proxy is installed."
+  if [ -f "/etc/tls-shunt-proxy/config.yaml" ]; then # tls-shunt-proxy installed and config.yaml exists
+    ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee /etc/tls-shunt-proxy/config.yaml.bak
+    ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee config-new.yaml
+    cd $(mktemp -d)
+    sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" config-new.yaml
+    sed -i "s/##V2RAY@//g" config-new.yaml
+    ${sudoCmd} /bin/cp -f config-new.yaml /etc/tls-shunt-proxy/config.yaml
   fi
 
   # install docker
@@ -168,9 +178,6 @@ install_v2ray() {
   # install docker-compose
   #${sudoCmd} curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   #${sudoCmd}  chmod +x /usr/local/bin/docker-compose
-
-  # folder for scripts configuration
-  mkdir -p /usr/local/etc/v2script
 
   cd $(mktemp -d)
   git clone https://github.com/phlinhng/v2ray-tcp-tls-web.git
@@ -181,12 +188,18 @@ install_v2ray() {
   ${sudoCmd} rm -rf /etc/ssl/tls-shunt-proxy
   ${sudoCmd} rm -rf /etc/tls-shunt-proxy
   ${sudoCmd} mkdir -p /etc/tls-shunt-proxy
+  ${sudoCmd} rm -rf /usr/local/etc/v2script
+  ${sudoCmd} rm -rf /var/www/html
+
+  # folder for scripts configuration
+  ${sudoCmd} mkdir -p /usr/local/etc/v2script
 
   # create config files
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
   sed -i "s/FAKEUUID/${uuid}/g" ./config_template/config.json
-  sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" ./config_template/config.yaml
-  sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" ./config_template/Caddyfile
+  sed -i "s/##V2RAY@//g" ./config_template/config.yaml
+  sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config_template/config.yaml
+  sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config_template/Caddyfile
   printf "${V2_DOMAIN}" | tr -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/tls-header
 
   # copy cofig files to respective path
@@ -194,7 +207,7 @@ install_v2ray() {
   ${sudoCmd} /bin/cp -f ./config_template/config.yaml /etc/tls-shunt-proxy/config.yaml
   ${sudoCmd} /bin/cp -f ./config_template/Caddyfile /usr/local/etc/Caddyfile
 
-  # copy template for dummy web pages
+  # choose and copy a random  template for dummy web pages
   # https://stackoverflow.com/questions/701505/best-way-to-choose-a-random-file-from-a-directory-in-a-shell-script
   files=(./web_template/*)
   ${sudoCmd} mkdir -p /var/www/html
@@ -210,13 +223,13 @@ install_v2ray() {
   # activate services
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl enable ntp
-  ${sudoCmd} systemctl start ntp
+  ${sudoCmd} systemctl restart ntp
   ${sudoCmd} systemctl enable docker
-  ${sudoCmd} systemctl start docker
+  ${sudoCmd} systemctl restart docker
   ${sudoCmd} systemctl enable v2ray
-  ${sudoCmd} systemctl start v2ray
+  ${sudoCmd} systemctl restart v2ray
   ${sudoCmd} systemctl enable tls-shunt-proxy
-  ${sudoCmd} systemctl start tls-shunt-proxy
+  ${sudoCmd} systemctl restart tls-shunt-proxy
 
   # remove installation files
   cd ..
@@ -284,18 +297,77 @@ rm_v2ray() {
 get_netSpeed() {
   ${sudoCmd} ${systemPackage} install curl -y
   cd $(mktemp -d)
-  curl -sSL "https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh" | ${sudoCmd} bash
+  curl -sSL https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh | ${sudoCmd} bash
   exit 0
 }
 
 get_v2sub() {
   if [ ! -f "/usr/local/bin/v2sub" ]; then
-    ${sudoComm} ${systemPackage} update
-    ${sudoComm} ${systemPackage} install wget -y
-    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/v2sub.sh -O /usr/local/bin/v2sub
+    ${sudoCmd} ${systemPackage} update
+    ${sudoCmd} ${systemPackage} install wget -y
+    wget https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/v2sub.sh -O /usr/local/bin/v2sub
     chmod +x /usr/local/bin/v2sub
   else
     /usr/local/bin/v2sub
+  fi
+}
+
+install_mtproto() {
+  if [ ! -f "/usr/local/etc/v2script/mtproto-header" ] && [ ! -f "/usr/local/etc/v2script/mtproto-secret" ]; then
+    ${sudoCmd} ${systemPackage} update
+    ${sudoCmd} ${systemPackage} install curl -y
+
+    curl -sSL https://get.docker.com/ | ${sudoCmd} bash
+
+    # generate random header from txt files
+    # FAKE_TLS_HEADER=
+    # generate secret
+    secret="$(${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c "${FAKE_TLS_HEADER}")"
+
+    # start mtproto ## reference https://raw.githubusercontent.com/9seconds/mtg/master/run.sh
+    ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 3128:3128 nineseconds/mtg:latest run "${secret}"
+
+    printf "${FAKE_TLS_HEADER}" | tr  -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/mtproto-header
+    printf "${secret}" | tr  -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/mtproto-secret
+
+    # set iptables for security
+    # only allow localhost to access port 3128
+    iptables -A INPUT -s 127.0.0.1 -p tcp --dport 3128 -j ACCEPT
+    iptables -A INPUT -s 127.0.0.1 -p udp --dport 3128 -j ACCEPT
+    # reject  otherts ip
+    iptables -A INPUT -p TCP --dport 3128 -j REJECT
+    iptables -A INPUT -p UDP --dport 3128 -j REJECT
+
+  if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then # tls-shunt-proxy not installed
+    colorEcho ${BLUE} "tls-shunt-proxy not installed, start installation"
+    curl -sSL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
+    colorEcho ${GREEN} "tls-shunt-proxy is installed."
+    cd $(mktemp -d)
+    # crate new config.yaml and overwrite whatever the current one exisits or not
+    wget https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/config_template/config.yaml
+    sed -i "s/##MTPROTO@//g" config.yaml
+    sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" config.yaml
+    ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy/config.yaml
+  elif [ -f "/etc/tls-shunt-proxy/config.yaml" ]; then # tls-shunt-proxy installed and config.yaml exists
+    ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee /etc/tls-shunt-proxy/config.yaml.bak
+    cd $(mktemp -d)
+    ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee config-new.yaml
+    sed -i "s/##MTPROTO@//g" config-new.yaml
+    sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" config-new.yaml
+    ${sudoCmd} /bin/cp -f config-new.yaml /etc/tls-shunt-proxy/config.yaml
+  fi
+  
+  # activate service
+  ${sudoCmd} systemctl enable docker
+  ${sudoCmd} systemctl restart docker
+  ${sudoCmd} systemctl enable tls-shunt-proxy
+  ${sudoCmd} systemctl restart tls-shunt-proxy
+  
+  colorEcho ${GREEN} "电报代理设置成功!"
+  #show mtproto link
+
+  else
+    #show mtproto link
   fi
 }
 
@@ -339,7 +411,7 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=39
-  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "安装加速脚本" "设置Swap" "卸载阿里云盾")
+  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置电报代理" "安装加速脚本" "设置Swap" "卸载阿里云盾")
   select opt in "${options[@]}"
   do
     case "${opt}" in
@@ -348,6 +420,7 @@ menu() {
       "卸载TCP+TLS+WEB") rm_v2ray ;;
       "显示vmess链接") display_vmess && continue_prompt ;;
       "管理订阅") get_v2sub && continue_prompt ;;
+      "设置电报代理") install_mtproto && continue_prompt;;
       "安装加速脚本") get_netSpeed ;;
       "设置Swap") bash ./tools/set_swap.sh && continue_prompt ;;
       "卸载阿里云盾") bash ./tools/rm_aliyundun.sh && continue_prompt ;;
