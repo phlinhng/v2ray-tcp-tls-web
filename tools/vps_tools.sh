@@ -65,9 +65,10 @@ continue_prompt() {
   esac
 }
 
+# credit: https://github.com/LemonBench/LemonBench
 get_LemonBench() {
   ${sudoCmd} ${systemPackage} install curl -y
-  curl -sSL https://github.com/LemonBench/LemonBench/raw/master/LemonBench.sh | bash
+  curl -sSL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash
   exit 0
 }
 
