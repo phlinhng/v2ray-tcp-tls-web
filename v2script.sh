@@ -67,9 +67,7 @@ show_menu() {
   echo "4) 显示vmess链接"
   echo "5) 管理订阅"
   echo "6) 设置电报代理"
-  echo "7) 安装加速脚本"
-  echo "8) 设置Swap"
-  echo "9) 卸载阿里云盾"
+  echo "7) VPS工具"
 }
 
 continue_prompt() {
@@ -294,13 +292,6 @@ rm_v2ray() {
   exit 0
 }
 
-get_netSpeed() {
-  ${sudoCmd} ${systemPackage} install curl -y
-  cd $(mktemp -d)
-  curl -sSL https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh | ${sudoCmd} bash
-  exit 0
-}
-
 get_v2sub() {
   if [ ! -f "/usr/local/bin/v2sub" ]; then
     ${sudoCmd} ${systemPackage} update
@@ -428,9 +419,7 @@ menu() {
       "显示vmess链接") display_vmess && continue_prompt ;;
       "管理订阅") get_v2sub && continue_prompt ;;
       "设置电报代理") install_mtproto && continue_prompt;;
-      "安装加速脚本") get_netSpeed ;;
-      "设置Swap") bash ./tools/set_swap.sh && continue_prompt ;;
-      "卸载阿里云盾") bash ./tools/rm_aliyundun.sh && continue_prompt ;;
+      "VPS工具") bash ./tools/vps_tools.sh ;;
       *) break ;;
     esac
   done
