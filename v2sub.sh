@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# /usr/local/etc/v2script ##config path
-# /usr/local/etc/v2script/tls-header ##domain for v2Ray
-# /usr/local/etc/v2script/subscription ##filename of main subscription
-
-# /usr/local/bin/v2script ##main
-# /usr/local/bin/v2sub ##subscription manager
-
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
 else
