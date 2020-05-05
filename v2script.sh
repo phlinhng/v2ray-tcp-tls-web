@@ -338,33 +338,33 @@ install_mtproto() {
     iptables -A INPUT -p TCP --dport 3128 -j REJECT
     iptables -A INPUT -p UDP --dport 3128 -j REJECT
 
-  if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then # tls-shunt-proxy not installed
-    colorEcho ${BLUE} "tls-shunt-proxy not installed, start installation"
-    curl -sSL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
-    colorEcho ${GREEN} "tls-shunt-proxy is installed."
-    cd $(mktemp -d)
-    # crate new config.yaml and overwrite whatever the current one exisits or not
-    wget https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/config_template/config.yaml
-    sed -i "s/##MTPROTO@//g" config.yaml
-    sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" config.yaml
-    ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy/config.yaml
-  elif [ -f "/etc/tls-shunt-proxy/config.yaml" ]; then # tls-shunt-proxy installed and config.yaml exists
-    ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee /etc/tls-shunt-proxy/config.yaml.bak
-    cd $(mktemp -d)
-    ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee config-new.yaml
-    sed -i "s/##MTPROTO@//g" config-new.yaml
-    sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" config-new.yaml
-    ${sudoCmd} /bin/cp -f config-new.yaml /etc/tls-shunt-proxy/config.yaml
-  fi
-  
-  # activate service
-  ${sudoCmd} systemctl enable docker
-  ${sudoCmd} systemctl restart docker
-  ${sudoCmd} systemctl enable tls-shunt-proxy
-  ${sudoCmd} systemctl restart tls-shunt-proxy
-  
-  colorEcho ${GREEN} "电报代理设置成功!"
-  #show mtproto link
+    if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then # tls-shunt-proxy not installed
+      colorEcho ${BLUE} "tls-shunt-proxy not installed, start installation"
+      curl -sSL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
+      colorEcho ${GREEN} "tls-shunt-proxy is installed."
+      cd $(mktemp -d)
+      # crate new config.yaml and overwrite whatever the current one exisits or not
+      wget https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/config_template/config.yaml
+      sed -i "s/##MTPROTO@//g" config.yaml
+      sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" config.yaml
+      ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy/config.yaml
+    elif [ -f "/etc/tls-shunt-proxy/config.yaml" ]; then # tls-shunt-proxy installed and config.yaml exists
+      ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee /etc/tls-shunt-proxy/config.yaml.bak
+      cd $(mktemp -d)
+      ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee config-new.yaml
+      sed -i "s/##MTPROTO@//g" config-new.yaml
+      sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" config-new.yaml
+      ${sudoCmd} /bin/cp -f config-new.yaml /etc/tls-shunt-proxy/config.yaml
+    fi
+    
+    # activate service
+    ${sudoCmd} systemctl enable docker
+    ${sudoCmd} systemctl restart docker
+    ${sudoCmd} systemctl enable tls-shunt-proxy
+    ${sudoCmd} systemctl restart tls-shunt-proxy
+    
+    colorEcho ${GREEN} "电报代理设置成功!"
+    #show mtproto link
 
   else
     #show mtproto link
