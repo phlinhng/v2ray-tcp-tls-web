@@ -221,7 +221,6 @@ install_v2ray() {
   ${sudoCmd} docker run -d --restart=always -v /usr/local/etc/Caddyfile:/etc/Caddyfile -v $HOME/.caddy:/root/.caddy -p 80:80 abiosoft/caddy
 
   # activate services
-  ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl enable ntp
   ${sudoCmd} systemctl restart ntp
   ${sudoCmd} systemctl enable docker
@@ -230,6 +229,7 @@ install_v2ray() {
   ${sudoCmd} systemctl restart v2ray
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy
+  ${sudoCmd} systemctl daemon-reload
 
   # remove installation files
   cd ..
@@ -361,6 +361,7 @@ install_mtproto() {
     ${sudoCmd} systemctl restart docker
     ${sudoCmd} systemctl enable tls-shunt-proxy
     ${sudoCmd} systemctl restart tls-shunt-proxy
+    ${sudoCmd} systemctl daemon-reload
     
     colorEcho ${GREEN} "电报代理设置成功!"
     echo ""
