@@ -73,14 +73,14 @@ display_vmess() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
-  elif [ ! -f "/etc/nginx/sites-available/default" ]; then
+  elif [ ! -f "/usr/local/etc/v2script/tls-header" ]; then
     colorEcho ${RED} "web server配置文件不存在"
     return 1
   fi
 
   #${sudoCmd} ${systemPackage} install coreutils jq -y
   uuid="$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')"
-  V2_DOMAIN="$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')"
+  V2_DOMAIN="$(${sudoCmd} cat /usr/local/etc/v2script/tls-header | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')"
 
   echo "${V2_DOMAIN}:443"
   echo "${uuid} (aid: 0)"
@@ -96,18 +96,18 @@ generate_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
-  elif [ ! -f "/etc/nginx/sites-available/default" ]; then
+  elif [ ! -f "/usr/local/etc/v2script/tls-header" ]; then
     colorEcho ${RED} "web server配置文件不存在"
     return 1
   fi
 
-  if [ -f "/etc/v2ray/subscription" ]; then
-    ${sudoCmd} rm -f /var/www/html/$(${sudoCmd} cat /etc/v2ray/subscription)
+  if [ -f "/usr/local/etc/v2script/subscription" ]; then
+    ${sudoCmd} rm -f /var/www/html/$(${sudoCmd} cat /usr/local/etc/v2script/subscription)
   fi
 
   #${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
-  V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
+  V2_DOMAIN=$(${sudoCmd} cat /usr/local/etc/v2script/tls-header | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
 
   read -p "输入节点名称[留空则使用默认值]: " remark
 
@@ -122,7 +122,7 @@ generate_link() {
   sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
   randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
-  printf "${randomName}" | ${sudoCmd} tee /etc/v2ray/subscription >/dev/null
+  printf "${randomName}" | ${sudoCmd} tee /usr/local/etc/v2script/subscription >/dev/null
   printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/${randomName} >/dev/null
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
 }
@@ -139,12 +139,10 @@ install_v2ray() {
   # install requirements
   # coreutils: for base64 command
   # uuid-runtime: for uuid generating
-  # nginx: for redirecting http to https to make dummy site look more real
   # ntp: time syncronise service
   # jq: json toolkits
   ${sudoCmd} ${systemPackage} update
   ${sudoCmd} ${systemPackage} install curl git coreutils wget ntp jq uuid-runtime -y
-  ${sudoCmd} ${systemPackage} install nginx -fy
 
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
@@ -157,6 +155,15 @@ install_v2ray() {
     colorEcho ${GREEN} "tls-shunt-proxy is installed."
   fi
 
+  # install docker
+  curl -sSL https://get.docker.com/ | ${sudoCmd} sh
+  # install docker-compose
+  #${sudoCmd} curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  #${sudoCmd}  chmod +x /usr/local/bin/docker-compose
+
+  # folder for scripts configuration
+  mkdir -p /usr/local/etc/v2script
+
   cd $(mktemp -d)
   git clone https://github.com/phlinhng/v2ray-tcp-tls-web.git
   cd v2ray-tcp-tls-web
@@ -164,38 +171,40 @@ install_v2ray() {
   # prevent some bug
   ${sudoCmd} rm -rf /etc/tls-shunt-proxy
   ${sudoCmd} mkdir -p /etc/tls-shunt-proxy
-  ${sudoCmd} rm -rf /etc/nginx/sites-available
-  ${sudoCmd} mkdir -p /etc/nginx/sites-available
 
   # create config files
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
-  sed -i "s/FAKEUUID/${uuid}/g" config.json
-  sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" config.yaml
-  sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" default
+  sed -i "s/FAKEUUID/${uuid}/g" ./config_template/config.json
+  sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" ./config_template/config.yaml
+  sed -i "s/FAKEDOMAIN/${V2_DOMAIN}/g" ./config_template/Caddyfile
+  printf "${V2_DOMAIN}" | tr -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/tls-header
 
   # copy cofig files to respective path
-  ${sudoCmd} /bin/cp -f config.json /etc/v2ray/config.json
-  ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy/config.yaml
-  ${sudoCmd} /bin/cp -f default /etc/nginx/sites-available/default
+  ${sudoCmd} /bin/cp -f ./config_template/config.json /etc/v2ray/config.json
+  ${sudoCmd} /bin/cp -f ./config_template/config.yaml /etc/tls-shunt-proxy/config.yaml
+  ${sudoCmd} /bin/cp -f ./config_template/Caddyfile /usr/local/etc/Caddyfile
 
   # copy template for dummy web pages
   ${sudoCmd} mkdir -p /var/www/html
-  ${sudoCmd} /bin/cp -rf templated-industrious/. /var/www/html
+  ${sudoCmd} /bin/cp -rf web_template/templated-industrious/. /var/www/html
 
   # set crontab to auto update geoip.dat and geosite.dat
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
+  # activate caddy
+  ${sudoCmd} docker run -d --restart=always -v /usr/local/etc/Caddyfile:/etc/Caddyfile -v $HOME/.caddy:/root/.caddy -p 80:80 abiosoft/caddy
+
   # activate services
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl enable ntp
   ${sudoCmd} systemctl start ntp
+  ${sudoCmd} systemctl enable docker
+  ${sudoCmd} systemctl start docker
   ${sudoCmd} systemctl enable v2ray
   ${sudoCmd} systemctl start v2ray
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl start tls-shunt-proxy
-  ${sudoCmd} systemctl enable nginx
-  ${sudoCmd} systemctl restart nginx
 
   # remove installation files
   cd ..
@@ -240,25 +249,19 @@ rm_v2ray() {
   ${sudoCmd} delgroup --only-if-empty tls-shunt-proxy
   colorEcho ${GREEN} "Removed tls-shunt-proxy successfully."
 
-  # remove nginx
-  # https://askubuntu.com/questions/361902/how-to-install-nginx-after-removed-it-manually
-  colorEcho ${BLUE} "Shutting down nginx service."
-  ${sudoCmd} systemctl stop nginx
-  ${sudoCmd} systemctl disable nginx
-  ${sudoCmd} rm -f /etc/systemd/system/nginx.service
-  ${sudoCmd} rm -f /etc/systemd/system/nginx.service # and symlinks that might be related
-  ${sudoCmd} rm -f /lib/systemd/system/nginx.service
-  ${sudoCmd} rm -f /lib/systemd/system/nginx.service # and symlinks that might be related
-  ${sudoCmd} systemctl daemon-reload
-  ${sudoCmd} systemctl reset-failed
-  colorEcho ${BLUE} "Purging nginx and dependencies."
-  ${sudoCmd} ${systemPackage} autoremove nginx -y
-  ${sudoCmd} ${systemPackage} --purge remove nginx
-  ${sudoCmd} ${systemPackage} autoremove -y && ${sudoCmd} ${systemPackage} autoclean -y
-  colorEcho ${BLUE} "Removing nginx files."
-  ${sudoCmd} find / | grep nginx | ${sudoCmd} xargs rm -rf
-  colorEcho ${GREEN} "Removed nginx successfully."
-  colorEcho ${GREEN} "卸载TCP+TLS+WEB成功!"
+  # docker
+  colorEcho ${BLUE} "Shutting down docker service."
+  ${sudoCmd} systemctl stop docker
+  ${sudoCmd} systemctl disable docker
+  colorEcho ${BLUE} "Removing docker containers, images, networks, and images"
+  ${sudoCmd} docker container prune --force
+  ${sudoCmd} docker image prune --force
+  ${sudoCmd} docker volume prune --force
+  ${sudoCmd} docker network prune
+  colorEcho ${GREEN} "Removed docker successfully."
+
+  # remove script configuration files
+  ${sudoCmd} rm -rf /usr/local/etc/v2script
 
   exit 0
 }
@@ -267,15 +270,15 @@ update_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
-  elif [ ! -f "/etc/nginx/sites-available/default" ]; then
+  elif [ ! -f "/usr/local/etc/v2script/tls-header" ]; then
     colorEcho ${RED} "web server配置文件不存在"
     return 1
   fi
 
-  if [ -f "/etc/v2ray/subscription" ]; then
-    subFileName="$(${sudoCmd} cat /etc/v2ray/subscription)"
+  if [ -f "/usr/local/etc/v2script/subscription" ]; then
+    subFileName="$(${sudoCmd} cat /usr/local/etc/v2script/subscription)"
     uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
-    V2_DOMAIN=$(${sudoCmd} cat /etc/nginx/sites-available/default | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
+    V2_DOMAIN=$(${sudoCmd} cat /usr/local/etc/v2script/tls-header | grep -e 'server_name' | sed -e 's/^[[:blank:]]server_name[[:blank:]]//g' -e 's/;//g' | tr -d '\n')
     currentRemark="$(cat /var/www/html/${subFileName} | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
 
     read -p "输入节点名称[留空则使用现有值 ${currentRemark}]: " remark
@@ -309,34 +312,33 @@ get_netSpeed() {
   exit 0
 }
 
-set_swap() {
-  if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
-    # allocate space
-    ${sudoCmd} fallocate -l 1G /swapfile
-
-    # set permission
-    ${sudoCmd} chmod 600 /swapfile
-
-    # make swap
-    ${sudoCmd} mkswap /swapfile
-
-    # enable swap
-    ${sudoCmd} swapon /swapfile
-
-    # make swap permanent
-    printf "/swapfile swap swap defaults 0 0" | ${sudoCmd} tee -a /etc/fstab  >/dev/null
-
-    # set swap percentage
-    ${sudoCmd} sysctl vm.swappiness=10
-    printf "vm.swappiness=10" | ${sudoCmd} tee -a /etc/sysctl.conf >/dev/null
-
-    free -h
-    colorEcho ${GREEN} "设置Swap成功"
+check_status() {
+  printf "TCP+TLS+WEB状态: "
+  if [ -d "/usr/bin/v2ray" ] && [ -f "/usr/local/bin/tls-shunt-proxy" ] && [ -f "/usr/local/etc/v2script/Caddyfile" ]; then
+    colorEcho ${GREEN} "己安装"
   else
-    free -h
-    colorEcho ${BLUE} "己有Swap 无需设置"
+    colorEcho ${YELLOW} "未安装"
   fi
 
+  if [ -f "/usr/local/etc/v2script/subscription" ] && [ -f "/usr/local/etc/v2script/tls-header" ]; then
+    printf "主订阅链接: "
+    colorEcho ${YELLO} "https://$(${sudoCmd} cat /usr/local/etc/v2script/tls-header)/$(${sudoCmd} cat /usr/local/etc/v2script/subscription)"
+  fi
+
+  echo ""
+  printf "Swap状态: "
+  if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
+    colorEcho ${GREEN} "己开启"
+  else
+    colorEcho ${YELLOW} "未开启"
+  fi
+
+  if [ ! -d /usr/sbin/aliyun-service ]; then
+    echo ""
+    colorEcho ${RED} "检测到阿里云监测服务 建议卸载"
+  fi
+
+  echo ""
 }
 
 menu() {
@@ -344,9 +346,11 @@ menu() {
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
+  check_status
+
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=12
-  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "生成订阅" "更新订阅" "安装加速脚本" "设置Swap")
+  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "生成订阅" "更新订阅" "安装加速脚本" "设置Swap" "卸载阿里云盾")
   select opt in "${options[@]}"
   do
     case "${opt}" in
@@ -357,7 +361,8 @@ menu() {
       "生成订阅") generate_link && continue_prompt ;;
       "更新订阅") update_link && continue_prompt ;;
       "安装加速脚本") get_netSpeed;;
-      "设置Swap") set_swap && continue_prompt ;;
+      "设置Swap") chmod +x ./tools/set_swap.sh && ./tools/set_swap.sh && continue_prompt ;;
+      "卸载阿里云盾") chmod +x ./tools/rm_aliyundun && ./tools/rm_aliyundun.sh && continue_prompt ;;
       *) break;;
     esac
   done
