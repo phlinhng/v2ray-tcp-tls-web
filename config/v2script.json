@@ -4,6 +4,9 @@
     "tlsHeader": "",
     "subscription": ""
   },
+  "sub": {
+    "nodes": []
+  },
   "api": {
     "installed": false,
     "prefix": ""
