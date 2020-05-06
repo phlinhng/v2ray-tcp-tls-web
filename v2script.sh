@@ -334,7 +334,7 @@ install_mtproto() {
       colorEcho ${GREEN} "tls-shunt-proxy is installed."
       cd $(mktemp -d)
       # crate new config.yaml and overwrite whatever the current one exisits or not
-      wget https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/config/config.yaml
+      wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/config/config.yaml
       sed -i "s/##MTPROTO@//g" config.yaml
       sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" config.yaml
       ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy/config.yaml
@@ -400,8 +400,14 @@ check_status() {
   echo ""
 }
 
+vps_tools() {
+  ${sudoCmd} ${systemPackage} install curl -y
+  curl -sSL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/tools/vps_tools.sh | bash
+  exit 0
+}
+
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v0.3.1"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v1.0"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
@@ -419,7 +425,7 @@ menu() {
       "显示vmess链接") display_vmess && continue_prompt ;;
       "管理订阅") get_v2sub && continue_prompt ;;
       "设置电报代理") install_mtproto && continue_prompt;;
-      "VPS工具") bash ./tools/vps_tools.sh ;;
+      "VPS工具") vps_tools ;;
       *) break ;;
     esac
   done

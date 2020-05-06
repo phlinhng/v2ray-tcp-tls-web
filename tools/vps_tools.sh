@@ -65,16 +65,28 @@ continue_prompt() {
   esac
 }
 
-# credit: https://github.com/LemonBench/LemonBench
-get_LemonBench() {
+netSpeed() {
   ${sudoCmd} ${systemPackage} install curl -y
-  curl -sSL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash
+  curl -sSL https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh | bash
   exit 0
 }
 
-get_netSpeed() {
+setSwap() {
   ${sudoCmd} ${systemPackage} install curl -y
-  curl -sSL https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh | ${sudoCmd} bash
+  curl -sSL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/tools/set_swap.sh | bash
+  exit 0
+}
+
+rmAliyundun() {
+  ${sudoCmd} ${systemPackage} install curl -y
+  curl -sSL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/tools/rm_aliyundun.sh | bash
+  exit 0
+}
+
+# credit: https://github.com/LemonBench/LemonBench
+LemonBench() {
+  ${sudoCmd} ${systemPackage} install curl -y
+  curl -sSL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash
   exit 0
 }
 
@@ -89,9 +101,9 @@ menu() {
   select opt in "${options[@]}"
   do
     case "${opt}" in
-      "安装加速") get_netSpeed ;;
-      "设置Swap") bash ./set_swap.sh && continue_prompt ;;
-      "卸载阿里云盾") bash ./rm_aliyundun.sh && continue_prompt ;;
+      "安装加速") netSpeed ;;
+      "设置Swap") setSwap && continue_prompt ;;
+      "卸载阿里云盾") rmAliyundun && continue_prompt ;;
       "性能测试") get_LemonBench ;;
       *) break;;
     esac
