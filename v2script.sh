@@ -315,18 +315,10 @@ install_mtproto() {
     secret="$(${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c "${FAKE_TLS_HEADER}")"
 
     # start mtproto ## reference https://raw.githubusercontent.com/9seconds/mtg/master/run.sh
-    ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 3128:3128 nineseconds/mtg:latest run "${secret}"
+    ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 127.0.0.1:3128:3128 nineseconds/mtg:latest run "${secret}"
 
     printf "${FAKE_TLS_HEADER}" | tr  -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/mtproto-header >/dev/null
     printf "${secret}" | tr  -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/mtproto-secret >/dev/null
-
-    # set iptables for security
-    # only allow localhost to access port 3128
-    iptables -A INPUT -s 127.0.0.1 -p tcp --dport 3128 -j ACCEPT
-    iptables -A INPUT -s 127.0.0.1 -p udp --dport 3128 -j ACCEPT
-    # reject  otherts ip
-    iptables -A INPUT -p TCP --dport 3128 -j REJECT
-    iptables -A INPUT -p UDP --dport 3128 -j REJECT
 
     if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then # tls-shunt-proxy not installed
       colorEcho ${BLUE} "tls-shunt-proxy not installed, start installation"
