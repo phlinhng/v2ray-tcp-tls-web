@@ -97,15 +97,15 @@ display_vmess() {
 
   #${sudoCmd} ${systemPackage} install coreutils jq -y
   uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-  V2_DOMAIN="$(${sudoCmd} cat /usr/local/etc/v2script/tls-header | grep -e 'server_name' | tr -d '\n')"
+  V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
 
   echo "${V2_DOMAIN}:443"
   echo "${uuid} (aid: 0)"
   echo ""
 
   json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  uri="$(printf "${json}" | base64)" # todo: add link to v2script config
 
-  uri="$(printf "${json}" | base64)"
   echo "vmess://${uri}" | tr -d '\n' && printf "\n"
 }
 
@@ -113,8 +113,8 @@ generate_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
-  elif [ ! -f "/usr/local/etc/v2script/tls-header" ]; then
-    colorEcho ${RED} "web server配置文件不存在"
+  elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
+    colorEcho ${RED} "配置文件不存在"
     return 1
   fi
 
