@@ -10,6 +10,8 @@
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
 
+# todo: use /usr/local/etc/v2script/script.json as config
+
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
 else
@@ -194,14 +196,14 @@ install_v2ray() {
 
   # create config files
   uuid=$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')
-  sed -i "s/FAKEUUID/${uuid}/g" ./config/config.json
+  sed -i "s/FAKEUUID/${uuid}/g" ./config/v2ray.json
   sed -i "s/##V2RAY@//g" ./config/config.yaml
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/config.yaml
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
   printf "${V2_DOMAIN}" | tr -d '\n' | ${sudoCmd} tee /usr/local/etc/v2script/tls-header
 
   # copy cofig files to respective path
-  ${sudoCmd} /bin/cp -f ./config/config.json /etc/v2ray/config.json
+  ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
   ${sudoCmd} /bin/cp -f ./config/config.yaml /etc/tls-shunt-proxy/config.yaml
   ${sudoCmd} /bin/cp -f ./config/Caddyfile /usr/local/etc/Caddyfile
 

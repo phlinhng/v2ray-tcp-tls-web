@@ -1,0 +1,15 @@
+{
+  "v2ray": {
+    "installed": false,
+    "tlsHeader": "",
+    "subscription": ""
+  },
+  "api": {
+    "installed": false
+  },
+  "mtproto": {
+    "installed": false,
+    "tlsHeader": "",
+    "secret": ""
+  }
+}
