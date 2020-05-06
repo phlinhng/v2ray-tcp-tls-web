@@ -1,5 +1,5 @@
-# v2ray tcp+tls+web [中文](https://github.com/phlinhng/v2ray-tcp-tls-web/wiki)
-automated script for v2Ray (TCP+TLS+Web)
+# v2ray tcp+tls+web
+automated script for v2Ray (TCP+TLS+Web) [中文](https://github.com/phlinhng/v2ray-tcp-tls-web/wiki)
 
 ## Usage
 ```
