@@ -90,8 +90,8 @@ display_vmess() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
-  elif [ ! -f "/usr/local/etc/v2script/tls-header" ]; then
-    colorEcho ${RED} "web server配置文件不存在"
+  elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
+    colorEcho ${RED} "配置文件不存在"
     return 1
   fi
 
