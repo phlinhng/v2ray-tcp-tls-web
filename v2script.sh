@@ -275,6 +275,8 @@ rm_v2ray() {
   colorEcho ${GREEN} "Removed tls-shunt-proxy successfully."
 
   # docker
+  # this will stop docker.service and remove every conatainer, image...etc created by docker but not docker itself
+  # since uninstalling docker is complicated and may cause unstable to OS, if you want the OS to go back to clean state then reinstall the whole OS is suggested
   colorEcho ${BLUE} "Shutting down docker service."
   ${sudoCmd} systemctl stop docker
   ${sudoCmd} systemctl disable docker
