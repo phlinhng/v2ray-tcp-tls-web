@@ -1,5 +1,7 @@
 #!/bin/bash
 
+branch="beta"
+
 # /usr/local/etc/v2script ##config path
 # /usr/local/etc/v2script/tls-header ##domain for v2Ray
 # /usr/local/etc/v2script/subscription ##filename of main subscription
