@@ -1,12 +1,10 @@
-# v2ray tcp+tls+web
+# v2ray tcp+tls+web [中文](https://github.com/phlinhng/v2ray-tcp-tls-web/wiki)
 automated script for v2Ray (TCP+TLS+Web)
 
 ## Usage
 ```
 wget -N --no-check-certificate https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/v2.sh && chmod +x v2.sh && ./v2.sh
 ```
-
-## [Tutorial in Chinese](https://github.com/phlinhng/v2ray-tcp-tls-web/wiki/安装TCP-TLS-WEB新三件套)
 
 ## TCP+TLS vs WS+TLS
 1. TCP+TLS has faster connection speed than WS+TLS benifit from that TCP is naturally faster than websocket
