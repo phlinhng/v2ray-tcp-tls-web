@@ -1,5 +1,7 @@
 #!/bin/bash
 
+branch="beta"
+
 # /usr/local/etc/v2script ##config path
 # /usr/local/etc/v2script/tls-header ##domain for v2Ray
 # /usr/local/etc/v2script/subscription ##filename of main subscription
@@ -182,7 +184,7 @@ install_v2ray() {
   cd $(mktemp -d)
   git clone https://github.com/phlinhng/v2ray-tcp-tls-web.git
   cd v2ray-tcp-tls-web
-  git checkout beta
+  git checkout ${branch}
 
   # prevent some bug
   ${sudoCmd} rm -rf /etc/ssl/tls-shunt-proxy
@@ -245,54 +247,9 @@ install_v2ray() {
   esac
 }
 
-rm_v2ray() {
-  if [ ! -d "/usr/bin/v2ray" ] || [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
-    return 1
-  fi
-
+rm_v2script() {
   ${sudoCmd} ${systemPackage} install curl -y
-
-  # remove v2ray
-  # Notice the two dashes (--) which are telling bash to not process anything following it as arguments to bash.
-  # https://stackoverflow.com/questions/4642915/passing-parameters-to-bash-when-executing-a-script-fetched-by-curl
-  curl -sSL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
-  ${sudoCmd} rm -rf /etc/v2ray
-
-  # remove tls-shunt-server
-  colorEcho ${BLUE} "Shutting down tls-shunt-proxy service."
-  ${sudoCmd} systemctl stop tls-shunt-proxy
-  ${sudoCmd} systemctl disable tls-shunt-proxy
-  ${sudoCmd} rm -f /etc/systemd/system/tls-shunt-proxy.service
-  ${sudoCmd} rm -f /etc/systemd/system/tls-shunt-proxy.service # and symlinks that might be related
-  ${sudoCmd} systemctl daemon-reload
-  ${sudoCmd} systemctl reset-failed
-  colorEcho ${BLUE} "Removing tls-shunt-proxy files."
-  ${sudoCmd} rm -rf /usr/local/bin/tls-shunt-proxy
-  ${sudoCmd} rm -rf /etc/ssl/tls-shunt-proxy
-  colorEcho ${BLUE} "Removing tls-shunt-proxy user & group."
-  ${sudoCmd} deluser tls-shunt-proxy
-  ${sudoCmd} delgroup --only-if-empty tls-shunt-proxy
-  colorEcho ${GREEN} "Removed tls-shunt-proxy successfully."
-
-  # docker
-  # this will stop docker.service and remove every conatainer, image...etc created by docker but not docker itself
-  # since uninstalling docker is complicated and may cause unstable to OS, if you want the OS to go back to clean state then reinstall the whole OS is suggested
-  colorEcho ${BLUE} "Shutting down docker service."
-  ${sudoCmd} systemctl stop docker
-  ${sudoCmd} systemctl disable docker
-  colorEcho ${BLUE} "Removing docker containers, images, networks, and images"
-  ${sudoCmd} docker container prune --force
-  ${sudoCmd} docker image prune --force
-  ${sudoCmd} docker volume prune --force
-  ${sudoCmd} docker network prune --force
-  colorEcho ${GREEN} "Removed docker successfully."
-
-  # remove script configuration files
-  ${sudoCmd} rm -rf /usr/local/etc/v2script
-
-  colorEcho ${BLUE} "卸载完成, 请手动執行下列指令移除脚本"
-  echo "rm -f /usr/local/bin/v2script && rm -f /usr/local/bin/v2sub"
-
+  curl -sSL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_v2script.sh | bash
   exit 0
 }
 
@@ -300,7 +257,7 @@ get_v2sub() {
   if [ ! -f "/usr/local/bin/v2sub" ]; then
     ${sudoCmd} ${systemPackage} update
     ${sudoCmd} ${systemPackage} install wget -y
-    wget https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/v2sub.sh -O /usr/local/bin/v2sub
+    wget https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/v2sub.sh -O /usr/local/bin/v2sub
     chmod +x /usr/local/bin/v2sub
   else
     /usr/local/bin/v2sub
@@ -330,7 +287,7 @@ install_mtproto() {
       colorEcho ${GREEN} "tls-shunt-proxy is installed."
       cd $(mktemp -d)
       # crate new config.yaml and overwrite whatever the current one exisits or not
-      wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/config/config.yaml
+      wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml
       sed -i "s/##MTPROTO@//g" config.yaml
       sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" config.yaml
       ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy/config.yaml
@@ -398,7 +355,7 @@ check_status() {
 
 vps_tools() {
   ${sudoCmd} ${systemPackage} install curl -y
-  curl -sSL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/tools/vps_tools.sh | bash
+  curl -sSL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh | bash
   exit 0
 }
 
@@ -417,7 +374,7 @@ menu() {
     case "${opt}" in
       "安装TCP+TLS+WEB") install_v2ray && continue_prompt ;;
       "更新v2Ray-core") get_v2ray && continue_prompt ;;
-      "卸载TCP+TLS+WEB") rm_v2ray ;;
+      "卸载TCP+TLS+WEB") rm_v2script ;;
       "显示vmess链接") display_vmess && continue_prompt ;;
       "管理订阅") get_v2sub && continue_prompt ;;
       "设置电报代理") install_mtproto && continue_prompt;;
