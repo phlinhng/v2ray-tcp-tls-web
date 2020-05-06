@@ -10,7 +10,7 @@
   },
   "mtproto": {
     "installed": false,
-    "tlsHeader": "",
+    "faketlsHeader": "",
     "secret": ""
   }
 }
