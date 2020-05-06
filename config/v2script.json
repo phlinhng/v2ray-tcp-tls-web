@@ -5,7 +5,8 @@
     "subscription": ""
   },
   "api": {
-    "installed": false
+    "installed": false,
+    "prefix": ""
   },
   "mtproto": {
     "installed": false,
