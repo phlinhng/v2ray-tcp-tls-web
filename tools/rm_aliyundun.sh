@@ -44,7 +44,7 @@ colorEcho() {
 
 if [ ! -f /usr/sbin/aliyun-service ]; then
   colorEcho ${YELLOW} "未检测到阿里云相关服务"
-  exit 1
+  return 0
 else
   # https://zhuanlan.zhihu.com/p/52758924
 
@@ -83,5 +83,5 @@ else
 
   colorEcho ${GREEN} "阿里云盾己卸载"
 
-  exit 0
+  return 0
 fi

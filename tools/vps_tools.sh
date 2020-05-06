@@ -74,13 +74,11 @@ netSpeed() {
 setSwap() {
   ${sudoCmd} ${systemPackage} install curl -y
   curl -sSL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/tools/set_swap.sh | bash
-  exit 0
 }
 
 rmAliyundun() {
   ${sudoCmd} ${systemPackage} install curl -y
   curl -sSL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/tools/rm_aliyundun.sh | bash
-  exit 0
 }
 
 # credit: https://github.com/LemonBench/LemonBench
