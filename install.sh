@@ -49,11 +49,18 @@ ${sudoCmd} ${systemPackage} update
 ${sudoCmd} ${systemPackage} install curl wget git jq -y
 
 mkdir -p /usr/local/etc/v2script
+
 if [ ! -f "/usr/local/etc/v2script/config.json" ]; then
   wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
 fi
-wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/v2script.sh -O /usr/local/bin/v2script
-chmod +x /usr/local/bin/v2script && /usr/local/bin/v2script
+
+if [ ! -f "/usr/local/bin/v2script" ]; then
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/v2script.sh -O /usr/local/bin/v2script
+  chmod +x /usr/local/bin/v2script
+else
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/v2script.sh -O /usr/local/bin/v2script
+  chmod +x /usr/local/bin/v2script && /usr/local/bin/v2script
+fi
 
 exit 0
 
