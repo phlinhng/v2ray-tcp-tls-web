@@ -82,6 +82,10 @@ continue_prompt() {
   esac
 }
 
+read_json() {
+  ${sudoCmd} jq --raw-output $1 $2 2>/dev/null | tr -d '\n'
+}
+
 display_vmess() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
@@ -92,7 +96,7 @@ display_vmess() {
   fi
 
   #${sudoCmd} ${systemPackage} install coreutils jq -y
-  uuid="$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')"
+  uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
   V2_DOMAIN="$(${sudoCmd} cat /usr/local/etc/v2script/tls-header | grep -e 'server_name' | tr -d '\n')"
 
   echo "${V2_DOMAIN}:443"
@@ -119,7 +123,7 @@ generate_link() {
   fi
 
   #${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
-  uuid="$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')"
+  uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
   V2_DOMAIN="$(${sudoCmd} cat /usr/local/etc/v2script/tls-header | tr -d '\n')"
 
   read -p "输入节点名称[留空则使用默认值]: " remark
