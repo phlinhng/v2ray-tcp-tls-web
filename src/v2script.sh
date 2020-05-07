@@ -189,6 +189,8 @@ install_v2ray() {
   git clone https://github.com/phlinhng/v2ray-tcp-tls-web.git
   cd v2ray-tcp-tls-web
   git checkout ${branch}
+  # wget https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
+  # unzip ${branch}.zip ## will unzip the source to current path
 
   # prevent some bug
   ${sudoCmd} rm -rf /etc/ssl/tls-shunt-proxy
@@ -218,6 +220,7 @@ install_v2ray() {
   wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template} -O template.zip
   ${sudoCmd} mkdir -p /var/www/html
   ${sudoCmd} unzip template.zip -d /var/www/html
+  ${sudoCmd} /bin/cp -f ./custom/robots.txt /var/www/html/robots.txt
 
   # set crontab to auto update geoip.dat and geosite.dat
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
