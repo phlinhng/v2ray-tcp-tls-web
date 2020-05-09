@@ -87,4 +87,6 @@ ${sudoCmd} rm -rf /usr/local/etc/v2script
 ${sudoCmd} rm -f /usr/local/bin/v2script
 ${sudoCmd} rm -f /usr/local/bin/v2ssub
 
+${sudoCmd} ${systemPackage} autoremove -y
+
 colorEcho ${BLUE} "卸载完成"
