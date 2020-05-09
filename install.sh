@@ -66,5 +66,3 @@ else
   chmod +x /usr/local/bin/v2script && /usr/local/bin/v2script
 fi
 
-exit 0
-
