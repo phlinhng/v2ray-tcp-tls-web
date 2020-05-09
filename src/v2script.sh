@@ -396,7 +396,7 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=39
-  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置电报代理" "安装加速脚本" "设置Swap" "卸载阿里云盾")
+  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置电报代理" "VPS工具")
   select opt in "${options[@]}"
   do
     case "${opt}" in
