@@ -161,7 +161,8 @@ install_v2ray() {
 
   cd $(mktemp -d)
   wget https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
-  unzip ${branch}.zip && rm -f ${branch}.zip ## will unzip the source to current path and remove the archive file
+  unzip -q ${branch}.zip && rm -f ${branch}.zip ## will unzip the source to current path and remove the archive file
+  cd v2ray-tcp-tls-web-${branch}
 
   if [ ! -d "/usr/local/etc/v2script" ]; then
     mkdir -p /usr/local/etc/v2script ## folder for scripts configuration
@@ -349,7 +350,7 @@ check_status() {
     colorEcho ${YELLOW} "未安装"
   fi
 
-  printf "主订阅链接: "
+  printf "订阅链接: "
   if [ -f "/usr/local/etc/v2script/config.json" ] && [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
     colorEcho ${YELLO} "https://$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
   else
