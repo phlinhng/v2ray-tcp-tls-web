@@ -215,7 +215,7 @@ install_v2ray() {
 
   # add new user and overwrite v2ray.service
   # https://github.com/v2ray/v2ray-core/issues/1011
-  ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray
+  ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray || true ##add user only if user doesn't exist
   ${sudoCmd} /bin/cp -f ./config/v2ray.service /etc/systemd/system/v2ray.service
   ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
 

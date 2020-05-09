@@ -53,6 +53,7 @@ ${sudoCmd} ${systemPackage} install curl -y
 # https://stackoverflow.com/questions/4642915/passing-parameters-to-bash-when-executing-a-script-fetched-by-curl
 curl -sSL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 ${sudoCmd} rm -rf /etc/v2ray
+${sudoCmd} deluser v2ray
 
 # remove tls-shunt-server
 colorEcho ${BLUE} "Shutting down tls-shunt-proxy service."
