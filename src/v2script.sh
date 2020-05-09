@@ -82,7 +82,7 @@ read_json() {
 }
 
 write_json() {
-  jq -r "$2 = \"$3\"" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1
+  jq -r "$2 = \"$3\"" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 }
 
 display_vmess() {
