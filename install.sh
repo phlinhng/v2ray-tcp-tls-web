@@ -56,13 +56,6 @@ if [ ! -f "/usr/local/etc/v2script/config.json" ]; then
   wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
 fi
 
-if [ ! -f "/usr/local/bin/v2script" ]; then
-  # update v2script
-  wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2script.sh -O /usr/local/bin/v2script
-  chmod +x /usr/local/bin/v2script
-else
-  # install v2script for the first time and start
-  wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2script.sh -O /usr/local/bin/v2script
-  chmod +x /usr/local/bin/v2script && /usr/local/bin/v2script
-fi
+wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2script.sh -O /usr/local/bin/v2script
+chmod +x /usr/local/bin/v2script
 

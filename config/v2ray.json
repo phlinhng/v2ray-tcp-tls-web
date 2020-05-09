@@ -2,8 +2,6 @@
   "inbounds": [
     {
       "protocol": "vmess",
-      "listen": "127.0.0.1",
-      "port": 35666,
       "settings": {
         "clients": [
           {
@@ -13,7 +11,10 @@
         ]
       },
       "streamSettings": {
-        "network": "tcp"
+        "network": "domainsocket",
+        "dsSettings": {
+          "path": "/tmp/v2ray-ds/v2ray.sock"
+        }
       },
       "sniffing": {
         "enabled": true,
