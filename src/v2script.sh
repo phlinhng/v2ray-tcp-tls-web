@@ -227,7 +227,7 @@ install_v2ray() {
   template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
   wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template} -O template.zip
   ${sudoCmd} mkdir -p /var/www/html
-  ${sudoCmd} unzip template.zip -d /var/www/html
+  ${sudoCmd} unzip -q template.zip -d /var/www/html
   ${sudoCmd} /bin/cp -f ./custom/robots.txt /var/www/html/robots.txt
 
   # set crontab to auto update geoip.dat and geosite.dat
