@@ -44,7 +44,6 @@ colorEcho() {
 
 if [ ! -f /usr/sbin/aliyun-service ]; then
   colorEcho ${YELLOW} "未检测到阿里云相关服务"
-  return 0
 else
   # https://zhuanlan.zhihu.com/p/52758924
 
@@ -82,8 +81,4 @@ else
   ${sudoCmd} iptables -I INPUT -s 140.205.225.204/32 -j DROP
 
   colorEcho ${GREEN} "阿里云盾己卸载"
-
-  return 0
 fi
-
-return 0

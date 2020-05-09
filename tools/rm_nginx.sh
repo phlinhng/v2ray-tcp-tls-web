@@ -60,5 +60,3 @@ ${sudoCmd} ${systemPackage} autoremove -y && ${sudoCmd} ${systemPackage} autocle
 colorEcho ${BLUE} "Removing nginx files."
 ${sudoCmd} find / | grep nginx | ${sudoCmd} xargs rm -rf
 colorEcho ${GREEN} "Removed nginx successfully."
-
-return 0

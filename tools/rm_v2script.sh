@@ -88,5 +88,3 @@ ${sudoCmd} rm -f /usr/local/bin/v2script
 ${sudoCmd} rm -f /usr/local/bin/v2ssub
 
 colorEcho ${BLUE} "卸载完成"
-
-return 0

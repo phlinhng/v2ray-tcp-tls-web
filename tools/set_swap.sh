@@ -64,9 +64,7 @@ if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
 
   free -h
   colorEcho ${GREEN} "设置Swap成功"
-  return 0
 else
   free -h
   colorEcho ${BLUE} "己有Swap 无需设置"
-  return 0
 fi
