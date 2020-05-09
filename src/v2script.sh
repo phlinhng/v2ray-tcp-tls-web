@@ -78,12 +78,14 @@ continue_prompt() {
 }
 
 read_json() {
-  ${sudoCmd} jq --raw-output $1 $2 2>/dev/null | tr -d '\n'
-}
+  # jq [key] [path-to-file]
+  ${sudoCmd} jq --raw-output $2 $1 2>/dev/null | tr -d '\n'
+} ## read_json [path-to-file] [key]
 
 write_json() {
+  # jq [key = value] [path-to-file]
   jq -r "$2 = \"$3\"" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
-}
+} ## write_json [path-to-file] [key = value]
 
 display_vmess() {
   if [ ! -d "/usr/bin/v2ray" ]; then
