@@ -176,6 +176,47 @@ install_v2ray() {
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
     get_v2ray
+    ds_service=$(mktemp)
+    cat > ${ds_service} <<-EOF
+[Unit]
+Description=V2Ray - A unified platform for anti-censorship
+Documentation=https://v2ray.com https://guide.v2fly.org
+After=network.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+# If the version of systemd is 240 or above, then uncommenting Type=exec and commenting out Type=simple
+#Type=exec
+Type=simple
+# Runs as root or add CAP_NET_BIND_SERVICE ability can bind 1 to 1024 port.
+# This service runs as root. You may consider to run it as another user for security concerns.
+# By uncommenting User=v2ray and commenting out User=root, the service will run as user v2ray.
+# More discussion at https://github.com/v2ray/v2ray-core/issues/1011
+#User=root
+User=v2ray
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
+NoNewPrivileges=yes
+
+ExecStartPre=$(which mkdir) -p /tmp/v2ray-ds
+ExecStartPre=$(which rm) -rf /tmp/v2ray-ds/*.sock
+
+ExecStart=/usr/bin/v2ray/v2ray -config /etc/v2ray/config.json
+
+ExecStartPost=$(which sleep) 1
+ExecStartPost=$(which chmod) 777 /tmp/v2ray-ds/v2ray.sock
+
+Restart=on-failure
+# Don't restart in the case of configuration error
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    # add new user and overwrite v2ray.service
+    # https://github.com/v2ray/v2ray-core/issues/1011
+    ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray
+    ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
+    ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
     write_json  /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
   fi
 
@@ -216,12 +257,6 @@ install_v2ray() {
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
   /bin/cp -f ./config/Caddyfile /usr/local/etc
   write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
-
-  # add new user and overwrite v2ray.service
-  # https://github.com/v2ray/v2ray-core/issues/1011
-  ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray
-  ${sudoCmd} /bin/cp -f ./config/v2ray.service /etc/systemd/system/v2ray.service
-  ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
 
   # choose and copy a random  template for dummy web pages
   template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
