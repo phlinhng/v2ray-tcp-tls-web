@@ -231,8 +231,8 @@ install_v2ray() {
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   # stop nginx service for user who had used the old version of script
-  ${sudoCmd} systemctl disable nginx
   ${sudoCmd} systemctl stop nginx
+  ${sudoCmd} systemctl disable nginx
 
   # kill process occupying port 80
   ${sudoCmd} kill -9 $(lsof -t -i:80)
