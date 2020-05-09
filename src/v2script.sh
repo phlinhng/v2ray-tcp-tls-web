@@ -346,7 +346,7 @@ install_mtproto() {
 }
 
 check_status() {
-  printf "TCP+TLS+WEB状态: "
+  printf "脚本状态: "
   if [ -d "/usr/bin/v2ray" ] && [ -f "/usr/local/bin/tls-shunt-proxy" ] && [ -f "/usr/local/etc/v2script/Caddyfile" ]; then
     colorEcho ${GREEN} "己安装"
   else
