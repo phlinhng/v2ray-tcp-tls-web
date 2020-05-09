@@ -18,6 +18,7 @@ vhosts:
   ##MTPROTO@- name: FAKETGDOMAIN
     # tlsoffloading: 解开 tls，false 为不解开，直接处理 tls 流量，适用于 trojan-gfw 等
     ##MTPROTO@tlsoffloading: false
+    ##MTPROTO@managedcert: false
     # default: 关闭 tlsoffloading 时，目前没有识别方法，均按其他流量处理
     ##MTPROTO@default:
       ##MTPROTO@handler: proxyPass
