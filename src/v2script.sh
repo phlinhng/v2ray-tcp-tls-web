@@ -165,7 +165,7 @@ install_v2ray() {
 
   if [ ! -d "/usr/local/etc/v2script" ]; then
     mkdir -p /usr/local/etc/v2script ## folder for scripts configuration
-  else if [ ! -f "/usr/local/etc/v2script/config.json" ]; then
+  elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
     wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
   fi
 
@@ -281,7 +281,7 @@ get_v2sub() {
 display_mtproto() {
   if [ -f "/usr/local/etc/v2script/config.json" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ];then
     echo "tg://proxy?server=`curl -s https://api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
-  else if  [ -f "/usr/local/etc/v2script/config.json" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ];then
+  elif  [ -f "/usr/local/etc/v2script/config.json" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ];then
     echo "tg://proxy?server=$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
   fi
 }
@@ -293,7 +293,7 @@ install_mtproto() {
 
     if [ ! -d "/usr/local/etc/v2script" ]; then
       ${sudoCmd} mkdir -p /usr/local/etc/v2script ## folder for scripts configuration
-    else if [ ! -f "/usr/local/etc/v2script/config.json" ]; then
+    elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
       wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
     fi
 
@@ -359,7 +359,7 @@ check_status() {
   printf "电报代理:　 "
   if [ -f "/usr/local/etc/v2script/config.json" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ];then
     colorEcho ${YELLOW} echo "tg://proxy?server=`curl -s https://api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
-  else if  [ -f "/usr/local/etc/v2script/config.json" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ];then
+  elif  [ -f "/usr/local/etc/v2script/config.json" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ];then
     colorEcho ${YELLOW} echo "tg://proxy?server=$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
   else
     colorEcho ${YELLOW} "未设置"
