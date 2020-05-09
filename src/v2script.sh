@@ -182,6 +182,7 @@ install_v2ray() {
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
     get_v2ray
+    colorEcho ${BLUE} "Building v2ray.service for domainsocket"
     ds_service=$(mktemp)
     cat > ${ds_service} <<-EOF
 [Unit]
@@ -232,20 +233,6 @@ EOF
     colorEcho ${GREEN} "tls-shunt-proxy is installed."
   fi
 
-  if [ -f "/etc/tls-shunt-proxy/config.yaml" ]; then # tls-shunt-proxy installed and config.yaml exists
-    ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee /etc/tls-shunt-proxy/config.yaml.bak >/dev/null
-    config_new="$(mktemp)"
-    ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml > ${config_new}
-    sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ${config_new}
-    sed -i "s/##V2RAY@//g" ${config_new}
-    ${sudoCmd} mv ${config_new} /etc/tls-shunt-proxy/config.yaml
-  else
-    ${sudoCmd} rm -rf /etc/tls-shunt-proxy && ${sudoCmd} mkdir -p /etc/tls-shunt-proxy
-    sed -i "s/##V2RAY@//g" ./config/config.yaml
-    sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/config.yaml
-    ${sudoCmd} /bin/cp -f ./config/config.yaml /etc/tls-shunt-proxy/config.yaml
-  fi
-
   # install docker
   curl -sL https://get.docker.com/ | ${sudoCmd} bash
   # install docker-compose
@@ -257,14 +244,30 @@ EOF
   ${sudoCmd} rm -rf /var/www/html
 
   # create config files
+  colorEcho ${BLUE} "Setting v2Ray"
   sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" ./config/v2ray.json
   sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" ./config/v2ray.json
   ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
+
+  colorEcho ${BLUE} "Setting tls-shunt-proxy"
+  ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee /etc/tls-shunt-proxy/config.yaml.bak >/dev/null
+  config_new="$(mktemp)"
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml -O "${config_new}"
+  sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ${config_new}
+  sed -i "s/##V2RAY@//g" ${config_new}
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "true" ]]; then
+    sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" ${config_new}
+    sed -i "s/##MTPROTO@//g" ${config_new}
+  fi
+  ${sudoCmd} mv ${config_new} /etc/tls-shunt-proxy/config.yaml
+
+  colorEcho ${BLUE} "Setting caddy"
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
   /bin/cp -f ./config/Caddyfile /usr/local/etc
   write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
 
   # choose and copy a random  template for dummy web pages
+  colorEcho ${BLUE} "Building dummy web site"
   template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
   wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template} -O template.zip
   ${sudoCmd} mkdir -p /var/www/html
@@ -276,16 +279,14 @@ EOF
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   # stop nginx service for user who had used the old version of script
-  ${sudoCmd} systemctl stop nginx
-  ${sudoCmd} systemctl disable nginx
+  ${sudoCmd} systemctl stop nginx >/dev/null >/dev/null
+  ${sudoCmd} systemctl disable nginx >/dev/null >/dev/null
 
   # kill process occupying port 80
-  ${sudoCmd} kill -9 $(lsof -t -i:80)
-
-  # activate caddy
-  ${sudoCmd} docker run -d --restart=always -v /usr/local/etc/Caddyfile:/etc/Caddyfile -v $HOME/.caddy:/root/.caddy -p 80:80 abiosoft/caddy
+  ${sudoCmd} kill -9 $(lsof -t -i:80) 2>/dev/null
 
   # activate services
+  colorEcho ${BLUE} "Activating services"
   ${sudoCmd} systemctl enable ntp
   ${sudoCmd} systemctl restart ntp
   ${sudoCmd} systemctl enable docker
@@ -295,6 +296,10 @@ EOF
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy
   ${sudoCmd} systemctl daemon-reload
+
+  # activate caddy
+  colorEcho ${BLUE} "Activating caddy"
+  ${sudoCmd} docker run -d --restart=always -v /usr/local/etc/Caddyfile:/etc/Caddyfile -v $HOME/.caddy:/root/.caddy -p 80:80 abiosoft/caddy
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
   display_vmess
@@ -355,25 +360,24 @@ install_mtproto() {
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.faketlsHeader" "\"${FAKE_TLS_HEADER}\""
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.secret" "\"${secret}\""
 
-    if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then # tls-shunt-proxy not installed
-      colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
-      curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
-      colorEcho ${GREEN} "tls-shunt-proxy is installed."
-      config_new="$(mktemp)"
-      # crate new config.yaml and overwrite whatever the current one exisits or not
-      wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml -O "${config_new}"
-      sed -i "s/##MTPROTO@//g" ${config_new}
-      sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" ${config_new}
-      ${sudoCmd} mv ${config_new} /etc/tls-shunt-proxy/config.yaml
-    elif [ -f "/etc/tls-shunt-proxy/config.yaml" ]; then # tls-shunt-proxy installed and config.yaml exists
-      ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee /etc/tls-shunt-proxy/config.yaml.bak >/dev/null
-      config_new="$(mktemp)"
-      ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml > ${config_new}
-      sed -i "s/##MTPROTO@//g" ${config_new}
-      sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" ${config_new}
-      ${sudoCmd} mv ${config_new} /etc/tls-shunt-proxy/config.yaml
+    colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
+    curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
+    colorEcho ${GREEN} "tls-shunt-proxy is installed."
+
+    colorEcho ${GREEN} "tls-shunt-proxy is installed."
+
+    colorEcho ${BLUE} "Setting tls-shunt-proxy"
+    ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee /etc/tls-shunt-proxy/config.yaml.bak >/dev/null
+    config_new="$(mktemp)"
+    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml -O "${config_new}"
+    sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" ${config_new}
+    sed -i "s/##MTPROTO@//g" ${config_new}
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+      sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/g" ${config_new}
+      sed -i "s/##V2RAY@//g" ${config_new}
     fi
-    
+    ${sudoCmd} mv ${config_new} /etc/tls-shunt-proxy/config.yaml
+
     # activate service
     ${sudoCmd} systemctl enable docker
     ${sudoCmd} systemctl restart docker
@@ -402,9 +406,9 @@ check_status() {
   fi
 
   printf "电报代理: "
-  if [ -f "/usr/local/etc/v2script/config.json" ] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "" ]] && [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "" ]] && [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
     colorEcho ${YELLOW} echo "tg://proxy?server=`curl -s https://api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
-  elif  [ -f "/usr/local/etc/v2script/config.json" ] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
+  elif [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
     colorEcho ${YELLOW} echo "tg://proxy?server=$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
   else
     colorEcho ${YELLOW} "未设置"
@@ -433,7 +437,7 @@ vps_tools() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB automated script v1.0"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB with Domainsocket automated script v1.0"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 

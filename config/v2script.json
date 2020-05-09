@@ -1,8 +1,7 @@
 {
   "v2ray": {
     "installed": false,
-    "tlsHeader": "",
-    "subscription": ""
+    "tlsHeader": ""
   },
   "sub": {
     "enabled": false,
