@@ -229,6 +229,7 @@ EOF
 
   # install tls-shunt-proxy
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
+    colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
     curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
     colorEcho ${GREEN} "tls-shunt-proxy is installed."
   fi
@@ -362,8 +363,6 @@ install_mtproto() {
 
     colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
     curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
-    colorEcho ${GREEN} "tls-shunt-proxy is installed."
-
     colorEcho ${GREEN} "tls-shunt-proxy is installed."
 
     colorEcho ${BLUE} "Setting tls-shunt-proxy"
