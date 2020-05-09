@@ -1,4 +1,7 @@
 #!/bin/bash
+export LC_ALL=C
+export LANG=C
+export LANGUAGE=en_US.UTF-8
 
 branch="beta"
 
