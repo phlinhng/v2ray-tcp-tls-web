@@ -53,7 +53,7 @@ ${sudoCmd} ${systemPackage} install curl wget jq -y
 mkdir -p /usr/local/etc/v2script
 
 if [ ! -f "/usr/local/etc/v2script/config.json" ]; then
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2script.json -O /usr/local/etc/v2script/config.json
 fi
 
 wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2script.sh -O /usr/local/bin/v2script
