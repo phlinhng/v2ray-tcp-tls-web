@@ -13,7 +13,7 @@ vhosts:
       ##V2RAY@args: /var/www/html
     ##V2RAY@default:
       ##V2RAY@handler: proxyPass
-      ##V2RAY@args: 127.0.0.1:35666
+      ##V2RAY@args: unix:/tmp/v2ray-ds/v2ray.sock
 
   ##MTPROTO@- name: FAKETGDOMAIN
     # tlsoffloading: 解开 tls，false 为不解开，直接处理 tls 流量，适用于 trojan-gfw 等
