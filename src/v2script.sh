@@ -350,7 +350,7 @@ check_status() {
   fi
 
   printf "主订阅链接: "
-  if [ -f "/usr/local/etc/v2script/config.json" ] && [ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]; then
+  if [ -f "/usr/local/etc/v2script/config.json" ] && [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
     colorEcho ${YELLO} "https://$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
   else
     colorEcho ${YELLO} "尚未生成"
