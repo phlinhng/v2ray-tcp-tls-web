@@ -84,7 +84,7 @@ read_json() {
 
 write_json() {
   # jq [key = value] [path-to-file]
-  jq -r "$2 = \"$3\"" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
+  jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key = value]
 
 display_vmess() {
@@ -253,6 +253,9 @@ EOF
   ${sudoCmd} rm -rf /var/www/html
 
   # create config files
+  port="$(read_json /etc/v2ray/config.json '.inbounds[0].port')"
+  sed -i "s/FAKEPORT/${port}/g" ./config/v2ray.json
+  ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
   uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
   sed -i "s/FAKEUUID/${uuid}/g" ./config/v2ray.json
   ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
