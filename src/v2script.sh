@@ -214,12 +214,12 @@ install_v2ray() {
   sed -i "s/FAKEUUID/${uuid}/g" ./config/v2ray.json
   ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
-  /bin/cp -f ./config/Caddyfile /usr/local/etc/Caddyfile
+  /bin/cp -f ./config/Caddyfile /usr/local/etc
   write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
 
   # add new user and overwrite v2ray.service
   # https://github.com/v2ray/v2ray-core/issues/1011
-  ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray || true ##add user only if user doesn't exist
+  ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray
   ${sudoCmd} /bin/cp -f ./config/v2ray.service /etc/systemd/system/v2ray.service
   ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
 
