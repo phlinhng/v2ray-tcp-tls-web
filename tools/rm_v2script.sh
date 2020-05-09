@@ -77,12 +77,12 @@ colorEcho ${GREEN} "Removed tls-shunt-proxy successfully."
 # docker
 # this will stop docker.service and remove every conatainer, image...etc created by docker but not docker itself
 # since uninstalling docker is complicated and may cause unstable to OS, if you want the OS to go back to clean state then reinstall the whole OS is suggested
+colorEcho ${BLUE} "Removing docker containers, images, networks, and images"
+${sudoCmd} docker stop $(docker ps -a -q)
+${sudoCmd} docker system prune --force
 colorEcho ${BLUE} "Shutting down docker service."
 ${sudoCmd} systemctl stop docker
 ${sudoCmd} systemctl disable docker
-colorEcho ${BLUE} "Removing docker containers, images, networks, and images"
-${sudoCmd} docker stop "$(docker ps -a -q)"
-${sudoCmd} docker system prune --force
 colorEcho ${GREEN} "Removed docker successfully."
 
 # remove script configuration files
