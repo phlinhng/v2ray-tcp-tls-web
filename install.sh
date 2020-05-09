@@ -47,8 +47,8 @@ elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
 fi
 
 # install requirements
-${sudoCmd} ${systemPackage} update
-${sudoCmd} ${systemPackage} install curl wget git jq -y
+#${sudoCmd} ${systemPackage} update
+${sudoCmd} ${systemPackage} install curl wget jq -y
 
 mkdir -p /usr/local/etc/v2script
 
