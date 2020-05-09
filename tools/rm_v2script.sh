@@ -90,4 +90,4 @@ ${sudoCmd} rm -f /usr/local/bin/v2ssub
 
 colorEcho ${BLUE} "卸载完成"
 
-exit 0
+return 0

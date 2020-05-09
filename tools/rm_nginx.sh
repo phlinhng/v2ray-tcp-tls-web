@@ -61,4 +61,4 @@ colorEcho ${BLUE} "Removing nginx files."
 ${sudoCmd} find / | grep nginx | ${sudoCmd} xargs rm -rf
 colorEcho ${GREEN} "Removed nginx successfully."
 
-exit 0
+return 0
