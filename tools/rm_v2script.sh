@@ -81,7 +81,7 @@ colorEcho ${BLUE} "Shutting down docker service."
 ${sudoCmd} systemctl stop docker
 ${sudoCmd} systemctl disable docker
 colorEcho ${BLUE} "Removing docker containers, images, networks, and images"
-${sudoCmd} docker stop $(docker ps -a -q)
+${sudoCmd} docker stop "$(docker ps -a -q)"
 ${sudoCmd} docker system prune --force
 colorEcho ${GREEN} "Removed docker successfully."
 
