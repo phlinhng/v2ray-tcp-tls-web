@@ -5,6 +5,7 @@
     "subscription": ""
   },
   "sub": {
+    "enabled": false,
     "nodes": [],
     "uri": ""
   },

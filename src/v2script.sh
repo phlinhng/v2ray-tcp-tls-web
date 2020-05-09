@@ -120,8 +120,12 @@ generate_link() {
     return 1
   fi
 
+  if [ "$(read_json /usr/local/etc/v2script/config.json '.sub.enabled')" != "true" ]; then
+    write_json /usr/local/etc/v2script/config.json '.sub.enabled' "true"
+  fi
+
   if [ "$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" != "" ]; then
-    "$(write_json /usr/local/etc/v2script/config.json '.sub.uri' \"\")"
+    write_json /usr/local/etc/v2script/config.json '.sub.uri' \"\"
   fi
 
   #${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
@@ -253,11 +257,8 @@ EOF
   ${sudoCmd} rm -rf /var/www/html
 
   # create config files
-  port="$(read_json /etc/v2ray/config.json '.inbounds[0].port')"
-  sed -i "s/FAKEPORT/${port}/g" ./config/v2ray.json
-  ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
-  uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-  sed -i "s/FAKEUUID/${uuid}/g" ./config/v2ray.json
+  sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" ./config/v2ray.json
+  sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" ./config/v2ray.json
   ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
   /bin/cp -f ./config/Caddyfile /usr/local/etc
@@ -394,7 +395,7 @@ check_status() {
   fi
 
   printf "订阅链接: "
-  if [ -f "/usr/local/etc/v2script/config.json" ] && [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
     colorEcho ${YELLO} "https://$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
   else
     colorEcho ${YELLO} "尚未生成"
