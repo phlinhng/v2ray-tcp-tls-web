@@ -356,7 +356,7 @@ check_status() {
     colorEcho ${YELLO} "尚未生成"
   fi
 
-  printf "电报代理:　 "
+  printf "电报代理: "
   if [ -f "/usr/local/etc/v2script/config.json" ] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "" ]] && [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
     colorEcho ${YELLOW} echo "tg://proxy?server=`curl -s https://api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
   elif  [ -f "/usr/local/etc/v2script/config.json" ] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
@@ -366,7 +366,7 @@ check_status() {
   fi
 
   echo ""
-  printf "Swap状态:        "
+  printf "Swap状态: "
   if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
     colorEcho ${GREEN} "己开启"
   else
