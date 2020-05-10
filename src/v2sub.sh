@@ -67,6 +67,63 @@ continue_prompt() {
   esac
 }
 
+get_docker() {
+  if [ ! -x "$(command -v docker)" ]; then
+    curl -sL https://get.docker.com/ | ${sudoCmd} bash
+  fi
+}
+
+set_proxy() {
+  ${sudoCmd} /bin/cp /etc/tls-shunt-proxy/config.yaml /etc/tls-shunt-proxy/config.yaml.bak 2>/dev/null
+  config_new="$(mktemp)"
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml -O ${config_new}
+
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+    sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/g" ${config_new}
+    sed -i "s/##V2RAY@//g" ${config_new}
+  fi
+
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.installed') == "true" ]]; then
+    sed -i "s/FAKEAPIDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader')/g" ${config_new}
+    sed -i "s/##SUBAPI@//g" ${config_new}
+  fi
+
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "true" ]]; then
+    sed -i "s/FAKEMTDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.mtproto.fakeTlsHeader')/g" ${config_new}
+    sed -i "s/##MTPROTO@//g" ${config_new}
+  fi
+
+  ${sudoCmd} mv ${config_new} /etc/tls-shunt-proxy/config.yaml
+}
+
+install_api() {
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+      if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == api_domain ]]; then
+        colorEcho ${RED} "域名 ${api_domain} 与现有v2Ray域名相同"
+        return 1
+      fi
+    fi
+    ${sudoCmd} ${systemPackage} install curl -y -qq
+    read -p "用于API的域名 (出于安全考虑，请使用和v2Ray不同的子域名): " api_domain
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+      if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == api_domain ]]; then
+        colorEcho ${RED} "域名 ${api_domain} 与现有v2Ray域名相同"
+        return 1
+      fi
+    fi
+    get_docker
+    docker run -d -p 127.0.0.1:25500:25500 tindy2013/subconverter:latest
+    write_json /usr/local/etc/v2script/config.json ".sub.api.installed" "true"
+    write_json /usr/local/etc/v2script/config.json ".sub.api.tlsHeader" "\"${api_domain}\""
+    set_proxy
+    ${sudoCmd} systemctl restart tls-shunt-proxy
+    colorEcho ${GREEN} "subscription manager api has been set up."
+  else
+    colorEcho ${YELLOW} "你还没有生成订阅连接"
+  fi
+}
+
 generate_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
@@ -76,11 +133,11 @@ generate_link() {
     return 1
   fi
 
-  if [ "$(read_json /usr/local/etc/v2script/config.json '.sub.enabled')" != "true" ]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') != "true" ]]; then
     write_json /usr/local/etc/v2script/config.json '.sub.enabled' "true"
   fi
 
-  if [ "$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" != "" ]; then
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" != "" ]]; then
     write_json /usr/local/etc/v2script/config.json '.sub.uri' \"\"
   fi
 
@@ -115,29 +172,32 @@ update_link() {
     return 1
   fi
 
-  if [ "$(read_json /usr/local/etc/v2script/config.json '.sub.enabled')" == "true" ]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
     uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
     V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
     currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
     read -p "输入节点名称[留空则使用默认值]: " remark
-  fi
 
-  if [ -z "${remark}" ]; then
-    remark=currentRemark
-  fi
+    if [ -z "${remark}" ]; then
+      remark=currentRemark
+    fi
 
-  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    uri="$(printf "${json}" | base64)"
+    sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
-  uri="$(printf "${json}" | base64)"
-  sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
+    printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+    echo "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | tr -d '\n' && printf "\n"
 
-  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
-  echo "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | tr -d '\n' && printf "\n"
-
-  colorEcho ${GREEN} "更新订阅完成"
+    colorEcho ${GREEN} "更新订阅完成"
   else
     generate_link
   fi
+}
+
+display_link_main() {
+  V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+  echo "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | tr -d '\n' && printf "\n"
 }
 
 display_link() {
@@ -149,28 +209,15 @@ display_link() {
     return 1
   fi
 
-  if [ "$(read_json /usr/local/etc/v2script/config.json '.sub.enabled')" == "true" ]; then
-    uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-    V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-    currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
-    read -p "输入节点名称[留空则使用默认值]: " remark
-  fi
-
-  if [ -z "${remark}" ]; then
-    remark=currentRemark
-  fi
-
-  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-
-  uri="$(printf "${json}" | base64)"
-  sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
-
-  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
-  echo "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | tr -d '\n' && printf "\n"
-
-  colorEcho ${GREEN} "更新订阅完成"
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.sub.api.installed')" == "true" ]]; then
+    echo "unfinished feature"
   else
-    generate_link
+    colorEcho ${YELLOW} "若您使用v2RayNG/Shdowrocket/Pharos Pro以外的客戶端, 需要安装订阅管理API"
+    read -p "是否安装 (yes/no)? " choice
+    case "${choice}" in
+      y|Y|[yY][eE][sS] ) install_api;;
+      * ) display_link_main;;
+    esac
   fi
 }
 

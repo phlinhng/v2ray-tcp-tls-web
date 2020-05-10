@@ -198,7 +198,7 @@ set_proxy() {
 }
 
 get_v2ray() {
-  ${sudoCmd} ${systemPackage} install curl -y
+  ${sudoCmd} ${systemPackage} install curl -y -qq
   curl -sL https://install.direct/go.sh | ${sudoCmd} bash
 }
 
@@ -342,7 +342,7 @@ EOF
 }
 
 rm_v2script() {
-  ${sudoCmd} ${systemPackage} install curl -y
+  ${sudoCmd} ${systemPackage} install curl -y -qq
   curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_v2script.sh | bash
   exit 0
 }
@@ -369,7 +369,7 @@ display_mtproto() {
 install_mtproto() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') != "true" ]]; then
     ${sudoCmd} ${systemPackage} update
-    ${sudoCmd} ${systemPackage} install curl -y
+    ${sudoCmd} ${systemPackage} install curl -y -qq
 
     if [ ! -d "/usr/local/etc/v2script" ]; then
       ${sudoCmd} mkdir -p /usr/local/etc/v2script ## folder for scripts configuration

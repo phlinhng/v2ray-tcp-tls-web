@@ -11,6 +11,15 @@ vhosts:
     ##V2RAY@default:
       ##V2RAY@handler: proxyPass
       ##V2RAY@args: unix:/tmp/v2ray-ds/v2ray.sock
+  
+  ##SUBAPI@- name: FAKEAPIDOMAIN
+    ##SUBAPI@tlsoffloading: true
+    ##SUBAPI@managedcert: true
+    ##SUBAPI@alpn: h2,http/1.1
+    ##SUBAPI@protocols: tls12,tls13
+    ##SUBAPI@http:
+      ##SUBAPI@handler: proxyPass
+      ##SUBAPI@args: 127.0.0.1:25500
 
   ##MTPROTO@- name: FAKEMTDOMAIN
     ##MTPROTO@tlsoffloading: false

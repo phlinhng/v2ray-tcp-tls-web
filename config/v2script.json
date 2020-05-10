@@ -9,7 +9,8 @@
     "uri": "",
     "api": {
       "installed": false,
-      "prefix": ""
+      "tlsHeader": "",
+      "path": "/"
     }
   },
   "mtproto": {
