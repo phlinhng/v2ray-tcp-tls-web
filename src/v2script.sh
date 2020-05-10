@@ -435,7 +435,7 @@ check_status() {
 }
 
 vps_tools() {
-  ${sudoCmd} ${systemPackage} install wget -y
+  ${sudoCmd} ${systemPackage} install wget -y -qq
   wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh -O /tmp/vps_tools.sh && chmod +x /tmp/vps_tools.sh && ${sudoCmd} /tmp/vps_tools.sh
   exit 0
 }
