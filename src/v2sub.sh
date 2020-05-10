@@ -63,6 +63,17 @@ write_json() {
   jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key = value]
 
+urlencode() {
+  local length="${#1}"
+  for (( i = 0; i < length; i++ )); do
+      local c="${1:i:1}"
+      case $c in
+          [a-zA-Z0-9.~_-]) printf "$c" ;;
+          *) printf "$c" | xxd -p -c1 | while read x;do printf "%%%s" "$x";done
+      esac
+  done
+}
+
 # a trick to redisplay menu option
 show_menu() {
   echo ""
@@ -217,7 +228,27 @@ display_link() {
   fi
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.sub.api.installed')" == "true" ]]; then
-    echo "unfinished feature"
+    mainSub="https://$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
+    mainSubEncoded="$(urlencode ${mainSub})"
+    apiPrefix="https://$(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader')/sub?url=${mainSubEncoded}&target="
+
+    colorEcho ${YELLOW} "v2RayNG / Shadowrocket / Pharos Pro"
+    printf "${mainSub}" | tr -d '\n' && printf "\n\n"
+
+    colorEcho ${YELLOW} "Clash"
+    printf "${apiPrefix}clash" | tr -d '\n' && printf "\n\n"
+
+    colorEcho ${YELLOW} "ClashR"
+    printf "${apiPrefix}clashr" | tr -d '\n' && printf "\n\n"
+
+    colorEcho ${YELLOW} "Quantumult"
+    printf "${apiPrefix}quan" | tr -d '\n' && printf "\n\n"
+
+    colorEcho ${YELLOW} "QuantumultX"
+    printf "${apiPrefix}quanx" | tr -d '\n' && printf "\n\n"
+    
+    colorEcho ${YELLOW} "Loon"
+    printf "${apiPrefix}loon" | tr -d '\n' && printf "\n"
   elif [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
     colorEcho ${YELLOW} "若您使用v2RayNG/Shdowrocket/Pharos Pro以外的客戶端, 需要安装订阅管理API"
     read -p "是否安装 (yes/no)? " choice
