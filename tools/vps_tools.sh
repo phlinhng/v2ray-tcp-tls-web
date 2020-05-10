@@ -70,8 +70,7 @@ continue_prompt() {
 
 netSpeed() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
-  tmp=$(mktmp)
-  wget -q https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh -O ${tmp} && chmod +x ${tmp} && ${sudoCmd} ${tmp}
+  wget -q -N https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh -O /tmp/tcp.sh && chmod +x /tmp/tcp.sh && ${sudoCmd} /tmp/tcp.sh
 }
 
 setSwap() {

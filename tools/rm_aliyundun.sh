@@ -50,15 +50,11 @@ if [ ! -f /usr/sbin/aliyun-service ]; then
 else
   # https://zhuanlan.zhihu.com/p/52758924
 
-  ${sudoCmd} ${systemPackage} install wget -y
-
-  cd $(mktemp -d)
+  ${sudoCmd} ${systemPackage} install curl -y -qq
 
   colorEcho ${BLUE} "卸载阿里云盾..."
-  ${sudoCmd} wget http://update.aegis.aliyun.com/download/uninstall.sh
-  ${sudoCmd} chmod +x uninstall.sh && ${sudoCmd} ./uninstall.sh
-  ${sudoCmd} wget http://update.aegis.aliyun.com/download/quartz_uninstall.sh
-  ${sudoCmd} chmod +x quartz_uninstall.sh && ${sudoCmd} ./quartz_uninstall.sh
+  ${sudoCmd} curl -sL http://update.aegis.aliyun.com/download/uninstall.sh | ${sudoCmd} bash
+  ${sudoCmd} curl -sL http://update.aegis.aliyun.com/download/quartz_uninstall.sh | ${sudoCmd} bash
 
   colorEcho ${BLUE} "删除阿里云盾文件残留..."
   ${sudoCmd} pkill aliyun-service
