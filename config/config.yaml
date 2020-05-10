@@ -4,21 +4,16 @@ vhosts:
     ##V2RAY@tlsoffloading: true
     ##V2RAY@managedcert: true
     ##V2RAY@alpn: h2,http/1.1
-    # 如果不需要兼容 tls12, 可改为 tls13
     ##V2RAY@protocols: tls12,tls13
     ##V2RAY@http:
       ##V2RAY@handler: fileServer
-      # /var/www/html 是静态网站目录
       ##V2RAY@args: /var/www/html
     ##V2RAY@default:
       ##V2RAY@handler: proxyPass
       ##V2RAY@args: unix:/tmp/v2ray-ds/v2ray.sock
 
   ##MTPROTO@- name: FAKEMTDOMAIN
-    # tlsoffloading: 解开 tls，false 为不解开，直接处理 tls 流量，适用于 trojan-gfw 等
     ##MTPROTO@tlsoffloading: false
-    ##MTPROTO@managedcert: false
-    # default: 关闭 tlsoffloading 时，目前没有识别方法，均按其他流量处理
     ##MTPROTO@default:
       ##MTPROTO@handler: proxyPass
       ##MTPROTO@args: 127.0.0.1:3128
