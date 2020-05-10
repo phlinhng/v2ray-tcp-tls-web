@@ -63,16 +63,26 @@ write_json() {
   jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key = value]
 
-urlencode() {
-  local length="${#1}"
-  for (( i = 0; i < length; i++ )); do
-      local c="${1:i:1}"
-      case $c in
-          [a-zA-Z0-9.~_-]) printf "$c" ;;
-          *) printf '%%%02X' "'$c" ;;
-      esac
+# https://gist.github.com/cdown/1163649
+# https://stackoverflow.com/questions/296536/how-to-urlencode-data-for-curl-command
+rawurlencode() {
+  local string="${1}"
+  local strlen=${#string}
+  local encoded=""
+  local pos c o
+
+  for (( pos=0 ; pos<strlen ; pos++ )); do
+     c=${string:$pos:1}
+     case "$c" in
+        [-_.~a-zA-Z0-9] ) o="${c}" ;;
+        * )               printf -v o '%%%02x' "'$c"
+     esac
+     encoded+="${o}"
   done
-}
+  echo "${encoded}"    # You can either set a return variable (FASTER) 
+  REPLY="${encoded}"   #+or echo the result (EASIER)... or both... :p
+} 
+
 
 # a trick to redisplay menu option
 show_menu() {
