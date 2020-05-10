@@ -49,7 +49,7 @@ if [ ! -d "/usr/bin/v2ray" ] || [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
   return 1
 fi
 
-${sudoCmd} ${systemPackage} install curl -y
+${sudoCmd} ${systemPackage} install curl -y -qq
 
 # remove v2ray
 # Notice the two dashes (--) which are telling bash to not process anything following it as arguments to bash.
