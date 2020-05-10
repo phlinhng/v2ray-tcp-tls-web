@@ -1,6 +1,5 @@
 listen: 0.0.0.0:443
 vhosts:
-    # 将 example.com 改为你的域名
   ##V2RAY@- name: FAKEV2DOMAIN
     ##V2RAY@tlsoffloading: true
     ##V2RAY@managedcert: true
@@ -15,7 +14,7 @@ vhosts:
       ##V2RAY@handler: proxyPass
       ##V2RAY@args: unix:/tmp/v2ray-ds/v2ray.sock
 
-  ##MTPROTO@- name: FAKETGDOMAIN
+  ##MTPROTO@- name: FAKEMTDOMAIN
     # tlsoffloading: 解开 tls，false 为不解开，直接处理 tls 流量，适用于 trojan-gfw 等
     ##MTPROTO@tlsoffloading: false
     ##MTPROTO@managedcert: false
