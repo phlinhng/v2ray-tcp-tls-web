@@ -124,7 +124,7 @@ install_api() {
     fi
     ${sudoCmd} ${systemPackage} install curl -y -qq
     get_docker
-    docker run -d -p 127.0.0.1:25500:25500 tindy2013/subconverter:latest
+    docker run -d --restart=always -p 127.0.0.1:25500:25500 tindy2013/subconverter:latest
     write_json /usr/local/etc/v2script/config.json ".sub.api.installed" "true"
     write_json /usr/local/etc/v2script/config.json ".sub.api.tlsHeader" "\"${api_domain}\""
     set_proxy
