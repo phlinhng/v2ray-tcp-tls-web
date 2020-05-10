@@ -1,0 +1,21 @@
+{
+  "v2ray": {
+    "installed": false,
+    "tlsHeader": ""
+  },
+  "sub": {
+    "enabled": false,
+    "nodes": [],
+    "uri": "",
+    "api": {
+      "installed": false,
+      "tlsHeader": "",
+      "path": "/"
+    }
+  },
+  "mtproto": {
+    "installed": false,
+    "fakeTlsHeader": "",
+    "secret": ""
+  }
+}
