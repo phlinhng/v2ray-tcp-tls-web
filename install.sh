@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=C
 export LANGUAGE=en_US.UTF-8
 
-branch="beta"
+branch="master"
 
 # /usr/local/etc/v2script ##config path
 # /usr/local/etc/v2script/tls-header ##domain for v2Ray

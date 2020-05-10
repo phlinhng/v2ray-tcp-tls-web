@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=C
 export LANGUAGE=en_US.UTF-8
 
-branch="beta"
+branch="master"
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
