@@ -219,7 +219,7 @@ install_v2ray() {
   ${sudoCmd} ${systemPackage} install curl coreutils wget ntp jq uuid-runtime unzip -y
 
   cd $(mktemp -d)
-  wget https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
+  wget -q https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
   unzip -q ${branch}.zip && rm -f ${branch}.zip ## will unzip the source to current path and remove the archive file
   cd v2ray-tcp-tls-web-${branch}
 
@@ -436,8 +436,7 @@ check_status() {
 
 vps_tools() {
   ${sudoCmd} ${systemPackage} install wget -y
-  cd $(mktemp -d)
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh && chmod +x vps_tools.sh && ./vps_tools.sh
+  wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh -O /tmp/vps_tools.sh && chmod +x /tmp/vps_tools.sh && ${sudoCmd} /tmp/vps_tools.sh
   exit 0
 }
 
