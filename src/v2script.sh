@@ -304,9 +304,9 @@ EOF
   # choose and copy a random  template for dummy web pages
   colorEcho ${BLUE} "Building dummy web site"
   template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
-  wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template} -O template.zip
+  wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template}
   ${sudoCmd} mkdir -p /var/www/html
-  ${sudoCmd} unzip -q template.zip -d /var/www/html
+  ${sudoCmd} unzip -q ${template} -d /var/www/html
   ${sudoCmd} /bin/cp -f ./custom/robots.txt /var/www/html/robots.txt
 
   # set crontab to auto update geoip.dat and geosite.dat

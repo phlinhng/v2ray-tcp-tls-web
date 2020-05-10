@@ -18,3 +18,4 @@ v2script
 + [x] Switch to docker ~~nginx~~ caddy
 + [ ] Add CentOS Support
 + [x] use random webpage template
++ [ ] Check if domain resloved correctly before coutinue
