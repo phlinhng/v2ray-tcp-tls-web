@@ -216,7 +216,7 @@ install_v2ray() {
   # ntp: time syncronise service
   # jq: json toolkits
   # unzip: to decompress web templates
-  ${sudoCmd} ${systemPackage} update
+  ${sudoCmd} ${systemPackage} update -qq
   ${sudoCmd} ${systemPackage} install curl coreutils wget ntp jq uuid-runtime unzip -y
 
   cd $(mktemp -d)
@@ -361,7 +361,7 @@ display_mtproto() {
 
 install_mtproto() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') != "true" ]]; then
-    ${sudoCmd} ${systemPackage} update
+    ${sudoCmd} ${systemPackage} update -qq
     ${sudoCmd} ${systemPackage} install curl -y -qq
 
     if [ ! -d "/usr/local/etc/v2script" ]; then
