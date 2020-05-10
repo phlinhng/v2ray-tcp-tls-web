@@ -100,10 +100,10 @@ menu() {
   select opt in "${options[@]}"
   do
     case "${opt}" in
-      "安装加速") netSpeed ;;
+      "安装加速") netSpeed && continue_prompt;;
       "设置Swap") setSwap && continue_prompt ;;
       "卸载阿里云盾") rmAliyundun && continue_prompt ;;
-      "性能测试") LemonBench ;;
+      "性能测试") LemonBench && exit 0;;
       *) break;;
     esac
   done
