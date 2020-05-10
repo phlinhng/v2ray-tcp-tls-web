@@ -347,17 +347,6 @@ rm_v2script() {
   exit 0
 }
 
-get_v2sub() {
-  if [ ! -f "/usr/local/bin/v2sub" ]; then
-    ${sudoCmd} ${systemPackage} update
-    ${sudoCmd} ${systemPackage} install wget -y
-    wget https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/v2sub.sh -O /usr/local/bin/v2sub
-    chmod +x /usr/local/bin/v2sub
-  else
-    /usr/local/bin/v2sub
-  fi
-}
-
 display_mtproto() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "" ]] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
     echo "tg://proxy?server=`curl -s https://api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
@@ -465,7 +454,7 @@ menu() {
       "更新v2Ray-core") get_v2ray && continue_prompt ;;
       "卸载TCP+TLS+WEB") rm_v2script ;;
       "显示vmess链接") display_vmess && continue_prompt ;;
-      "管理订阅") get_v2sub && continue_prompt ;;
+      "管理订阅") v2sub && continue_prompt ;;
       "设置电报代理") install_mtproto && continue_prompt;;
       "VPS工具") vps_tools ;;
       *) break ;;
