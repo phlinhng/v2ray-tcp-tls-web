@@ -106,7 +106,7 @@ display_vmess() {
 
   json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
   uri="$(printf "${json}" | base64)"
-  jq -r ".sub.nodes[.sub.nodes| length] |= . \"vmess://${uri}\"" /usr/local/etc/v2script/config.json > tmp.$$.json && mv tmp.$$.json /usr/local/etc/v2script/config.json
+  write_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' "\"vmess://${uri}\""
 
   echo "vmess://${uri}" | tr -d '\n' && printf "\n"
 }
