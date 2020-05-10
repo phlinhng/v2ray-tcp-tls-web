@@ -90,7 +90,7 @@ colorEcho ${GREEN} "Removed docker successfully."
 colorEcho ${BLUE} "Removing v2script excutable and configuration files"
 ${sudoCmd} rm -rf /usr/local/etc/v2script
 ${sudoCmd} rm -f /usr/local/bin/v2script
-${sudoCmd} rm -f /usr/local/bin/v2ssub
+${sudoCmd} rm -f /usr/local/bin/v2sub
 colorEcho ${GREEN} "Removed v2script successfully."
 
 ${sudoCmd} ${systemPackage} autoremove -y
