@@ -214,17 +214,15 @@ display_link() {
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.sub.api.installed')" == "true" ]]; then
     echo "unfinished feature"
+  elif [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
+    colorEcho ${YELLOW} "若您使用v2RayNG/Shdowrocket/Pharos Pro以外的客戶端, 需要安装订阅管理API"
+    read -p "是否安装 (yes/no)? " choice
+    case "${choice}" in
+      y|Y|[yY][eE][sS] ) install_api;;
+      * ) display_link_main;;
+    esac
   else
-    if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "false" ]]; then
-      colorEcho ${YELLOW} "若您使用v2RayNG/Shdowrocket/Pharos Pro以外的客戶端, 需要安装订阅管理API"
-      read -p "是否安装 (yes/no)? " choice
-      case "${choice}" in
-        y|Y|[yY][eE][sS] ) install_api;;
-        * ) display_link_main;;
-      esac
-    else
-      colorEcho ${YELLOW} "你还没有生成订阅连接, 请先运行\"1) 生成订阅\""
-    fi
+    colorEcho ${YELLOW} "你还没有生成订阅连接, 请先运行\"1) 生成订阅\""
   fi
 }
 
