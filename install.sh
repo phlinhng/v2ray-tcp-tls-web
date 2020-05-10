@@ -51,7 +51,7 @@ fi
 
 # install requirements
 #${sudoCmd} ${systemPackage} update
-${sudoCmd} ${systemPackage} install curl wget jq -y
+${sudoCmd} ${systemPackage} install curl wget jq -y -qq
 
 mkdir -p /usr/local/etc/v2script
 
