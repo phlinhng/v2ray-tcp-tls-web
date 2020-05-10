@@ -51,6 +51,16 @@ elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
   #exit 0
 fi
 
+read_json() {
+  # jq [key] [path-to-file]
+  ${sudoCmd} jq --raw-output $2 $1 2>/dev/null | tr -d '\n'
+} ## read_json [path-to-file] [key]
+
+write_json() {
+  # jq [key = value] [path-to-file]
+  jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
+} ## write_json [path-to-file] [key = value]
+
 # a trick to redisplay menu option
 show_menu() {
   echo ""
