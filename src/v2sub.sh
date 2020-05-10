@@ -142,6 +142,7 @@ generate_link() {
   fi
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" != "" ]]; then
+    ${sudoCmd} rm -f /var/www/html/${randomName}
     write_json /usr/local/etc/v2script/config.json '.sub.uri' \"\"
   fi
 
@@ -163,7 +164,7 @@ generate_link() {
   randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
 
-  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/${randomName} >/dev/null
+  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/${randomName} >/dev/null
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
 }
 
@@ -190,7 +191,7 @@ update_link() {
     uri="$(printf "${json}" | base64)"
     sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
-    printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+    printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
     echo "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | tr -d '\n' && printf "\n"
 
     colorEcho ${GREEN} "更新订阅完成"
