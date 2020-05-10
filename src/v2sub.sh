@@ -111,6 +111,7 @@ install_api() {
     if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
       if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "${api_domain}" ]]; then
         colorEcho ${RED} "域名 ${api_domain} 与现有v2Ray域名相同"
+        show_menu
         return 1
       fi
     fi
