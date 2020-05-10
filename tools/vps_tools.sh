@@ -104,7 +104,7 @@ menu() {
       "安装加速") netSpeed ;;
       "设置Swap") setSwap && continue_prompt ;;
       "卸载阿里云盾") rmAliyundun && continue_prompt ;;
-      "性能测试") get_LemonBench ;;
+      "性能测试") LemonBench ;;
       *) break;;
     esac
   done
