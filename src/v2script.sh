@@ -414,9 +414,8 @@ check_status() {
     colorEcho ${YELLOW} "未设置"
   fi
 
-  echo ""
-  
   if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
+    echo ""
     colorEcho ${YELLOW} "检测到Swap未开启 建议启用"
   fi
 
