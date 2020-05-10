@@ -459,9 +459,9 @@ menu() {
       "更新v2Ray-core") get_v2ray && continue_prompt ;;
       "卸载TCP+TLS+WEB") rm_v2script ;;
       "显示vmess链接") display_vmess && continue_prompt ;;
-      "管理订阅") v2sub && continue_prompt ;;
+      "管理订阅") v2sub ;;
       "设置电报代理") install_mtproto && continue_prompt;;
-      "VPS工具") vps_tools && exit 0;;
+      "VPS工具") vps_tools ;;
       *) break ;;
     esac
   done
