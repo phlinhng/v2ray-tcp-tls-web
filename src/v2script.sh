@@ -152,7 +152,6 @@ generate_link() {
   fi
 
   json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-
   uri="$(printf "${json}" | base64)"
   sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
@@ -182,20 +181,20 @@ get_proxy() {
 
 set_proxy() {
   ${sudoCmd} /bin/cp /etc/tls-shunt-proxy/config.yaml /etc/tls-shunt-proxy/config.yaml.bak 2>/dev/null
-  cd "$(mktemp -d)"
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml
+  config_new="$(mktemp)"
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml -O ${config_new}
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/g" config.yaml
-    sed -i "s/##V2RAY@//g" config.yaml
+    sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/g" ${config_new}
+    sed -i "s/##V2RAY@//g" ${config_new}
   fi
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "true" ]]; then
-    sed -i "s/FAKEMTDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.mtproto.fakeTlsHeader')/g" config.yaml
-    sed -i "s/##MTPROTO@//g" config.yaml
+    sed -i "s/FAKEMTDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.mtproto.fakeTlsHeader')/g" ${config_new}
+    sed -i "s/##MTPROTO@//g" ${config_new}
   fi
 
-  ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy/config.yaml
+  ${sudoCmd} mv ${config_new} /etc/tls-shunt-proxy/config.yaml
 }
 
 get_v2ray() {

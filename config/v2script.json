@@ -6,11 +6,11 @@
   "sub": {
     "enabled": false,
     "nodes": [],
-    "uri": ""
-  },
-  "api": {
-    "installed": false,
-    "prefix": ""
+    "uri": "",
+    "api": {
+      "installed": false,
+      "prefix": ""
+    }
   },
   "mtproto": {
     "installed": false,

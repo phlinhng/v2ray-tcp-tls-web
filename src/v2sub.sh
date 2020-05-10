@@ -56,6 +56,7 @@ show_menu() {
   echo ""
   echo "1) 生成订阅"
   echo "2) 更新订阅"
+  echo "3) 显示订阅"
 }
 
 continue_prompt() {
@@ -70,18 +71,22 @@ generate_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
-  elif [ ! -f "/usr/local/etc/v2script/tls-header" ]; then
-    colorEcho ${RED} "web server配置文件不存在"
+  elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
+    colorEcho ${RED} "配置文件不存在"
     return 1
   fi
 
-  if [ -f "/usr/local/etc/v2script/subscription" ]; then
-    ${sudoCmd} rm -f /var/www/html/$(${sudoCmd} cat /usr/local/etc/v2script/subscription)
+  if [ "$(read_json /usr/local/etc/v2script/config.json '.sub.enabled')" != "true" ]; then
+    write_json /usr/local/etc/v2script/config.json '.sub.enabled' "true"
+  fi
+
+  if [ "$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" != "" ]; then
+    write_json /usr/local/etc/v2script/config.json '.sub.uri' \"\"
   fi
 
   #${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
-  uuid="$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')"
-  V2_DOMAIN="$(${sudoCmd} cat /usr/local/etc/v2script/tls-header | tr -d '\n')"
+  uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+  V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
 
   read -p "输入节点名称[留空则使用默认值]: " remark
 
@@ -95,7 +100,8 @@ generate_link() {
   sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
   randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
-  printf "${randomName}" | ${sudoCmd} tee /usr/local/etc/v2script/subscription >/dev/null
+  write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
+
   printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/${randomName} >/dev/null
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
 }
@@ -104,32 +110,65 @@ update_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
-  elif [ ! -f "/usr/local/etc/v2script/tls-header" ]; then
-    colorEcho ${RED} "web server配置文件不存在"
+  elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
+    colorEcho ${RED} "配置文件不存在"
     return 1
   fi
 
-  if [ -f "/usr/local/etc/v2script/subscription" ]; then
-    subFileName="$(${sudoCmd} cat /usr/local/etc/v2script/subscription)"
-    uuid="$(${sudoCmd} cat /etc/v2ray/config.json | jq --raw-output '.inbounds[0].settings.clients[0].id')"
-    V2_DOMAIN="$(${sudoCmd} cat /usr/local/etc/v2script/tls-header | tr -d '\n')"
-    currentRemark="$(cat /var/www/html/${subFileName} | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+  if [ "$(read_json /usr/local/etc/v2script/config.json '.sub.enabled')" == "true" ]; then
+    uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+    V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+    currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+    read -p "输入节点名称[留空则使用默认值]: " remark
+  fi
 
-    read -p "输入节点名称[留空则使用现有值 ${currentRemark}]: " remark
+  if [ -z "${remark}" ]; then
+    remark=currentRemark
+  fi
 
-    if [ -z "${remark}" ]; then
-      remark="${currentRemark}"
-    fi
+  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
 
-    json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  uri="$(printf "${json}" | base64)"
+  sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
-    uri="$(printf "${json}" | base64)"
-    sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
+  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+  echo "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | tr -d '\n' && printf "\n"
 
-    printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/${subFileName} >/dev/null
-    echo "https://${V2_DOMAIN}/${subFileName}" | tr -d '\n' && printf "\n"
+  colorEcho ${GREEN} "更新订阅完成"
+  else
+    generate_link
+  fi
+}
 
-    colorEcho ${GREEN} "更新订阅完成"
+display_link() {
+  if [ ! -d "/usr/bin/v2ray" ]; then
+    colorEcho ${RED} "尚末安装v2Ray"
+    return 1
+  elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
+    colorEcho ${RED} "配置文件不存在"
+    return 1
+  fi
+
+  if [ "$(read_json /usr/local/etc/v2script/config.json '.sub.enabled')" == "true" ]; then
+    uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+    V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+    currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+    read -p "输入节点名称[留空则使用默认值]: " remark
+  fi
+
+  if [ -z "${remark}" ]; then
+    remark=currentRemark
+  fi
+
+  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+
+  uri="$(printf "${json}" | base64)"
+  sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
+
+  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+  echo "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | tr -d '\n' && printf "\n"
+
+  colorEcho ${GREEN} "更新订阅完成"
   else
     generate_link
   fi
