@@ -227,19 +227,19 @@ display_link() {
     apiPrefix="https://$(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader')/sub?url=${mainSubEncoded}&target="
 
     colorEcho ${YELLOW} "v2RayNG / Shadowrocket / Pharos Pro"
-    printf "${mainSub}" | tr -d '\n' && printf "\n\n"
+    printf %s "${mainSub}" | tr -d '\n' && printf "\n\n"
 
     colorEcho ${YELLOW} "Clash"
-    printf "${apiPrefix}clash" | tr -d '\n' && printf "\n\n"
+    printf %s "${apiPrefix}clash" | tr -d '\n' && printf "\n\n"
 
     colorEcho ${YELLOW} "ClashR"
-    printf "${apiPrefix}clashr" | tr -d '\n' && printf "\n\n"
+    printf %s "${apiPrefix}clashr" | tr -d '\n' && printf "\n\n"
 
     colorEcho ${YELLOW} "Quantumult"
-    printf "${apiPrefix}quan" | tr -d '\n' && printf "\n\n"
+    printf %s "${apiPrefix}quan" | tr -d '\n' && printf "\n\n"
 
     colorEcho ${YELLOW} "QuantumultX"
-    printf "${apiPrefix}quanx" | tr -d '\n' && printf "\n\n"
+    printf %s "${apiPrefix}quanx" | tr -d '\n' && printf "\n\n"
 
     colorEcho ${YELLOW} "Loon"
     printf "${apiPrefix}loon" | tr -d '\n' && printf "\n"
