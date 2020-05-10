@@ -110,7 +110,7 @@ install_api() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
     if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
       read -p "用于API的域名 (出于安全考虑，请使用和v2Ray不同的子域名): " api_domain
-      if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == api_domain ]]; then
+      if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "${api_domain}" ]]; then
         colorEcho ${RED} "域名 ${api_domain} 与现有v2Ray域名相同"
         return 1
       fi
