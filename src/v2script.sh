@@ -338,7 +338,7 @@ display_mtproto() {
 }
 
 install_mtproto() {
-  if [ ! -f "/usr/local/etc/v2script/config.json" ] || [ -f "/usr/local/etc/v2script/config.json" &&  $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "false" ]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') != "true" ]]; then
     ${sudoCmd} ${systemPackage} update
     ${sudoCmd} ${systemPackage} install curl -y
 
@@ -354,12 +354,13 @@ install_mtproto() {
     FAKE_TLS_HEADER="$(curl -s https://raw.githubusercontent.com/phlinhng/my-scripts/master/text/mainland_cdn.txt | shuf -n 1)"
     secret="$(${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c "${FAKE_TLS_HEADER}")"
 
-    # start mtproto ## reference https://raw.githubusercontent.com/9seconds/mtg/master/run.sh
-    ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 127.0.0.1:3128:3128 nineseconds/mtg:latest run "${secret}"
-
+    # writing configurations
     write_json  "/usr/local/etc/v2script/config.json" ".mtproto.installed" "true"
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.faketlsHeader" "\"${FAKE_TLS_HEADER}\""
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.secret" "\"${secret}\""
+
+    # start mtproto ## reference https://raw.githubusercontent.com/9seconds/mtg/master/run.sh
+    ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 127.0.0.1:3128:3128 nineseconds/mtg:latest run "${secret}"
 
     colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
     curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
