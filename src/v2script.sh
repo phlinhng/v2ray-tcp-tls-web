@@ -88,6 +88,19 @@ write_json() {
 } ## write_json [path-to-file] [key = value]
 
 display_vmess() {
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.install') != "true" ]]; then
+    uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+    V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+    json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    uri="$(printf "${json}" | base64)"
+    echo "vmess://${uri}" | tr -d '\n' && printf "\n"
+  else
+    colorEcho ${RED} "配置文件不存在"
+    return 1
+  fi
+}
+
+display_vmess_full() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
     return 1
@@ -320,7 +333,7 @@ EOF
   ${sudoCmd} docker run -d --restart=always -v /usr/local/etc/Caddyfile:/etc/Caddyfile -v $HOME/.caddy:/root/.caddy -p 80:80 abiosoft/caddy
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
-  display_vmess
+  display_vmess_full
 
   read -p "生成订阅链接 (yes/no)? " linkConfirm
   case "${linkConfirm}" in
