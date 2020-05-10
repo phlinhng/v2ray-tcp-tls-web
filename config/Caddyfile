@@ -1,0 +1,3 @@
+:80 {
+    redir https://FAKEV2DOMAIN{uri}
+}
