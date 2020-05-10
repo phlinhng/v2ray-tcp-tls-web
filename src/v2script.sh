@@ -433,7 +433,6 @@ check_status() {
 vps_tools() {
   ${sudoCmd} ${systemPackage} install curl -y
   curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh | bash
-  exit 0
 }
 
 menu() {
