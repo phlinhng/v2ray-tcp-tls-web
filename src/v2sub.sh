@@ -228,7 +228,7 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=39
-  options=("生成订阅" "更新订阅" "")
+  options=("生成订阅" "更新订阅" "显示订阅")
   select opt in "${options[@]}"
   do
     case "${opt}" in
