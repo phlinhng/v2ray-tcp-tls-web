@@ -69,24 +69,24 @@ continue_prompt() {
 }
 
 netSpeed() {
-  ${sudoCmd} ${systemPackage} install curl -y
+  ${sudoCmd} ${systemPackage} install curl -y -qq
   tmp=$(mktmp)
   wget -q https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh -O ${tmp} && chmod +x ${tmp} && ${sudoCmd} ${tmp}
 }
 
 setSwap() {
-  ${sudoCmd} ${systemPackage} install curl -y
+  ${sudoCmd} ${systemPackage} install curl -y -qq
   curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/tools/set_swap.sh | bash
 }
 
 rmAliyundun() {
-  ${sudoCmd} ${systemPackage} install curl -y
+  ${sudoCmd} ${systemPackage} install curl -y -qq
   curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/tools/rm_aliyundun.sh | bash
 }
 
 # credit: https://github.com/LemonBench/LemonBench
 LemonBench() {
-  ${sudoCmd} ${systemPackage} install curl -y
+  ${sudoCmd} ${systemPackage} install curl -y -qq
   curl -sL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash
 }
 
