@@ -63,24 +63,9 @@ write_json() {
   jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key = value]
 
-# https://gist.github.com/cdown/1163649
-# https://stackoverflow.com/questions/296536/how-to-urlencode-data-for-curl-command
-rawurlencode() {
-  local string="${1}"
-  local strlen=${#string}
-  local encoded=""
-  local pos c o
-
-  for (( pos=0 ; pos<strlen ; pos++ )); do
-     c=${string:$pos:1}
-     case "$c" in
-        [-_.~a-zA-Z0-9] ) o="${c}" ;;
-        * )               printf -v o '%%%02x' "'$c"
-     esac
-     encoded+="${o}"
-  done
-  echo "${encoded}"    # You can either set a return variable (FASTER) 
-  REPLY="${encoded}"   #+or echo the result (EASIER)... or both... :p
+# https://stackoverflow.com/questions/37309551/how-to-urlencode-data-into-a-url-with-bash-or-curl
+urlEncode() {
+  printf %s "$1" | jq -s -R -r @uri
 }
 
 # a trick to redisplay menu option
@@ -238,7 +223,7 @@ display_link() {
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.sub.api.installed')" == "true" ]]; then
     mainSub="https://$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
-    mainSubEncoded="$(rawurlencode ${mainSub})"
+    mainSubEncoded="$(urlEncode ${mainSub})"
     apiPrefix="https://$(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader')/sub?url=${mainSubEncoded}&target="
 
     colorEcho ${YELLOW} "v2RayNG / Shadowrocket / Pharos Pro"
