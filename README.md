@@ -13,7 +13,7 @@ v2script
 ## TODO
 + [x] Show installation(is installed/not installed) status on script startup
 + [x] Show current subscriton link if existed
-+ [ ] Integrate [tindy2013/subconverter](https://github.com/tindy2013/subconverter)
++ [x] Integrate [tindy2013/subconverter](https://github.com/tindy2013/subconverter)
 + [x] Integrate [9seconds/mtg](https://github.com/9seconds/mtg)
 + [x] Switch to docker ~~nginx~~ caddy
 + [ ] Add CentOS Support
