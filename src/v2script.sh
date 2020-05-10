@@ -330,9 +330,9 @@ get_v2sub() {
 }
 
 display_mtproto() {
-  if [ -f "/usr/local/etc/v2script/config.json" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ];then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "" ]] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
     echo "tg://proxy?server=`curl -s https://api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
-  elif  [ -f "/usr/local/etc/v2script/config.json" ] &&  [ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ];then
+  elif  [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]] &&  [ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ];then
     echo "tg://proxy?server=$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
   fi
 }
