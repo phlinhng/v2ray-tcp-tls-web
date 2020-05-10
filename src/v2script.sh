@@ -171,13 +171,14 @@ set_proxy() {
   ${sudoCmd} /bin/cp /etc/tls-shunt-proxy/config.yaml /etc/tls-shunt-proxy/config.yaml.bak 2>/dev/null
   cd "$(mktemp -d)"
   wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml
+
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
     sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/g" config.yaml
     sed -i "s/##V2RAY@//g" config.yaml
   fi
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "true" ]]; then
-    sed -i "s/FAKEMTDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.mtproto.fakeTlsHeader')/g" ${config_new}
+    sed -i "s/FAKEMTDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.mtproto.fakeTlsHeader')/g" config.yaml
     sed -i "s/##MTPROTO@//g" config.yaml
   fi
 
@@ -243,7 +244,7 @@ ExecStartPre=$(which rm) -rf /tmp/v2ray-ds/*.sock
 ExecStart=/usr/bin/v2ray/v2ray -config /etc/v2ray/config.json
 
 ExecStartPost=$(which sleep) 1
-ExecStartPost=$(which chmod) 644 /tmp/v2ray-ds/v2ray.sock
+ExecStartPost=$(which chmod) 777 /tmp/v2ray-ds/v2ray.sock
 
 Restart=on-failure
 # Don't restart in the case of configuration error
