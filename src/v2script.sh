@@ -260,7 +260,7 @@ ExecStartPre=$(which rm) -rf /tmp/v2ray-ds/*.sock
 ExecStart=/usr/bin/v2ray/v2ray -config /etc/v2ray/config.json
 
 ExecStartPost=$(which sleep) 1
-ExecStartPost=$(which chmod) 777 /tmp/v2ray-ds/v2ray.sock
+ExecStartPost=$(which chmod) 666 /tmp/v2ray-ds/v2ray.sock
 
 Restart=on-failure
 # Don't restart in the case of configuration error
