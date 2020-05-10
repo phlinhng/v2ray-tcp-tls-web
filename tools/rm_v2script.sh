@@ -68,6 +68,7 @@ ${sudoCmd} systemctl daemon-reload
 ${sudoCmd} systemctl reset-failed
 colorEcho ${BLUE} "Removing tls-shunt-proxy files."
 ${sudoCmd} rm -rf /usr/local/bin/tls-shunt-proxy
+${sudoCmd} rm -rf /etc/tls-shunt-proxy
 ${sudoCmd} rm -rf /etc/ssl/tls-shunt-proxy
 colorEcho ${BLUE} "Removing tls-shunt-proxy user & group."
 ${sudoCmd} deluser tls-shunt-proxy

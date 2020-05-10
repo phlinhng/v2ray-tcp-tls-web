@@ -352,7 +352,7 @@ install_mtproto() {
 
     # generate random header from txt files
     FAKE_TLS_HEADER="$(curl -s https://raw.githubusercontent.com/phlinhng/my-scripts/master/text/mainland_cdn.txt | shuf -n 1)"
-    secret="$(${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c "${FAKE_TLS_HEADER}")"
+    secret="$(${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c ${FAKE_TLS_HEADER})"
 
     # writing configurations
     write_json  "/usr/local/etc/v2script/config.json" ".mtproto.installed" "true"
