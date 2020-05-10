@@ -228,12 +228,13 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=39
-  options=("生成订阅" "更新订阅")
+  options=("生成订阅" "更新订阅" "")
   select opt in "${options[@]}"
   do
     case "${opt}" in
       "生成订阅") generate_link && continue_prompt ;;
       "更新订阅") update_link && continue_prompt ;;
+      "显示订阅") display_link && continue_prompt ;;
       *) break;;
     esac
   done
