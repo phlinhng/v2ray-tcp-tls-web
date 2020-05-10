@@ -321,6 +321,7 @@ EOF
 
   # activate services
   colorEcho ${BLUE} "Activating services"
+  ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl enable ntp
   ${sudoCmd} systemctl restart ntp
   ${sudoCmd} systemctl enable docker
@@ -330,6 +331,7 @@ EOF
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy
   ${sudoCmd} systemctl daemon-reload
+  ${sudoCmd} systemctl reset-failed
 
   # activate caddy
   colorEcho ${BLUE} "Activating caddy"
