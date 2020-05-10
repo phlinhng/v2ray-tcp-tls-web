@@ -81,8 +81,7 @@ rawurlencode() {
   done
   echo "${encoded}"    # You can either set a return variable (FASTER) 
   REPLY="${encoded}"   #+or echo the result (EASIER)... or both... :p
-} 
-
+}
 
 # a trick to redisplay menu option
 show_menu() {
@@ -239,7 +238,7 @@ display_link() {
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.sub.api.installed')" == "true" ]]; then
     mainSub="https://$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
-    mainSubEncoded="$(urlencode ${mainSub})"
+    mainSubEncoded="$(rawurlencode ${mainSub})"
     apiPrefix="https://$(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader')/sub?url=${mainSubEncoded}&target="
 
     colorEcho ${YELLOW} "v2RayNG / Shadowrocket / Pharos Pro"
