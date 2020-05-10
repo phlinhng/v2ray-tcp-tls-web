@@ -415,15 +415,12 @@ check_status() {
   fi
 
   echo ""
-  printf "Swap状态: "
+  
   if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
-    colorEcho ${GREEN} "己开启"
-  else
-    colorEcho ${YELLOW} "未开启"
+    colorEcho ${YELLOW} "检测到Swap未开启 建议启用"
   fi
 
   if [ -f /usr/sbin/aliyun-service ]; then
-    echo ""
     colorEcho ${RED} "检测到阿里云监测服务 建议卸载"
   fi
 
