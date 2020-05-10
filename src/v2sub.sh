@@ -69,7 +69,7 @@ urlencode() {
       local c="${1:i:1}"
       case $c in
           [a-zA-Z0-9.~_-]) printf "$c" ;;
-          *) printf "$c" | xxd -p -c1 | while read x;do printf "%%%s" "$x";done
+          *) printf '%%%02X' "'$c" ;;
       esac
   done
 }
@@ -246,7 +246,7 @@ display_link() {
 
     colorEcho ${YELLOW} "QuantumultX"
     printf "${apiPrefix}quanx" | tr -d '\n' && printf "\n\n"
-    
+
     colorEcho ${YELLOW} "Loon"
     printf "${apiPrefix}loon" | tr -d '\n' && printf "\n"
   elif [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
