@@ -397,7 +397,7 @@ install_mtproto() {
 
 check_status() {
   printf "脚本状态: "
-  if [ -d "/usr/bin/v2ray" ] && [ -f "/usr/local/bin/tls-shunt-proxy" ] && [ -f "/usr/local/etc/Caddyfile" ]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
     colorEcho ${GREEN} "己安装"
   else
     colorEcho ${YELLOW} "未安装"
