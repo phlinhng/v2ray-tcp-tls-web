@@ -427,9 +427,10 @@ check_status() {
 }
 
 vps_tools() {
-  ${sudoCmd} ${systemPackage} install curl -y
-  vps_tool=$(mktemp)
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh && chmod +x ${vps_tool} && ${vps_tool}
+  ${sudoCmd} ${systemPackage} install wget -y
+  cd $(mktemp -d)
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh && chmod +x vps_tools.sh && ./vps_tools.sh
+  exit 0
 }
 
 menu() {
