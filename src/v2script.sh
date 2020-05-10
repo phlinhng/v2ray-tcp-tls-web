@@ -403,15 +403,13 @@ check_status() {
     colorEcho ${YELLOW} "未安装"
   fi
 
-  printf "订阅链接: "
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
+    printf "订阅链接: "
     colorEcho ${YELLO} "https://$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
-  else
-    colorEcho ${YELLO} "尚未生成"
   fi
 
   printf "电报代理: "
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "" ]] && [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "false" ]] && [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
     colorEcho ${YELLOW} "tg://proxy?server=`curl -s https://api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
   elif [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
     colorEcho ${YELLOW} "tg://proxy?server=$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
