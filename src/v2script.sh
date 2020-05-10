@@ -181,20 +181,25 @@ get_proxy() {
 
 set_proxy() {
   ${sudoCmd} /bin/cp /etc/tls-shunt-proxy/config.yaml /etc/tls-shunt-proxy/config.yaml.bak 2>/dev/null
-  config_new="$(mktemp)"
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml -O ${config_new}
+  cd "$(mktemp -d)"
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/g" ${config_new}
-    sed -i "s/##V2RAY@//g" ${config_new}
+    sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/g" config.yaml
+    sed -i "s/##V2RAY@//g" config.yaml
+  fi
+
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.installed') == "true" ]]; then
+    sed -i "s/FAKEAPIDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader')/g" config.yaml
+    sed -i "s/##SUBAPI@//g" config.yaml
   fi
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "true" ]]; then
-    sed -i "s/FAKEMTDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.mtproto.fakeTlsHeader')/g" ${config_new}
-    sed -i "s/##MTPROTO@//g" ${config_new}
+    sed -i "s/FAKEMTDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.mtproto.fakeTlsHeader')/g" config.yaml
+    sed -i "s/##MTPROTO@//g"config.yaml
   fi
 
-  ${sudoCmd} mv ${config_new} /etc/tls-shunt-proxy/config.yaml
+  ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy/config.yaml
 }
 
 get_v2ray() {
@@ -377,7 +382,7 @@ install_mtproto() {
 
     # writing configurations & setting tls-shunt-proxy
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.installed" "true"
-    write_json "/usr/local/etc/v2script/config.json" ".mtproto.faketlsHeader" "\"${FAKE_TLS_HEADER}\""
+    write_json "/usr/local/etc/v2script/config.json" ".mtproto.fakeTlsHeader" "\"${FAKE_TLS_HEADER}\""
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.secret" "\"${secret}\""
     set_proxy
 
