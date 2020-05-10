@@ -150,9 +150,42 @@ generate_link() {
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
 }
 
+get_docker() {
+  if [ ! -x "$(command -v docker)" ]; then
+    curl -sL https://get.docker.com/ | ${sudoCmd} bash
+    # install docker-compose
+    #${sudoCmd} curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    #${sudoCmd} chmod +x /usr/local/bin/docker-compose
+  fi
+}
+
+get_proxy() {
+  if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
+    colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
+    curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
+    colorEcho ${GREEN} "tls-shunt-proxy is installed."
+  fi
+}
+
+set_proxy() {
+  ${sudoCmd} /bin/cp /etc/tls-shunt-proxy/config.yaml /etc/tls-shunt-proxy/config.yaml.bak 2>/dev/null
+  cd "$(mktemp -d)"
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+    sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/g" config.yaml
+    sed -i "s/##V2RAY@//g" config.yaml
+  fi
+
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "true" ]]; then
+    sed -i "s/FAKEMTDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.mtproto.fakeTlsHeader')/g" ${config_new}
+    sed -i "s/##MTPROTO@//g" config.yaml
+  fi
+
+  ${sudoCmd} /bin/cp -f config.yaml /etc/tls-shunt-proxy/config.yaml
+}
+
 get_v2ray() {
   ${sudoCmd} ${systemPackage} install curl -y
-  # install v2ray
   curl -sL https://install.direct/go.sh | ${sudoCmd} bash
 }
 
@@ -224,24 +257,17 @@ EOF
     ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
-    write_json  /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
+    write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
+    write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
   fi
 
   # install tls-shunt-proxy
-  if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
-    colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
-    curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
-    colorEcho ${GREEN} "tls-shunt-proxy is installed."
-  fi
+  get_proxy
 
   # install docker
-  curl -sL https://get.docker.com/ | ${sudoCmd} bash
-  # install docker-compose
-  #${sudoCmd} curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  #${sudoCmd}  chmod +x /usr/local/bin/docker-compose
+  get_docker
 
   # prevent some bug
-  ${sudoCmd} rm -rf /etc/ssl/tls-shunt-proxy
   ${sudoCmd} rm -rf /var/www/html
 
   # create config files
@@ -251,21 +277,11 @@ EOF
   ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
 
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
-  ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee /etc/tls-shunt-proxy/config.yaml.bak >/dev/null
-  config_new="$(mktemp)"
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml -O "${config_new}"
-  sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ${config_new}
-  sed -i "s/##V2RAY@//g" ${config_new}
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "true" ]]; then
-    sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" ${config_new}
-    sed -i "s/##MTPROTO@//g" ${config_new}
-  fi
-  ${sudoCmd} mv ${config_new} /etc/tls-shunt-proxy/config.yaml
+  set_proxy
 
   colorEcho ${BLUE} "Setting caddy"
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
   /bin/cp -f ./config/Caddyfile /usr/local/etc
-  write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
 
   # choose and copy a random  template for dummy web pages
   colorEcho ${BLUE} "Building dummy web site"
@@ -348,35 +364,23 @@ install_mtproto() {
       wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
     fi
 
-    curl -sL https://get.docker.com/ | ${sudoCmd} bash
+    get_proxy
+    get_docker
+    # pre-run this to pull image
+    ${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c "www.fast.com" >/dev/null
 
     # generate random header from txt files
     FAKE_TLS_HEADER="$(curl -s https://raw.githubusercontent.com/phlinhng/my-scripts/master/text/mainland_cdn.txt | shuf -n 1)"
     secret="$(${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c ${FAKE_TLS_HEADER})"
 
-    # writing configurations
-    write_json  "/usr/local/etc/v2script/config.json" ".mtproto.installed" "true"
+    # writing configurations & setting tls-shunt-proxy
+    write_json "/usr/local/etc/v2script/config.json" ".mtproto.installed" "true"
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.faketlsHeader" "\"${FAKE_TLS_HEADER}\""
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.secret" "\"${secret}\""
+    set_proxy
 
     # start mtproto ## reference https://raw.githubusercontent.com/9seconds/mtg/master/run.sh
     ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 127.0.0.1:3128:3128 nineseconds/mtg:latest run "${secret}"
-
-    colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
-    curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
-    colorEcho ${GREEN} "tls-shunt-proxy is installed."
-
-    colorEcho ${BLUE} "Setting tls-shunt-proxy"
-    ${sudoCmd} cat /etc/tls-shunt-proxy/config.yaml | ${sudoCmd} tee /etc/tls-shunt-proxy/config.yaml.bak >/dev/null
-    config_new="$(mktemp)"
-    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/config.yaml -O "${config_new}"
-    sed -i "s/FAKEMTDOMAIN/${FAKE_TLS_HEADER}/g" ${config_new}
-    sed -i "s/##MTPROTO@//g" ${config_new}
-    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-      sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/g" ${config_new}
-      sed -i "s/##V2RAY@//g" ${config_new}
-    fi
-    ${sudoCmd} mv ${config_new} /etc/tls-shunt-proxy/config.yaml
 
     # activate service
     ${sudoCmd} systemctl enable docker
