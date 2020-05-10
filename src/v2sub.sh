@@ -222,7 +222,7 @@ display_link() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB subscription manager v0.3.1"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB subscription manager v1.0"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
