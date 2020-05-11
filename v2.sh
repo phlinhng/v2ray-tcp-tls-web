@@ -97,12 +97,11 @@ install_v2ray() {
 
   # install requirements
   # coreutils: for base64 command
-  # uuid-runtime: for uuid generating
   # ntp: time syncronise service
   # jq: json toolkits
   # unzip: to decompress web templates
   ${sudoCmd} ${systemPackage} update -qq
-  ${sudoCmd} ${systemPackage} install curl coreutils wget ntp jq uuid-runtime unzip -y -qq
+  ${sudoCmd} ${systemPackage} install curl coreutils wget ntp jq unzip -y -qq
 
   cd $(mktemp -d)
   wget -q https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
@@ -119,7 +118,7 @@ install_v2ray() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     get_v2ray
     colorEcho ${BLUE} "Building v2ray.service for domainsocket"
-    ds_service=$(mktemp)
+    local ds_service=$(mktemp)
     cat > ${ds_service} <<-EOF
 [Unit]
 Description=V2Ray - A unified platform for anti-censorship
@@ -189,7 +188,7 @@ EOF
 
   # choose and copy a random  template for dummy web pages
   colorEcho ${BLUE} "Building dummy web site"
-  template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
+  local template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
   wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template}
   ${sudoCmd} mkdir -p /var/www/html
   ${sudoCmd} unzip -q ${template} -d /var/www/html
@@ -225,14 +224,14 @@ EOF
   ${sudoCmd} docker run -d --restart=always -v /usr/local/etc/Caddyfile:/etc/Caddyfile -v $HOME/.caddy:/root/.caddy -p 80:80 abiosoft/caddy
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
-  uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+  local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
 
   echo "${V2_DOMAIN}:443"
   echo "${uuid} (aid: 0)"
   echo ""
 
-  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  uri="$(printf "${json}" | base64)"
+  local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local uri="$(printf "${json}" | base64)"
 
   echo "vmess://${uri}" | tr -d '\n' && printf "\n"
 }
