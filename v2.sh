@@ -70,19 +70,6 @@ write_json() {
   jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key = value]
 
-display_vmess() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.install') != "true" ]]; then
-    uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-    V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-    json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    uri="$(printf "${json}" | base64)"
-    echo "vmess://${uri}" | tr -d '\n' && printf "\n"
-  else
-    colorEcho ${RED} "配置文件不存在"
-    return 1
-  fi
-}
-
 get_docker() {
   if [ ! -x "$(command -v docker)" ]; then
     curl -sL https://get.docker.com/ | ${sudoCmd} bash
