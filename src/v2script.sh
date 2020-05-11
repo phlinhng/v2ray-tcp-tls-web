@@ -89,10 +89,10 @@ write_json() {
 
 display_vmess() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.install') != "true" ]]; then
-    uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-    V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-    json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    uri="$(printf "${json}" | base64)"
+    local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+    local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+    local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local uri="$(printf "${json}" | base64)"
     echo "vmess://${uri}" | tr -d '\n' && printf "\n"
   else
     colorEcho ${RED} "配置文件不存在"
@@ -110,17 +110,14 @@ display_vmess_full() {
   fi
 
   #${sudoCmd} ${systemPackage} install coreutils jq -y
-  uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-  V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-
-  echo "${V2_DOMAIN}:443"
-  echo "${uuid} (aid: 0)"
-  echo ""
-
-  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  uri="$(printf "${json}" | base64)"
+  local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+  local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+  local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local uri="$(printf "${json}" | base64)"
   write_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' "$(printf "\"vmess://${uri}\"" | tr -d '\n')"
 
+  echo "${V2_DOMAIN}:443"
+  echo "${uuid} (aid: 0)" && echo ""
   echo "vmess://${uri}" | tr -d '\n' && printf "\n"
 }
 
