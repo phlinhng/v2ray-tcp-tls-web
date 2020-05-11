@@ -107,7 +107,6 @@ get_v2ray() {
 
 install_v2ray() {
   read -p "解析到本VPS的域名: " V2_DOMAIN
-  write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
 
   # install requirements
   # coreutils: for base64 command
