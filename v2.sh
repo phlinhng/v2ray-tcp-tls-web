@@ -210,10 +210,10 @@ EOF
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl enable ntp
   ${sudoCmd} systemctl restart ntp
-  ${sudoCmd} systemctl enable docker
-  ${sudoCmd} systemctl restart docker
   ${sudoCmd} systemctl enable v2ray
   ${sudoCmd} systemctl restart v2ray
+  ${sudoCmd} systemctl enable docker
+  ${sudoCmd} systemctl restart docker
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy
   ${sudoCmd} systemctl daemon-reload
