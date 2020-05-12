@@ -86,7 +86,7 @@ rmAliyundun() {
 # credit: https://github.com/LemonBench/LemonBench
 LemonBench() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
-  curl -sL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash -s -- --mode full
+  curl -sL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash -s -- --mode fast
 }
 
 menu() {
