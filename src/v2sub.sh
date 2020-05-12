@@ -125,7 +125,13 @@ install_api() {
     fi
     ${sudoCmd} ${systemPackage} install curl -y -qq
     get_docker
-    docker run -d --restart=always -p 127.0.0.1:25500:25500 tindy2013/subconverter:latest
+
+    # set up api
+    wget -q wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/pref.ini -O /tmp/pref.ini
+    sed -i "s/FAKECONFIGPREFIX/https:\/\/${api_domain}/g" /tmp/pref.ini
+    mv /tmp/pref.ini /usr/local/etc/v2script/pref.ini
+
+    docker run -d --restart=always -p 127.0.0.1:25500:25500 -v /usr/local/etc/v2script/pref.ini:/base/pref.ini tindy2013/subconverter:latest
     write_json /usr/local/etc/v2script/config.json ".sub.api.installed" "true"
     write_json /usr/local/etc/v2script/config.json ".sub.api.tlsHeader" "\"${api_domain}\""
     set_proxy
