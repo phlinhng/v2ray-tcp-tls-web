@@ -127,7 +127,7 @@ install_api() {
     get_docker
 
     # set up api
-    wget -q wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/pref.ini -O /tmp/pref.ini
+    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/pref.ini -O /tmp/pref.ini
     sed -i "s/FAKECONFIGPREFIX/https:\/\/${api_domain}/g" /tmp/pref.ini
     mv /tmp/pref.ini /usr/local/etc/v2script/pref.ini
 
