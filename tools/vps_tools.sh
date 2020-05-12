@@ -86,7 +86,7 @@ rmAliyundun() {
 # credit: https://github.com/LemonBench/LemonBench
 LemonBench() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
-  curl -sL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash  -s -- --mode full
+  curl -sL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash -s -- --mode full
 }
 
 menu() {
@@ -103,7 +103,7 @@ menu() {
       "安装加速") netSpeed && continue_prompt;;
       "设置Swap") setSwap && continue_prompt ;;
       "卸载阿里云盾") rmAliyundun && continue_prompt ;;
-      "性能测试") LemonBench && exit 0;;
+      "性能测试") LemonBench && exit 0 ;;
       *) break;;
     esac
   done
