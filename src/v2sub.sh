@@ -131,7 +131,8 @@ install_api() {
     sed -i "s/FAKECONFIGPREFIX/https:\/\/${api_domain}/g" /tmp/pref.ini
     mv /tmp/pref.ini /usr/local/etc/v2script/pref.ini
 
-    docker run -d --restart=always -p 127.0.0.1:25500:25500 -v /usr/local/etc/v2script/pref.ini:/base/pref.ini tindy2013/subconverter:latest
+    ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=tindy2013/subconverter) 2>/dev/null) 2>/dev/null
+    ${sudoCmd} docker run -d --restart=always -p 127.0.0.1:25500:25500 -v /usr/local/etc/v2script/pref.ini:/base/pref.ini tindy2013/subconverter:latest
     write_json /usr/local/etc/v2script/config.json ".sub.api.installed" "true"
     write_json /usr/local/etc/v2script/config.json ".sub.api.tlsHeader" "\"${api_domain}\""
     set_proxy

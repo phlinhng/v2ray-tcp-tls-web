@@ -332,6 +332,7 @@ EOF
 
   # activate caddy
   colorEcho ${BLUE} "Activating caddy"
+  ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=abiosoft/caddy) 2>/dev/null) 2>/dev/null
   ${sudoCmd} docker run -d --restart=always -v /usr/local/etc/Caddyfile:/etc/Caddyfile -v $HOME/.caddy:/root/.caddy -p 80:80 abiosoft/caddy
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
@@ -385,6 +386,7 @@ install_mtproto() {
     set_proxy
 
     # start mtproto ## reference https://raw.githubusercontent.com/9seconds/mtg/master/run.sh
+    ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=nineseconds/mtg) 2>/dev/null) 2>/dev/null
     ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 127.0.0.1:3128:3128 nineseconds/mtg:latest run "${secret}"
 
     # activate service
