@@ -53,11 +53,10 @@ fi
 
 # a trick to redisplay menu option
 show_menu() {
-  echo "1) 开启BBR (Linux内核5+推荐)"
-  echo "2) 安装加速 (Linux内核4.x推荐)"
-  echo "3) 设置Swap"
-  echo "4) 卸载阿里云盾"
-  echo "5) 性能测试"
+  echo "1) 安装加速"
+  echo "2) 设置Swap"
+  echo "3) 卸载阿里云盾"
+  echo "4) 性能测试"
 }
 
 continue_prompt() {
@@ -75,7 +74,7 @@ setSwap() {
 
 netSpeed() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
-  wget -q -N https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh -O /tmp/tcp.sh && chmod +x /tmp/tcp.sh && ${sudoCmd} /tmp/tcp.sh
+  wget -q -N https://raw.githubusercontent.com/ylx2016/Linux-NetSpeed/master/tcpx.sh -O /tmp/tcpx.sh && chmod +x /tmp/tcpx.sh && ${sudoCmd} /tmp/tcpx.sh
 }
 
 setSwap() {
@@ -101,12 +100,11 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=39
-  options=("开启BBR (Linux内核5+推荐)" "安装加速 (Linux内核4.x推荐)" "设置Swap" "卸载阿里云盾" "性能测试")
+  options=("安装加速" "设置Swap" "卸载阿里云盾" "性能测试")
   select opt in "${options[@]}"
   do
     case "${opt}" in
-      "开启BBR (Linux内核5+推荐)") bbr && continue_prompt ;;
-      "安装加速 (Linux内核4.x推荐)") netSpeed && continue_prompt ;;
+      "安装加速") netSpeed && continue_prompt ;;
       "设置Swap") setSwap && continue_prompt ;;
       "卸载阿里云盾") rmAliyundun && continue_prompt ;;
       "性能测试") LemonBench && exit 0 ;;
