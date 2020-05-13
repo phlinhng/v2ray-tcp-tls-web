@@ -4,6 +4,7 @@ export LANG=C
 export LANGUAGE=en_US.UTF-8
 
 branch="master"
+VERSION="$(curl -fsL https://api.github.com/repos/phlinhng/v2ray-tcp-tls-web/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/')"
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
@@ -269,7 +270,7 @@ display_link() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB subscription manager v1.0.4"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB subscription manager ${VERSION}"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 

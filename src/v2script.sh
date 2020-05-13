@@ -4,6 +4,7 @@ export LANG=C
 export LANGUAGE=en_US.UTF-8
 
 branch="master"
+VERSION="$(curl -fsL https://api.github.com/repos/phlinhng/v2ray-tcp-tls-web/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/')"
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
@@ -457,7 +458,7 @@ vps_tools() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB with Domainsocket automated script v1.0.4"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB with Domainsocket automated script ${VERSION}"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
