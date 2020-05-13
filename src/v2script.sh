@@ -457,7 +457,7 @@ vps_tools() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB with Domainsocket automated script ${VERSION}"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB with Domainsocket automated script v${VERSION}"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
