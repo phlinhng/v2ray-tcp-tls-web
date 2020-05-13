@@ -53,8 +53,8 @@ fi
 
 # a trick to redisplay menu option
 show_menu() {
-  echo "1) 开启BBR (Linux内核4.19以上推荐)"
-  echo "2) 安装加速 (Linux内核4.19以下推荐)"
+  echo "1) 开启BBR (Linux内核5+推荐)"
+  echo "2) 安装加速 (Linux内核4.x推荐)"
   echo "3) 设置Swap"
   echo "4) 卸载阿里云盾"
   echo "5) 性能测试"
@@ -101,12 +101,12 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=39
-  options=("开启BBR (Linux内核4.19以上推荐)" "安装加速 (Linux内核4.19以下推荐)" "设置Swap" "卸载阿里云盾" "性能测试")
+  options=("开启BBR (Linux内核5+推荐)" "安装加速 (Linux内核4.x推荐)" "设置Swap" "卸载阿里云盾" "性能测试")
   select opt in "${options[@]}"
   do
     case "${opt}" in
-      "开启BBR (Linux内核4.19以上推荐)") bbr && continue_prompt ;;
-      "安装加速 (Linux内核4.19以下推荐)") netSpeed && continue_prompt ;;
+      "开启BBR (Linux内核5+推荐)") bbr && continue_prompt ;;
+      "安装加速 (Linux内核4.x推荐)") netSpeed && continue_prompt ;;
       "设置Swap") setSwap && continue_prompt ;;
       "卸载阿里云盾") rmAliyundun && continue_prompt ;;
       "性能测试") LemonBench && exit 0 ;;
