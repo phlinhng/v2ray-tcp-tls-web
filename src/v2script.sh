@@ -319,15 +319,14 @@ EOF
 
   # activate services
   colorEcho ${BLUE} "Activating services"
-  ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl enable ntp
-  ${sudoCmd} systemctl restart ntp
+  ${sudoCmd} systemctl start ntp
   ${sudoCmd} systemctl enable v2ray
-  ${sudoCmd} systemctl restart v2ray
+  ${sudoCmd} systemctl start v2ray
   ${sudoCmd} systemctl enable docker
-  ${sudoCmd} systemctl restart docker
+  ${sudoCmd} systemctl start docker
   ${sudoCmd} systemctl enable tls-shunt-proxy
-  ${sudoCmd} systemctl restart tls-shunt-proxy
+  ${sudoCmd} systemctl start tls-shunt-proxy
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
@@ -407,9 +406,9 @@ install_mtproto() {
 
     # activate service
     ${sudoCmd} systemctl enable docker
-    ${sudoCmd} systemctl restart docker
+    ${sudoCmd} systemctl start docker
     ${sudoCmd} systemctl enable tls-shunt-proxy
-    ${sudoCmd} systemctl restart tls-shunt-proxy
+    ${sudoCmd} systemctl start tls-shunt-proxy
     ${sudoCmd} systemctl daemon-reload
     colorEcho ${GREEN} "电报代理设置成功!"
   fi
