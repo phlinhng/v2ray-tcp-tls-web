@@ -105,7 +105,8 @@ menu() {
   select opt in "${options[@]}"
   do
     case "${opt}" in
-      "安装加速") netSpeed && continue_prompt;;
+      "开启BBR (Linux内核4.19以上推荐)") bbr && continue_prompt ;;
+      "安装加速 (Linux内核4.19以下推荐)") netSpeed && continue_prompt ;;
       "设置Swap") setSwap && continue_prompt ;;
       "卸载阿里云盾") rmAliyundun && continue_prompt ;;
       "性能测试") LemonBench && exit 0 ;;
