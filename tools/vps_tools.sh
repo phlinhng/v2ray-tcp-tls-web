@@ -53,11 +53,11 @@ fi
 
 # a trick to redisplay menu option
 show_menu() {
-  echo ""
-  echo "1) 安装加速"
-  echo "2) 设置Swap"
-  echo "3) 卸载阿里云盾"
-  echo "4) 性能测试"
+  echo "1) 开启BBR (Linux内核4.19以上推荐)"
+  echo "2) 安装加速 (Linux内核4.19以下推荐)"
+  echo "3) 设置Swap"
+  echo "4) 卸载阿里云盾"
+  echo "5) 性能测试"
 }
 
 continue_prompt() {
@@ -66,6 +66,11 @@ continue_prompt() {
     y|Y|[yY][eE][sS] ) show_menu ;;
     * ) exit 0;;
   esac
+}
+
+setSwap() {
+  ${sudoCmd} ${systemPackage} install curl -y -qq
+  curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/tools/bbr.sh | bash
 }
 
 netSpeed() {
@@ -96,7 +101,7 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=39
-  options=("安装加速" "设置Swap" "卸载阿里云盾" "性能测试")
+  options=("开启BBR (Linux内核4.19以上推荐)" "安装加速 (Linux内核4.19以下推荐)" "设置Swap" "卸载阿里云盾" "性能测试")
   select opt in "${options[@]}"
   do
     case "${opt}" in
