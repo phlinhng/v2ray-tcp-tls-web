@@ -241,7 +241,7 @@ install_api() {
     set_proxy
     ${sudoCmd} systemctl start tls-shunt-proxy
     ${sudoCmd} systemctl daemon-reload
-    
+
     colorEcho ${GREEN} "subscription manager api has been set up."
     display_link_more
   else
