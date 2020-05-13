@@ -237,9 +237,11 @@ install_api() {
     ${sudoCmd} docker run -d --restart=always -p 127.0.0.1:25500:25500 -v /usr/local/etc/v2script/pref.ini:/base/pref.ini tindy2013/subconverter:latest
     write_json /usr/local/etc/v2script/config.json ".sub.api.installed" "true"
     write_json /usr/local/etc/v2script/config.json ".sub.api.tlsHeader" "\"${api_domain}\""
+
     set_proxy
     ${sudoCmd} systemctl start tls-shunt-proxy
     ${sudoCmd} systemctl daemon-reload
+    
     colorEcho ${GREEN} "subscription manager api has been set up."
     display_link_more
   else
