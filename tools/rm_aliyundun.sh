@@ -78,6 +78,7 @@ else
   ${sudoCmd} iptables -I INPUT -s 140.205.225.205/32 -j DROP
   ${sudoCmd} iptables -I INPUT -s 140.205.225.195/32 -j DROP
   ${sudoCmd} iptables -I INPUT -s 140.205.225.204/32 -j DROP
+  ${sudoCmd} /sbin/iptables-save
 
   colorEcho ${GREEN} "阿里云盾己卸载"
 fi
