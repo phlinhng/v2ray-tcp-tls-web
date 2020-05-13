@@ -238,7 +238,8 @@ install_api() {
     write_json /usr/local/etc/v2script/config.json ".sub.api.installed" "true"
     write_json /usr/local/etc/v2script/config.json ".sub.api.tlsHeader" "\"${api_domain}\""
     set_proxy
-    ${sudoCmd} systemctl restart tls-shunt-proxy
+    ${sudoCmd} systemctl start tls-shunt-proxy
+    ${sudoCmd} systemctl daemon-reload
     colorEcho ${GREEN} "subscription manager api has been set up."
     display_link_more
   else
