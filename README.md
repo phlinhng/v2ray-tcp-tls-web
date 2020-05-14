@@ -17,5 +17,6 @@ v2script
 + [x] Integrate [9seconds/mtg](https://github.com/9seconds/mtg)
 + [x] Switch to docker ~~nginx~~ caddy
 + [ ] Add CentOS Support
-+ [x] use random webpage template
++ [x] Random webpage template
 + [ ] Check if domain resloved correctly before coutinue
++ [ ] Support [trojan-go](https://github.com/p4gefau1t/trojan-go) (maybe)
