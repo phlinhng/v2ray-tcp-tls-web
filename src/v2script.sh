@@ -409,7 +409,7 @@ install_mtproto() {
     ${sudoCmd} systemctl enable docker
     ${sudoCmd} systemctl start docker
     ${sudoCmd} systemctl enable tls-shunt-proxy
-    ${sudoCmd} systemctl start tls-shunt-proxy
+    ${sudoCmd} systemctl restart tls-shunt-proxy
     ${sudoCmd} systemctl daemon-reload
     colorEcho ${GREEN} "电报代理设置成功!"
   fi
