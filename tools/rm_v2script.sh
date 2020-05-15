@@ -57,8 +57,8 @@ ${sudoCmd} ${systemPackage} install curl -y -qq
 curl -sSL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 ${sudoCmd} rm -rf /etc/v2ray
 ${sudoCmd} deluser v2ray
-${sudoCmd} crontab -l | grep -v 'geoip.dat' | ${sudoCmd} crontab
-${sudoCmd} crontab -l | grep -v 'geosite.dat' | ${sudoCmd} crontab
+${sudoCmd} crontab -l | grep -v 'geoip.dat' | ${sudoCmd} crontab -
+${sudoCmd} crontab -l | grep -v 'geosite.dat' | ${sudoCmd} crontab -
 
 # remove tls-shunt-server
 colorEcho ${BLUE} "Shutting down tls-shunt-proxy service."
