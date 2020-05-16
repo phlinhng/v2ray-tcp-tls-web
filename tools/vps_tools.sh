@@ -74,7 +74,7 @@ setSwap() {
 
 netSpeed() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
-  wget -q -N https://raw.githubusercontent.com/ylx2016/Linux-NetSpeed/master/tcpx.sh -O /tmp/tcp.sh && chmod +x /tmp/tcp.sh && ${sudoCmd} /tmp/tcp.sh
+  wget -q https://raw.githubusercontent.com/ylx2016/Linux-NetSpeed/master/tcpx.sh -O /tmp/tcp.sh && chmod +x /tmp/tcp.sh && ${sudoCmd} /tmp/tcp.sh
 }
 
 setSwap() {
