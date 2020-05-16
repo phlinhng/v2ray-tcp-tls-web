@@ -32,6 +32,7 @@ v2script
 + [@Loyalsoldier/v2ray-rules-dat](https://github.com/Loyalsoldier/v2ray-rules-dat)
 + [@mack-a/v2ray-agent](https://github.com/mack-a/v2ray-agent)
 + [@chiakge/Linux-NetSpeed](https://github.com/chiakge/Linux-NetSpeed)
++ [@ylx2016/Linux-NetSpeed](https://github.com/ylx2016/Linux-NetSpeed)
 + [@LemonBench/LemonBench](https://github.com/LemonBench/LemonBench)
 + [@tindy2013/subconverter](https://github.com/tindy2013/subconverter)
 + [@9seconds/mtg](https://github.com/9seconds/mtg)
