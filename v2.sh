@@ -203,7 +203,7 @@ EOF
   #${sudoCmd} systemctl disable nginx 2>/dev/null
 
   # kill process occupying port 80
-  #${sudoCmd} kill -9 $(lsof -t -i:80) 2>/dev/null
+  ${sudoCmd} kill -9 $(lsof -t -i:80) 2>/dev/null
 
   # activate services
   colorEcho ${BLUE} "Activating services"
