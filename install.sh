@@ -5,9 +5,7 @@ export LANGUAGE=en_US.UTF-8
 
 branch="master"
 
-# /usr/local/etc/v2script ##config path
-# /usr/local/etc/v2script/tls-header ##domain for v2Ray
-# /usr/local/etc/v2script/subscription ##filename of main subscription
+# /usr/local/etc/v2script/config.json ##config path
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager

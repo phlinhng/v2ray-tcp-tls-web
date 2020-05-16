@@ -67,11 +67,6 @@ continue_prompt() {
   esac
 }
 
-setSwap() {
-  ${sudoCmd} ${systemPackage} install curl -y -qq
-  curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/tools/bbr.sh | bash
-}
-
 netSpeed() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
   wget -q -N https://raw.githubusercontent.com/ylx2016/Linux-NetSpeed/master/tcp.sh -O /tmp/tcp.sh && chmod +x /tmp/tcp.sh && ${sudoCmd} /tmp/tcp.sh
