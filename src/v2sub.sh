@@ -255,7 +255,7 @@ install_api() {
     # set up api
     wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/pref.ini -O /tmp/pref.ini
     sed -i "s/FAKECONFIGPREFIX/https:\/\/${api_domain}/g" /tmp/pref.ini
-    mv /tmp/pref.ini /usr/local/etc/v2script/pref.ini
+    ${sudoCmd} mv /tmp/pref.ini /usr/local/etc/v2script/pref.ini
 
     write_json /usr/local/etc/v2script/config.json ".sub.api.installed" "true"
     write_json /usr/local/etc/v2script/config.json ".sub.api.tlsHeader" "\"${api_domain}\""
