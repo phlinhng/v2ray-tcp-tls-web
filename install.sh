@@ -49,7 +49,7 @@ fi
 
 # install requirements
 #${sudoCmd} ${systemPackage} update
-${sudoCmd} ${systemPackage} install curl wget jq -y -qq
+${sudoCmd} ${systemPackage} install curl wget jq lsof -y -qq
 
 ${sudoCmd} mkdir -p /usr/local/etc/v2script
 
