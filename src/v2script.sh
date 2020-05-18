@@ -322,7 +322,7 @@ EOF
 
   colorEcho ${BLUE} "Setting caddy"
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
-  /bin/cp -f ./config/Caddyfile /usr/local/etc
+  ${sudoCmd} /bin/cp -f ./config/Caddyfile /usr/local/etc
 
   # choose and copy a random  template for dummy web pages
   colorEcho ${BLUE} "Building dummy web site"
