@@ -216,6 +216,97 @@ set_proxy() {
   ${sudoCmd} /bin/cp -f /tmp/config_new.yaml /etc/tls-shunt-proxy/config.yaml
 }
 
+get_caddy() {
+  if [ ! -f "/usr/local/bin/caddy" ]; then
+    ${sudoCmd} ${systemPackage} libcap2-bin -y -qq
+    
+    curl https://getcaddy.com | ${sudoCmd} bash -s personal
+    # Give the caddy binary the ability to bind to privileged ports (e.g. 80, 443) as a non-root user
+    ${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
+
+    # create user for caddy
+    groupadd -g 33 www-data
+    useradd -g www-data --no-user-group \
+      --home-dir /var/www --no-create-home \
+      --shell /usr/sbin/nologin \
+      --system --uid 33 www-data
+  
+    mkdir /var/www
+    chown www-data:www-data /var/www
+    chmod 555 /var/www
+    mkdir -p /etc/caddy
+    chown -R root:root /etc/caddy
+    mkdir -p /etc/ssl/caddy
+    chown -R root:www-data /etc/ssl/caddy
+    chmod 0770 /etc/ssl/caddy
+    
+    local caddy_service=$(mktemp)
+    cat > ${caddy_service} <<-EOF
+[Unit]
+Description=Caddy HTTP/2 web server
+Documentation=https://caddyserver.com/docs
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+\; Do not allow the process to be restarted in a tight loop. If the
+\; process fails to start, something critical needs to be fixed.
+StartLimitIntervalSec=14400
+StartLimitBurst=10
+
+[Service]
+Restart=on-abnormal
+
+\; User and group the process will run as.
+User=www-data
+Group=www-data
+
+\; Letsencrypt-issued certificates will be written to this directory.
+Environment=CADDYPATH=/etc/ssl/caddy
+
+\; Always set "-root" to something safe in case it gets forgotten in the Caddyfile.
+ExecStart=/usr/local/bin/caddy -log stdout -log-timestamps=false -agree=true -conf=/usr/local/etc/Caddyfile -root=/var/tmp
+ExecReload=/bin/kill -USR1 $MAINPID
+
+\; Use graceful shutdown with a reasonable timeout
+KillMode=mixed
+KillSignal=SIGQUIT
+TimeoutStopSec=5s
+
+\; Limit the number of file descriptors; see `man systemd.exec` for more limit settings.
+LimitNOFILE=1048576
+\; Unmodified caddy is not expected to use more than that.
+LimitNPROC=512
+
+\; Use private /tmp and /var/tmp, which are discarded after caddy stops.
+PrivateTmp=true
+\; Use a minimal /dev (May bring additional security if switched to 'true', but it may not work on Raspberry Pi's or other devices, so it has been disabled in this dist.)
+PrivateDevices=false
+\; Hide /home, /root, and /run/user. Nobody will steal your SSH-keys.
+ProtectHome=true
+\; Make /usr, /boot, /etc and possibly some more folders read-only.
+ProtectSystem=full
+\; … except /etc/ssl/caddy, because we want Letsencrypt-certificates there.
+\;   This merely retains r/w access rights, it does not add any new. Must still be writable on the host!
+ReadWritePaths=/etc/ssl/caddy
+ReadWriteDirectories=/etc/ssl/caddy
+
+\; The following additional security directives only work with systemd v229 or later.
+\; They further restrict privileges that can be gained by caddy. Uncomment if you like.
+\; Note that you may have to add capabilities required by any plugins in use.
+\;CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+\;AmbientCapabilities=CAP_NET_BIND_SERVICE
+\;NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    
+    ${sudoCmd} mv ${caddy_service} /etc/systemd/system/caddy.service
+    ${sudoCmd} chown root:root /etc/systemd/system/caddy.service
+    ${sudoCmd} chmod 644 /etc/systemd/system/caddy.service
+  fi
+}
+
 get_v2ray() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
   curl -sL https://install.direct/go.sh | ${sudoCmd} bash
@@ -297,9 +388,14 @@ EOF
 
   # install tls-shunt-proxy
   get_proxy
+  
+  # install caddy
+  ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=abiosoft/caddy) 2>/dev/null) 2>/dev/null
+  get_caddy
 
   # prevent some bug
   ${sudoCmd} rm -rf /var/www/html
+  ${sudoCmd} rm -rf /etc/ssl/caddy/*
 
   # create config files
   colorEcho ${BLUE} "Setting v2Ray"
@@ -341,8 +437,8 @@ EOF
   ${sudoCmd} systemctl restart v2ray ## restart v2ray to enable new config
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy ## restart tls-shunt-proxy to enable new config
-  #${sudoCmd} systemctl enable caddy
-  #${sudoCmd} systemctl restart caddy
+  ${sudoCmd} systemctl enable caddy
+  ${sudoCmd} systemctl restart caddy
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
