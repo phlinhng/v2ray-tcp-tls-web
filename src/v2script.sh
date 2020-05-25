@@ -218,7 +218,7 @@ set_proxy() {
 
 get_caddy() {
   if [ ! -f "/usr/local/bin/caddy" ]; then
-    ${sudoCmd} ${systemPackage} libcap2-bin -y -qq
+    ${sudoCmd} ${systemPackage} install libcap2-bin -y -qq
     
     curl -sL https://getcaddy.com | ${sudoCmd} bash -s personal
     # Give the caddy binary the ability to bind to privileged ports (e.g. 80, 443) as a non-root user
