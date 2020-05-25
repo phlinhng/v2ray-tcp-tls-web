@@ -70,15 +70,6 @@ write_json() {
   jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key = value]
 
-get_docker() {
-  if [ ! -x "$(command -v docker)" ]; then
-    curl -sL https://get.docker.com/ | ${sudoCmd} bash
-    # install docker-compose
-    #${sudoCmd} curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    #${sudoCmd} chmod +x /usr/local/bin/docker-compose
-  fi
-}
-
 get_proxy() {
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
     colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
@@ -164,9 +155,6 @@ EOF
   # install tls-shunt-proxy
   get_proxy
 
-  # install docker
-  get_docker
-
   # prevent some bug
   ${sudoCmd} rm -rf /var/www/html
 
@@ -181,10 +169,6 @@ EOF
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/config.yaml
   sed -i "s/##V2RAY@//g" ./config/config.yaml
   ${sudoCmd} /bin/cp -f ./config/config.yaml /etc/tls-shunt-proxy/config.yaml
-
-  colorEcho ${BLUE} "Setting caddy"
-  sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
-  /bin/cp -f ./config/Caddyfile /usr/local/etc
 
   # choose and copy a random  template for dummy web pages
   colorEcho ${BLUE} "Building dummy web site"
@@ -212,17 +196,10 @@ EOF
   ${sudoCmd} systemctl restart ntp
   ${sudoCmd} systemctl enable v2ray
   ${sudoCmd} systemctl restart v2ray
-  ${sudoCmd} systemctl enable docker
-  ${sudoCmd} systemctl restart docker
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
-
-  # activate caddy
-  colorEcho ${BLUE} "Activating caddy"
-  ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=abiosoft/caddy) 2>/dev/null) 2>/dev/null
-  ${sudoCmd} docker run -d --restart=always -v /usr/local/etc/Caddyfile:/etc/Caddyfile -v $HOME/.caddy:/root/.caddy -p 80:80 abiosoft/caddy
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
   local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
