@@ -170,13 +170,6 @@ get_docker() {
 }
 
 set_docker() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    if [ ! "$(${sudoCmd} docker ps -q --filter ancestor=abiosoft/caddy)" ]; then
-      ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=abiosoft/caddy) 2>/dev/null) 2>/dev/null
-      ${sudoCmd} docker run -d --restart=always -v /usr/local/etc/Caddyfile:/etc/Caddyfile -v $HOME/.caddy:/root/.caddy -p 80:80 abiosoft/caddy
-    fi
-  fi
-
   if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "true" ]]; then
     if [ ! "$(${sudoCmd} docker ps -q --filter ancestor=nineseconds/mtg)" ]; then
       ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=nineseconds/mtg) 2>/dev/null) 2>/dev/null
@@ -305,9 +298,6 @@ EOF
   # install tls-shunt-proxy
   get_proxy
 
-  # install docker
-  get_docker
-
   # prevent some bug
   ${sudoCmd} rm -rf /var/www/html
 
@@ -349,16 +339,16 @@ EOF
   ${sudoCmd} systemctl start ntp
   ${sudoCmd} systemctl enable v2ray
   ${sudoCmd} systemctl restart v2ray ## restart v2ray to enable new config
-  ${sudoCmd} systemctl enable docker
-  ${sudoCmd} systemctl start docker ## no need to restart if docker is already on
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy ## restart tls-shunt-proxy to enable new config
+  #${sudoCmd} systemctl enable caddy
+  #${sudoCmd} systemctl restart caddy
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
   # activate caddy
   colorEcho ${BLUE} "Activating caddy"
-  set_docker
+  #set_docker
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
   display_vmess_full
