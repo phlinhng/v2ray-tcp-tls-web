@@ -225,20 +225,12 @@ get_caddy() {
     ${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
 
     # create user for caddy
-    groupadd -g 33 www-data
-    useradd -g www-data --no-user-group \
-      --home-dir /var/www --no-create-home \
-      --shell /usr/sbin/nologin \
-      --system --uid 33 www-data
+    ${sudoCmd} groupadd -g 33 www-data
+    ${sudoCmd} useradd -g www-data --no-user-group --no-create-home --shell /usr/sbin/nologin --system --uid 33 www-data
   
-    mkdir /var/www
-    chown www-data:www-data /var/www
-    chmod 555 /var/www
-    mkdir -p /etc/caddy
-    chown -R root:root /etc/caddy
-    mkdir -p /etc/ssl/caddy
-    chown -R root:www-data /etc/ssl/caddy
-    chmod 0770 /etc/ssl/caddy
+    ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
+    ${sudoCmd} mkdir -p /usr/local/etc/ssl/caddy && ${sudoCmd} chown -R root:www-data /usr/local/etc/ssl/caddy
+    ${sudoCmd} chmod 0770 /usr/local/etc/ssl/caddy
     
     local caddy_service=$(mktemp)
     cat > ${caddy_service} <<-EOF
@@ -261,10 +253,10 @@ User=www-data
 Group=www-data
 
 \; Letsencrypt-issued certificates will be written to this directory.
-Environment=CADDYPATH=/etc/ssl/caddy
+Environment=CADDYPATH=/usr/local/etc/ssl/caddy
 
 \; Always set "-root" to something safe in case it gets forgotten in the Caddyfile.
-ExecStart=/usr/local/bin/caddy -log stdout -log-timestamps=false -agree=true -conf=/usr/local/etc/Caddyfile -root=/var/tmp
+ExecStart=/usr/local/bin/caddy -log stdout -log-timestamps=false -agree=true -conf=/usr/local/etc/caddy/Caddyfile -root=/var/tmp
 ExecReload=/bin/kill -USR1 $MAINPID
 
 \; Use graceful shutdown with a reasonable timeout
@@ -395,7 +387,8 @@ EOF
 
   # prevent some bug
   ${sudoCmd} rm -rf /var/www/html
-  ${sudoCmd} rm -rf /etc/ssl/caddy/*
+  ${sudoCmd} rm -rf /usr/local/etc/ssl/caddy/*
+  ${sudoCmd} rm -f /usr/local/etc/Caddyfile # path for old version v2script
 
   # create config files
   colorEcho ${BLUE} "Setting v2Ray"
@@ -408,7 +401,7 @@ EOF
 
   colorEcho ${BLUE} "Setting caddy"
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
-  ${sudoCmd} /bin/cp -f ./config/Caddyfile /usr/local/etc
+  ${sudoCmd} /bin/cp -f ./config/Caddyfile /usr/local/etc/caddy
 
   # choose and copy a random  template for dummy web pages
   colorEcho ${BLUE} "Building dummy web site"
@@ -441,10 +434,6 @@ EOF
   ${sudoCmd} systemctl restart caddy
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
-
-  # activate caddy
-  colorEcho ${BLUE} "Activating caddy"
-  #set_docker
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
   display_vmess_full
