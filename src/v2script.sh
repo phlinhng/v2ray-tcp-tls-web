@@ -226,7 +226,7 @@ get_caddy() {
     #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
 
     # create user for caddy
-    ${sudoCmd} useradd -g www-data --no-user-group --no-create-home --shell /usr/sbin/nologin --system --uid 33 www-data
+    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s /sbin/nologin -r -u 33 www-data
   
     ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
     ${sudoCmd} mkdir -p /usr/local/etc/ssl/caddy && ${sudoCmd} chown -R root:www-data /usr/local/etc/ssl/caddy
@@ -250,11 +250,10 @@ install_v2ray() {
 
   # install requirements
   # coreutils: for base64 command
-  # ntp: time syncronise service
   # jq: json toolkits
   # unzip: to decompress web templates
   ${sudoCmd} ${systemPackage} update -qq
-  ${sudoCmd} ${systemPackage} install curl coreutils wget ntp jq unzip -y -qq
+  ${sudoCmd} ${systemPackage} install curl coreutils wget jq unzip -y -qq
 
   cd $(mktemp -d)
   wget -q https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
@@ -315,11 +314,12 @@ EOF
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
     write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
+    ${sudoCmd} timedatectl set-ntp true
   fi
 
   # install tls-shunt-proxy
   get_proxy
-  
+
   # install caddy
   ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=abiosoft/caddy) 2>/dev/null) 2>/dev/null
   get_caddy
@@ -330,10 +330,12 @@ EOF
   ${sudoCmd} rm -f /usr/local/etc/Caddyfile # path for old version v2script
 
   # create config files
-  colorEcho ${BLUE} "Setting v2Ray"
-  sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" ./config/v2ray.json
-  sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" ./config/v2ray.json
-  ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
+  if [[ $(read_json /etc/v2ray/config.json '.inbounds[0].streamSettings.network') != "domainsocket" ]]; then
+    colorEcho ${BLUE} "Setting v2Ray"
+    sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" ./config/v2ray.json
+    sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" ./config/v2ray.json
+    ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
+  fi
 
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
   set_proxy
@@ -363,8 +365,6 @@ EOF
 
   # activate services
   colorEcho ${BLUE} "Activating services"
-  ${sudoCmd} systemctl enable ntp
-  ${sudoCmd} systemctl start ntp
   ${sudoCmd} systemctl enable v2ray
   ${sudoCmd} systemctl restart v2ray ## restart v2ray to enable new config
   ${sudoCmd} systemctl enable tls-shunt-proxy
