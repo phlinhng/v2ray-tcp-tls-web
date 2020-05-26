@@ -452,7 +452,7 @@ set_v2ray_wss() {
   local wssPath="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
   local sni="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
   local certPath="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${sni}"
-  local wssInbound="{\"protocal\": \"vmess\",
+  local wssInbound="{\"protocol\": \"vmess\",
   \"port\": ${port},
   \"settings\": {
     \"clients\": [{
