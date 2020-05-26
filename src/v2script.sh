@@ -451,7 +451,6 @@ set_v2ray_wss() {
   local uuid="$(cat '/proc/sys/kernel/random/uuid')"
   local wssPath="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
   local sni="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-  local certPath="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${sni}"
   local wssInbound="{\"protocol\": \"vmess\",
   \"port\": ${port},
   \"settings\": {
@@ -469,8 +468,8 @@ set_v2ray_wss() {
       \"tlsSettings\": {
         \"allowInsecure\": false,
         \"certificates\": [{
-          \"certificateFile\": \"${certPath}/${sni}.crt\",
-          \"keyFile\": \"${certPath}/${sni}.key\"
+          \"certificateFile\": \"/etc/ssl/v2ray/${sni}.crt\",
+          \"keyFile\": \"/etc/ssl/v2ray/${sni}.key\"
         }]
       }
     },
@@ -481,8 +480,9 @@ set_v2ray_wss() {
   }"
 
   ${sudoCmd} mkdir -p /etc/ssl/v2ray
-  chown -R root:v2ray /usr/local/etc/ssl/caddy
+  ${sudoCmd} chown -R root:v2ray /etc/ssl/v2ray
 
+  # not elegant way to resolve certificate permissons problem
   local cert_sync=$(mktemp)
   cat > ${cert_sync} <<-EOF
 #!/bin/bash
