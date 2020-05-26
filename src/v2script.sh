@@ -471,7 +471,7 @@ set_v2ray_wss() {
   cat > ${cert_sync} <<-EOF
 #!/bin/bash
 site="${sni}"
-path="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/\$\{site\}"
+path="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/\${site}"
 cd $(mktemp -d)
 touch \${site}.key \${site}.crt
 sudo cat "\${path}/\${site}.crt" >  "\${site}.crt"
