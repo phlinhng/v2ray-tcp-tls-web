@@ -78,8 +78,9 @@ show_menu() {
   echo "4) 卸载TCP+TLS+WEB"
   echo "5) 显示vmess链接"
   echo "6) 管理订阅"
-  echo "7) 设置电报代理"
-  echo "8) VPS工具"
+  echo "7) 开启备用CDN"
+  echo "8) 设置电报代理"
+  echo "9) VPS工具"
 }
 
 continue_prompt() {
@@ -407,7 +408,6 @@ display_mtproto() {
 
 install_mtproto() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') != "true" ]]; then
-    ${sudoCmd} ${systemPackage} update -qq
     ${sudoCmd} ${systemPackage} install curl -y -qq
 
     if [ ! -d "/usr/local/etc/v2script" ]; then
@@ -429,8 +429,8 @@ install_mtproto() {
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.installed" "true"
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.fakeTlsHeader" "\"${FAKE_TLS_HEADER}\""
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.secret" "\"${secret}\""
-    set_proxy
 
+    set_proxy
     set_docker
 
     # activate service
@@ -443,6 +443,84 @@ install_mtproto() {
   fi
 
   display_mtproto
+}
+
+set_v2ray_wss() {
+  local ports=(2053 2083 2087 2096 8443)
+  local port="${ports[RANDOM%5]}"
+  local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+  local wssPath="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+  local sni="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+  local certPath="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${sni}"
+  local wssInbound="\"protocal\": \"vmess\",
+  \"port\": ${port},
+  \"settings\": {
+    \"clients\": [{
+      \"id\": \"${uuid}\",
+      \"alterId\": 0
+      }]
+    },
+  \"streamSettings\": {
+      \"network\": \"ws\",
+      \"wsSettings\": {
+        \"path\": \"\/${wssPath}\"
+      },
+      \"security\": \"tls\",
+      \"tlsSettings\": {
+        \"allowInsecure\": false,
+        \"certificates\": [{
+          \"certificateFile\": \"${certPath}\/${sni}.crt\",
+          \"keyFile\": \"${certPath}\/${sni}.key\"
+        }]
+      }
+    },
+    \"sniffing\": {
+      \"enabled\": true,
+      \"destOverride\": [ \"http\", \"tls\" ]
+    }
+  }"
+
+  # setting v2ray
+  ${sudoCmd} /bin/cp /etc/v2ray/config.json /etc/v2ray/config.json.bak 2>/dev/null
+  jq -r ".inbounds += [${wssInbound}]" /etc/v2ray/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /etc/v2ray/config.json
+
+  ${sudoCmd} systemctl restart v2ray
+  ${sudoCmd} systemctl daemon-reload
+
+  local cfUrl="amp.cloudflare.com"
+  local currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+  local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":${sni}\"\",\"id\":\"${uuid}\",\"net\":ws\"\",\"path\":\"\/${wssPath}\",\"port\":\"${port}\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local uri="$(printf "${json}" | base64)"
+
+  # updating subscription
+  if [[$(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true"]]; then
+    local sub="$(printf "\nvmess://${uri}" | base64)"
+    jq -r ".sub.nodes += ['vmess://${uri}']" /usr/local/etc/v2scirpt/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2scirpt/config.json
+    printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+  fi
+
+  colorEcho ${GREEN} "开启备用CDN成功!"
+
+  echo "${cfUrl}:${port}"
+  echo "${uuid} (aid: 0)"
+  echo "Header: ${sni}, Path: \/${wssPath}" && echo ""
+  echo "vmess://${uri}" | tr -d '\n' && printf "\n"
+}
+
+set_v2ray_wss_prompt() {
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+    echo "此选项会增加一个WS+TLS+CDN的连接入口做为备用连接方式"
+    echo "备用连接方式的速度、延迟可能不如TCP+TLS"
+    colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
+    read -p "确定设置备用CDN (yes/no)? " wssConfirm
+    case "${linkConfirm}" in
+      y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
+      * ) return 0 ;;
+    esac
+  else
+    colorEcho ${YELLOW} "请先安装TCP+TLS+WEB!"
+    return 1
+  fi
 }
 
 check_status() {
@@ -494,7 +572,7 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=woof
-  options=("安装TCP+TLS+WEB" "更新v2ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置电报代理" "VPS工具")
+  options=("安装TCP+TLS+WEB" "更新v2ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "开启备用CDN" "设置电报代理" "VPS工具")
   select opt in "${options[@]}"
   do
     case "${opt}" in
@@ -504,7 +582,8 @@ menu() {
       "卸载TCP+TLS+WEB") rm_v2script ;;
       "显示vmess链接") display_vmess && continue_prompt ;;
       "管理订阅") v2sub && exit 0 ;;
-      "设置电报代理") install_mtproto && continue_prompt;;
+      "开启备用CDN") set_v2ray_wss_prompt && continue_prompt ;;
+      "设置电报代理") install_mtproto && continue_prompt ;;
       "VPS工具") vps_tools ;;
       *) break ;;
     esac
