@@ -513,7 +513,7 @@ set_v2ray_wss_prompt() {
     echo "备用连接方式的速度、延迟可能不如TCP+TLS"
     colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
     read -p "确定设置备用CDN (yes/no)? " wssConfirm
-    case "${linkConfirm}" in
+    case "${wssConfirm}" in
       y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
       * ) return 0 ;;
     esac
