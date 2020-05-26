@@ -483,8 +483,7 @@ then
 fi
 exit 0
 EOF
-  ${sudoCmd} mv ${cert_sync} /usr/local/etc/v2script/cert_sync.sh && ${sudoCmd} chmod +x /usr/local/etc/v2script/cert_sync.sh
-
+  ${sudoCmd} mv ${cert_sync} /usr/local/etc/v2script/cert_sync.sh && ${sudoCmd} chmod +x /usr/local/etc/v2script/cert_sync.sh && /usr/local/etc/v2script/cert_sync.sh
   (crontab -l 2>/dev/null; echo "0 8 * * * /usr/local/etc/v2script/cert_sync.sh >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   # setting v2ray
