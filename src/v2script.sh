@@ -488,7 +488,7 @@ EOF
 
   # setting v2ray
   ${sudoCmd} /bin/cp /etc/v2ray/config.json /etc/v2ray/config.json.bak 2>/dev/null
-  jq -r ".inbounds += [${wssInbound}]" /etc/v2ray/config.json  > tmp.$$.json && ${sudoCmd} /bin/cp -f tmp.$$.json /etc/v2ray/config.json
+  jq -r ".inbounds += [${wssInbound}]" /etc/v2ray/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /etc/v2ray/config.json
 
   ${sudoCmd} systemctl restart v2ray
   ${sudoCmd} systemctl daemon-reload
