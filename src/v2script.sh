@@ -489,17 +489,17 @@ set_v2ray_wss() {
 site="${sni}"
 path="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/\$\{site\}"
 cd $(mktemp -d)
-touch \$\{site\}.key \$\{site\}.crt
-sudo cat "\$\{path\}/\$\{site\}.crt" >  "\$\{site\}.crt"
-sudo cat "\$\{path\}/\$\{site\}.key" >  "\$\{site\}.key"
-if [ -s "$\{site\}.crt" ] && [ -s "$\{site\}.key" ]
+touch \${site}.key \${site}.crt
+sudo cat "\${path}/\${site}.crt" >  "\${site}.crt"
+sudo cat "\${path}/\${site}.key" >  "\${site}.key"
+if [ -s "${site}.crt" ] && [ -s "${site}.key" ]
 then
-  mv "\$\{site\}.crt" "/etc/ssl/v2ray/\$\{site\}.crt"
-  mv "\$\{site\}.key" "/etc/ssl/v2ray/\$\{site\}.key"
+  mv "\${site}.crt" "/etc/ssl/v2ray/\${site}.crt"
+  mv "\${site}.key" "/etc/ssl/v2ray/\${site}.key"
 fi
 exit 0
 EOF
-  ${sudoCmd} mv ${cert_sync} /usr/local/etc/v2scirpt/cert_sync.sh && ${sudoCmd} chmod +x /usr/local/etc/v2scirpt/cert_sync.sh
+  ${sudoCmd} mv ${cert_sync} /usr/local/etc/v2script/cert_sync.sh && ${sudoCmd} chmod +x /usr/local/etc/v2scirpt/cert_sync.sh
 
   (crontab -l 2>/dev/null; echo "0 8 * * * /usr/local/etc/v2scirpt/cert_sync.sh >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
