@@ -74,11 +74,12 @@ show_menu() {
   echo ""
   echo "1) 安装TCP+TLS+WEB"
   echo "2) 更新v2Ray-core"
-  echo "3) 卸载TCP+TLS+WEB"
-  echo "4) 显示vmess链接"
-  echo "5) 管理订阅"
-  echo "6) 设置电报代理"
-  echo "7) VPS工具"
+  echo "3) 更新tls-shunt-proxy"
+  echo "4) 卸载TCP+TLS+WEB"
+  echo "5) 显示vmess链接"
+  echo "6) 管理订阅"
+  echo "7) 设置电报代理"
+  echo "8) VPS工具"
 }
 
 continue_prompt() {
@@ -192,6 +193,12 @@ get_proxy() {
     colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
     curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
     colorEcho ${GREEN} "tls-shunt-proxy is installed."
+  else
+    local API_URL="https://api.github.com/repos/liberal-boy/tls-shunt-proxy/releases/latest"
+    local DOWNLOAD_URL="$(curl "${PROXY}" -H "Accept: application/json" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0" -s "${API_URL}" --connect-timeout 10| grep 'browser_download_url' | cut -d\" -f4)"
+    ${sudoCmd} curl -L -H "Cache-Control: no-cache" -o "/tmp/tls-shunt-proxy/tls-shunt-proxy.zip" "${DOWNLOAD_URL}"
+    ${sudoCmd} unzip -o -d /usr/local/bin/ "${DOWNLOAD_PATH}"
+    ${sudoCmd} chmod +x /usr/local/bin/tls-shunt-proxy
   fi
 }
 
@@ -487,12 +494,13 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=39
-  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置电报代理" "VPS工具")
+  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置电报代理" "VPS工具")
   select opt in "${options[@]}"
   do
     case "${opt}" in
       "安装TCP+TLS+WEB") install_v2ray && continue_prompt ;;
       "更新v2Ray-core") get_v2ray && continue_prompt ;;
+      "更新tls-shunt-proxy") get_proxy && continue_prompt ;;
       "卸载TCP+TLS+WEB") rm_v2script ;;
       "显示vmess链接") display_vmess && continue_prompt ;;
       "管理订阅") v2sub && exit 0 ;;

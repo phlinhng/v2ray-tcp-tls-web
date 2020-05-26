@@ -56,7 +56,8 @@ show_menu() {
   echo "1) 安装加速"
   echo "2) 设置Swap"
   echo "3) 卸载阿里云盾"
-  echo "4) 性能测试"
+  echo "4) 性能测试(LemonBench)"
+  echo "5) 性能测试(Oldking)"
 }
 
 continue_prompt() {
@@ -88,6 +89,12 @@ LemonBench() {
   curl -sL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash -s -- --mode fast
 }
 
+# credit: https://www.oldking.net/350.html
+Oldking() {
+  ${sudoCmd} ${systemPackage} install wget -y -qq
+  wget -qO- https://git.io/Jvh0J | ${sudoCmd} bash
+}
+
 menu() {
   cd "$(dirname "$0")"
   colorEcho ${YELLOW} "VPS Toolkit by phlinhng"
@@ -102,7 +109,8 @@ menu() {
       "安装加速") netSpeed && continue_prompt ;;
       "设置Swap") setSwap && continue_prompt ;;
       "卸载阿里云盾") rmAliyundun && continue_prompt ;;
-      "性能测试") LemonBench && exit 0 ;;
+      "性能测试(LemonBench)") LemonBench && exit 0 ;;
+      "性能测试(Oldking)") Oldking && exit 0 ;;
       *) break;;
     esac
   done
