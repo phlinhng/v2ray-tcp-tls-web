@@ -3,7 +3,7 @@
     {
       "protocol": "vmess",
       "listen": "127.0.0.1",
-      "port": "FAKEPORT",
+      "port": FAKEPORT,
       "settings": {
         "clients": [
           {
