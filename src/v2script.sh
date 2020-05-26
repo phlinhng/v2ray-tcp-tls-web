@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=C
 export LANGUAGE=en_US.UTF-8
 
-branch="master"
+branch="beta"
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
