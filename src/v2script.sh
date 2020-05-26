@@ -452,7 +452,7 @@ set_v2ray_wss() {
   local wssPath="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
   local sni="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
   local certPath="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${sni}"
-  local wssInbound="\"protocal\": \"vmess\",
+  local wssInbound="$(jq -n '\"protocal\": \"vmess\",
   \"port\": ${port},
   \"settings\": {
     \"clients\": [{
@@ -478,7 +478,7 @@ set_v2ray_wss() {
       \"enabled\": true,
       \"destOverride\": [ \"http\", \"tls\" ]
     }
-  }"
+  }')"
 
   # setting v2ray
   ${sudoCmd} /bin/cp /etc/v2ray/config.json /etc/v2ray/config.json.bak 2>/dev/null
@@ -493,7 +493,7 @@ set_v2ray_wss() {
   local uri="$(printf "${json}" | base64)"
 
   # updating subscription
-  if [[$(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true"]]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
     local sub="$(printf "\nvmess://${uri}" | base64)"
     jq -r ".sub.nodes += ['vmess://${uri}']" /usr/local/etc/v2scirpt/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2scirpt/config.json
     printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
@@ -503,7 +503,7 @@ set_v2ray_wss() {
 
   echo "${cfUrl}:${port}"
   echo "${uuid} (aid: 0)"
-  echo "Header: ${sni}, Path: \/${wssPath}" && echo ""
+  echo "Header: ${sni}, Path: /${wssPath}" && echo ""
   echo "vmess://${uri}" | tr -d '\n' && printf "\n"
 }
 
