@@ -4,7 +4,6 @@ export LANG=C
 export LANGUAGE=en_US.UTF-8
 
 branch="master"
-VERSION="$(curl -fsL https://api.github.com/repos/phlinhng/v2ray-tcp-tls-web/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/')"
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
@@ -53,6 +52,8 @@ elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
   #colorEcho ${RED} "unsupported OS"
   #exit 0
 fi
+
+VERSION="$(${sudoCmd} jq --raw-output '.version' /usr/local/etc/v2script/config.json 2>/dev/null | tr -d '\n')"
 
 read_json() {
   # jq [key] [path-to-file]

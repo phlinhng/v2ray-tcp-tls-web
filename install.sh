@@ -4,6 +4,7 @@ export LANG=C
 export LANGUAGE=en_US.UTF-8
 
 branch="master"
+VERSION="$(curl -fsL https://api.github.com/repos/phlinhng/v2ray-tcp-tls-web/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/')"
 
 # /usr/local/etc/v2script/config.json ##config path
 
@@ -62,3 +63,5 @@ ${sudoCmd} chmod +x /usr/local/bin/v2script
 
 ${sudoCmd} wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2sub.sh -O /usr/local/bin/v2sub
 ${sudoCmd} chmod +x /usr/local/bin/v2sub
+
+jq -r "version = \"${VERSION}\"" /usr/local/etc/v2script/config.json > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2script/config.json

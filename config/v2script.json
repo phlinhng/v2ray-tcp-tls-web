@@ -17,5 +17,6 @@
     "installed": false,
     "fakeTlsHeader": "",
     "secret": ""
-  }
+  },
+  "version": ""
 }
