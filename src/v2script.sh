@@ -149,7 +149,7 @@ generate_link() {
   read -p "输入节点名称[留空则使用默认值]: " remark
 
   if [ -z "${remark}" ]; then
-    remark="${V2_DOMAIN}:443"
+    remark="${V2_DOMAIN}"
   fi
 
   local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
