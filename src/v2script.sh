@@ -259,8 +259,8 @@ install_v2ray() {
   # coreutils: for base64 command
   # jq: json toolkits
   # unzip: to decompress web templates
-  ${sudoCmd} ${systemPackage} update -qq
-  ${sudoCmd} ${systemPackage} install curl coreutils wget jq unzip -y -qq
+  #${sudoCmd} ${systemPackage} update -qq
+  #${sudoCmd} ${systemPackage} install curl coreutils wget jq unzip -y -qq
 
   cd $(mktemp -d)
   wget -q https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
