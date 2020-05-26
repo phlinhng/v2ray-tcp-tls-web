@@ -234,7 +234,7 @@ get_caddy() {
     #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
 
     # create user for caddy
-    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s /sbin/nologin -r -u 33 www-data
+    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s $(which nologin) -r -u 33 www-data
   
     ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
     ${sudoCmd} mkdir -p /usr/local/etc/ssl/caddy && ${sudoCmd} chown -R root:www-data /usr/local/etc/ssl/caddy
@@ -318,7 +318,7 @@ WantedBy=multi-user.target
 EOF
     # add new user and overwrite v2ray.service
     # https://github.com/v2ray/v2ray-core/issues/1011
-    ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray
+    ${sudoCmd} useradd -d /etc/v2ray/ -M -s $(which nologin) v2ray
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
     write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
@@ -479,6 +479,8 @@ set_v2ray_wss() {
       \"destOverride\": [ \"http\", \"tls\" ]
     }
   }"
+  
+  ${sudoCmd} setfacl -m u:v2ray:r ${certPath}
 
   # setting v2ray
   ${sudoCmd} /bin/cp /etc/v2ray/config.json /etc/v2ray/config.json.bak 2>/dev/null
