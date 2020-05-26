@@ -476,7 +476,7 @@ cd $(mktemp -d)
 touch \${site}.key \${site}.crt
 cat "\${path}/\${site}.crt" >  "\${site}.crt"
 cat "\${path}/\${site}.key" >  "\${site}.key"
-if [ -s "${site}.crt" ] && [ -s "${site}.key" ]
+if [ -s "\${site}.crt" ] && [ -s "\${site}.key" ]
 then
   mv "\${site}.crt" "/etc/ssl/v2ray/\${site}.crt"
   mv "\${site}.key" "/etc/ssl/v2ray/\${site}.key"
