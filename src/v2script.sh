@@ -494,7 +494,7 @@ menu() {
   check_status
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
-  COLUMNS=39
+  COLUMNS=woof
   options=("安装TCP+TLS+WEB" "更新v2ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置电报代理" "VPS工具")
   select opt in "${options[@]}"
   do
