@@ -268,12 +268,6 @@ install_v2ray() {
   unzip -q ${branch}.zip && rm -f ${branch}.zip ## will unzip the source to current path and remove the archive file
   cd v2ray-tcp-tls-web-${branch}
 
-  if [ ! -d "/usr/local/etc/v2script" ]; then
-    mkdir -p /usr/local/etc/v2script ## folder for scripts configuration
-  elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
-    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
-  fi
-
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
     get_v2ray
@@ -406,12 +400,6 @@ install_mtproto() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') != "true" ]]; then
     ${sudoCmd} ${systemPackage} install curl -y -qq
 
-    if [ ! -d "/usr/local/etc/v2script" ]; then
-      ${sudoCmd} mkdir -p /usr/local/etc/v2script ## folder for scripts configuration
-    elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
-      wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
-    fi
-
     get_proxy
     get_docker
     # pre-run this to pull image
@@ -495,9 +483,9 @@ then
 fi
 exit 0
 EOF
-  ${sudoCmd} mv ${cert_sync} /usr/local/etc/v2script/cert_sync.sh && ${sudoCmd} chmod +x /usr/local/etc/v2scirpt/cert_sync.sh
+  ${sudoCmd} mv ${cert_sync} /usr/local/etc/v2script/cert_sync.sh && ${sudoCmd} chmod +x /usr/local/etc/v2script/cert_sync.sh
 
-  (crontab -l 2>/dev/null; echo "0 8 * * * /usr/local/etc/v2scirpt/cert_sync.sh >/dev/null >/dev/null") | ${sudoCmd} crontab -
+  (crontab -l 2>/dev/null; echo "0 8 * * * /usr/local/etc/v2script/cert_sync.sh >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   # setting v2ray
   ${sudoCmd} /bin/cp /etc/v2ray/config.json /etc/v2ray/config.json.bak 2>/dev/null
@@ -514,7 +502,7 @@ EOF
   # updating subscription
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
     local sub="$(printf "\nvmess://${uri}" | base64)"
-    jq -r ".sub.nodes += [${sub}]" /usr/local/etc/v2scirpt/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2scirpt/config.json
+    jq -r ".sub.nodes += [${sub}]" /usr/local/etc/v2script/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2script/config.json
     printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
 
