@@ -153,7 +153,7 @@ generate_link() {
   local uri="$(printf "${json}" | base64)"
   local sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
-  local randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
+  local randomName="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
 
   printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/${randomName} >/dev/null
@@ -225,7 +225,6 @@ get_caddy() {
     #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
 
     # create user for caddy
-    ${sudoCmd} groupadd -g 33 www-data
     ${sudoCmd} useradd -g www-data --no-user-group --no-create-home --shell /usr/sbin/nologin --system --uid 33 www-data
   
     ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
@@ -250,12 +249,11 @@ install_v2ray() {
 
   # install requirements
   # coreutils: for base64 command
-  # uuid-runtime: for uuid generating
   # ntp: time syncronise service
   # jq: json toolkits
   # unzip: to decompress web templates
   ${sudoCmd} ${systemPackage} update -qq
-  ${sudoCmd} ${systemPackage} install curl coreutils wget ntp jq uuid-runtime unzip -y -qq
+  ${sudoCmd} ${systemPackage} install curl coreutils wget ntp jq unzip -y -qq
 
   cd $(mktemp -d)
   wget -q https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
