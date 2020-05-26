@@ -92,18 +92,12 @@ install_v2ray() {
   # jq: json toolkits
   # unzip: to decompress web templates
   ${sudoCmd} ${systemPackage} update -qq
-  ${sudoCmd} ${systemPackage} install curl coreutils wget ntp jq unzip -y -qq
+  ${sudoCmd} ${systemPackage} install curl coreutils wget jq unzip -y -qq
 
   cd $(mktemp -d)
   wget -q https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
   unzip -q ${branch}.zip && rm -f ${branch}.zip ## will unzip the source to current path and remove the archive file
   cd v2ray-tcp-tls-web-${branch}
-
-  if [ ! -d "/usr/local/etc/v2script" ]; then
-    mkdir -p /usr/local/etc/v2script ## folder for scripts configuration
-  elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
-    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
-  fi
 
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
@@ -150,6 +144,7 @@ EOF
     ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
+    ${sudoCmd} timedatectl set-ntp true
   fi
 
   # install tls-shunt-proxy
@@ -182,18 +177,9 @@ EOF
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
-  # stop nginx service for user who had used the old version of script
-  #${sudoCmd} systemctl stop nginx 2>/dev/null
-  #${sudoCmd} systemctl disable nginx 2>/dev/null
-
-  # kill process occupying port 80
-  ${sudoCmd} kill -9 $(lsof -t -i:80) 2>/dev/null
-
   # activate services
   colorEcho ${BLUE} "Activating services"
   ${sudoCmd} systemctl daemon-reload
-  ${sudoCmd} systemctl enable ntp
-  ${sudoCmd} systemctl restart ntp
   ${sudoCmd} systemctl enable v2ray
   ${sudoCmd} systemctl restart v2ray
   ${sudoCmd} systemctl enable tls-shunt-proxy
