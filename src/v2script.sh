@@ -452,7 +452,7 @@ set_v2ray_wss() {
   local wssPath="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
   local sni="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
   local certPath="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${sni}"
-  local wssInbound="$(jq -n '\"protocal\": \"vmess\",
+  local wssInbound="{\"protocal\": \"vmess\",
   \"port\": ${port},
   \"settings\": {
     \"clients\": [{
@@ -463,14 +463,14 @@ set_v2ray_wss() {
   \"streamSettings\": {
       \"network\": \"ws\",
       \"wsSettings\": {
-        \"path\": \"\/${wssPath}\"
+        \"path\": \"/${wssPath}\"
       },
       \"security\": \"tls\",
       \"tlsSettings\": {
         \"allowInsecure\": false,
         \"certificates\": [{
-          \"certificateFile\": \"${certPath}\/${sni}.crt\",
-          \"keyFile\": \"${certPath}\/${sni}.key\"
+          \"certificateFile\": \"${certPath}/${sni}.crt\",
+          \"keyFile\": \"${certPath}/${sni}.key\"
         }]
       }
     },
@@ -478,7 +478,7 @@ set_v2ray_wss() {
       \"enabled\": true,
       \"destOverride\": [ \"http\", \"tls\" ]
     }
-  }')"
+  }"
 
   # setting v2ray
   ${sudoCmd} /bin/cp /etc/v2ray/config.json /etc/v2ray/config.json.bak 2>/dev/null
