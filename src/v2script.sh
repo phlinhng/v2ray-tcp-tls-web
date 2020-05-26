@@ -474,8 +474,8 @@ site="${sni}"
 path="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/\${site}"
 cd $(mktemp -d)
 touch \${site}.key \${site}.crt
-sudo cat "\${path}/\${site}.crt" >  "\${site}.crt"
-sudo cat "\${path}/\${site}.key" >  "\${site}.key"
+cat "\${path}/\${site}.crt" >  "\${site}.crt"
+cat "\${path}/\${site}.key" >  "\${site}.key"
 if [ -s "${site}.crt" ] && [ -s "${site}.key" ]
 then
   mv "\${site}.crt" "/etc/ssl/v2ray/\${site}.crt"
