@@ -9,31 +9,6 @@ else
   sudoCmd=""
 fi
 
-#copied & modified from atrandys trojan scripts
-#copy from 秋水逸冰 ss scripts
-if [[ -f /etc/redhat-release ]]; then
-  release="centos"
-  systemPackage="yum"
-elif cat /etc/issue | grep -Eqi "debian"; then
-  release="debian"
-  systemPackage="apt-get"
-elif cat /etc/issue | grep -Eqi "ubuntu"; then
-  release="ubuntu"
-  systemPackage="apt-get"
-elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
-  release="centos"
-  systemPackage="yum"
-elif cat /proc/version | grep -Eqi "debian"; then
-  release="debian"
-  systemPackage="apt-get"
-elif cat /proc/version | grep -Eqi "ubuntu"; then
-  release="ubuntu"
-  systemPackage="apt-get"
-elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
-  release="centos"
-  systemPackage="yum"
-fi
-
 # copied from v2ray official script
 # colour code
 RED="31m"      # Error message
@@ -59,11 +34,11 @@ if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
   ${sudoCmd} swapon /swapfile
 
   # make swap permanent
-  printf "/swapfile swap swap defaults 0 0" | ${sudoCmd} tee -a /etc/fstab  >/dev/null
+  echo "/swapfile swap swap defaults 0 0" | ${sudoCmd} tee -a /etc/fstab  >/dev/null
 
   # set swap percentage
   ${sudoCmd} sysctl vm.swappiness=10
-  printf "vm.swappiness=10" | ${sudoCmd} tee -a /etc/sysctl.conf >/dev/null
+  echo "vm.swappiness=10" | ${sudoCmd} tee -a /etc/sysctl.conf >/dev/null
 
   free -h
   colorEcho ${GREEN} "设置Swap成功"

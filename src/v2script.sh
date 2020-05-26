@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=C
 export LANGUAGE=en_US.UTF-8
 
-branch="beta"
+branch="master"
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
@@ -57,25 +57,7 @@ elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
   #exit 0
 fi
 
-# a trick to redisplay menu option
-show_menu() {
-  echo ""
-  echo "1) 安装TCP+TLS+WEB"
-  echo "2) 更新v2Ray-core"
-  echo "3) 卸载TCP+TLS+WEB"
-  echo "4) 显示vmess链接"
-  echo "5) 管理订阅"
-  echo "6) 设置电报代理"
-  echo "7) VPS工具"
-}
-
-continue_prompt() {
-  read -p "继续其他操作 (yes/no)? " choice
-  case "${choice}" in
-    y|Y|[yY][eE][sS] ) show_menu ;;
-    * ) exit 0;;
-  esac
-}
+VERSION="$(${sudoCmd} jq --raw-output '.version' /usr/local/etc/v2script/config.json 2>/dev/null | tr -d '\n')"
 
 read_json() {
   # jq [key] [path-to-file]
@@ -87,12 +69,33 @@ write_json() {
   jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key = value]
 
+# a trick to redisplay menu option
+show_menu() {
+  echo ""
+  echo "1) 安装TCP+TLS+WEB"
+  echo "2) 更新v2ray-core"
+  echo "3) 更新tls-shunt-proxy"
+  echo "4) 卸载TCP+TLS+WEB"
+  echo "5) 显示vmess链接"
+  echo "6) 管理订阅"
+  echo "7) 设置电报代理"
+  echo "8) VPS工具"
+}
+
+continue_prompt() {
+  read -p "继续其他操作 (yes/no)? " choice
+  case "${choice}" in
+    y|Y|[yY][eE][sS] ) show_menu ;;
+    * ) exit 0;;
+  esac
+}
+
 display_vmess() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.install') != "true" ]]; then
-    uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-    V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-    json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    uri="$(printf "${json}" | base64)"
+    local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+    local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+    local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local uri="$(printf "${json}" | base64)"
     echo "vmess://${uri}" | tr -d '\n' && printf "\n"
   else
     colorEcho ${RED} "配置文件不存在"
@@ -110,17 +113,14 @@ display_vmess_full() {
   fi
 
   #${sudoCmd} ${systemPackage} install coreutils jq -y
-  uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-  V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-
-  echo "${V2_DOMAIN}:443"
-  echo "${uuid} (aid: 0)"
-  echo ""
-
-  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  uri="$(printf "${json}" | base64)"
+  local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+  local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+  local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local uri="$(printf "${json}" | base64)"
   write_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' "$(printf "\"vmess://${uri}\"" | tr -d '\n')"
 
+  echo "${V2_DOMAIN}:443"
+  echo "${uuid} (aid: 0)" && echo ""
   echo "vmess://${uri}" | tr -d '\n' && printf "\n"
 }
 
@@ -142,8 +142,8 @@ generate_link() {
   fi
 
   #${sudoCmd} ${systemPackage} install uuid-runtime coreutils jq -y
-  uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-  V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+  local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+  local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
 
   read -p "输入节点名称[留空则使用默认值]: " remark
 
@@ -151,11 +151,11 @@ generate_link() {
     remark="${V2_DOMAIN}:443"
   fi
 
-  json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  uri="$(printf "${json}" | base64)"
-  sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
+  local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local uri="$(printf "${json}" | base64)"
+  local sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
-  randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
+  local randomName="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
 
   printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/${randomName} >/dev/null
@@ -171,11 +171,34 @@ get_docker() {
   fi
 }
 
+set_docker() {
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "true" ]]; then
+    if [ ! "$(${sudoCmd} docker ps -q --filter ancestor=nineseconds/mtg)" ]; then
+      ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=nineseconds/mtg) 2>/dev/null) 2>/dev/null
+      # start mtproto ## reference https://raw.githubusercontent.com/9seconds/mtg/master/run.sh
+      ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 127.0.0.1:3128:3128 nineseconds/mtg:latest run "$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
+    fi
+  fi
+
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.installed') == "true" ]]; then
+    if [ ! "$(${sudoCmd} docker ps -q --filter ancestor=tindy2013/subconverter)" ]; then
+      ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=tindy2013/subconverter) 2>/dev/null) 2>/dev/null
+      ${sudoCmd} docker run -d --restart=always -p 127.0.0.1:25500:25500 -v /usr/local/etc/v2script/pref.ini:/base/pref.ini tindy2013/subconverter:latest
+    fi
+  fi
+}
+
 get_proxy() {
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
     colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
     curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
     colorEcho ${GREEN} "tls-shunt-proxy is installed."
+  else
+    local API_URL="https://api.github.com/repos/liberal-boy/tls-shunt-proxy/releases/latest"
+    local DOWNLOAD_URL="$(curl "${PROXY}" -H "Accept: application/json" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0" -s "${API_URL}" --connect-timeout 10| grep 'browser_download_url' | cut -d\" -f4)"
+    ${sudoCmd} curl -L -H "Cache-Control: no-cache" -o "/tmp/tls-shunt-proxy.zip" "${DOWNLOAD_URL}"
+    ${sudoCmd} unzip -o -d /usr/local/bin/ "/tmp/tls-shunt-proxy.zip"
+    ${sudoCmd} chmod +x /usr/local/bin/tls-shunt-proxy
   fi
 }
 
@@ -201,6 +224,28 @@ set_proxy() {
   ${sudoCmd} /bin/cp -f /tmp/config_new.yaml /etc/tls-shunt-proxy/config.yaml
 }
 
+get_caddy() {
+  if [ ! -f "/usr/local/bin/caddy" ]; then
+    #${sudoCmd} ${systemPackage} install libcap2-bin -y -qq
+    
+    curl -sL https://getcaddy.com | ${sudoCmd} bash -s personal
+    # Give the caddy binary the ability to bind to privileged ports (e.g. 80, 443) as a non-root user
+    #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
+
+    # create user for caddy
+    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s /sbin/nologin -r -u 33 www-data
+  
+    ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
+    ${sudoCmd} mkdir -p /usr/local/etc/ssl/caddy && ${sudoCmd} chown -R root:www-data /usr/local/etc/ssl/caddy
+    ${sudoCmd} chmod 0770 /usr/local/etc/ssl/caddy
+    
+    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/caddy.service -O /tmp/caddy.service
+    ${sudoCmd} mv /tmp/caddy.service /etc/systemd/system/caddy.service
+    ${sudoCmd} chown root:root /etc/systemd/system/caddy.service
+    ${sudoCmd} chmod 644 /etc/systemd/system/caddy.service
+  fi
+}
+
 get_v2ray() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
   curl -sL https://install.direct/go.sh | ${sudoCmd} bash
@@ -212,12 +257,10 @@ install_v2ray() {
 
   # install requirements
   # coreutils: for base64 command
-  # uuid-runtime: for uuid generating
-  # ntp: time syncronise service
   # jq: json toolkits
   # unzip: to decompress web templates
   ${sudoCmd} ${systemPackage} update -qq
-  ${sudoCmd} ${systemPackage} install curl coreutils wget ntp jq uuid-runtime unzip -y -qq
+  ${sudoCmd} ${systemPackage} install curl coreutils wget jq unzip -y -qq
 
   cd $(mktemp -d)
   wget -q https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
@@ -234,7 +277,7 @@ install_v2ray() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     get_v2ray
     colorEcho ${BLUE} "Building v2ray.service for domainsocket"
-    ds_service=$(mktemp)
+    local ds_service=$(mktemp)
     cat > ${ds_service} <<-EOF
 [Unit]
 Description=V2Ray - A unified platform for anti-censorship
@@ -264,6 +307,8 @@ ExecStartPost=$(which sleep) 1
 ExecStartPost=$(which chmod) 666 /tmp/v2ray-ds/v2ray.sock
 
 Restart=on-failure
+#Restart=always
+#RestartSec=10
 # Don't restart in the case of configuration error
 RestartPreventExitStatus=23
 
@@ -276,33 +321,39 @@ EOF
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
     write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
+    ${sudoCmd} timedatectl set-ntp true
   fi
 
   # install tls-shunt-proxy
   get_proxy
 
-  # install docker
-  get_docker
+  # install caddy
+  ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=abiosoft/caddy) 2>/dev/null) 2>/dev/null
+  get_caddy
 
   # prevent some bug
   ${sudoCmd} rm -rf /var/www/html
+  ${sudoCmd} rm -rf /usr/local/etc/ssl/caddy/*
+  ${sudoCmd} rm -f /usr/local/etc/Caddyfile # path for old version v2script
 
   # create config files
-  colorEcho ${BLUE} "Setting v2Ray"
-  sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" ./config/v2ray.json
-  sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" ./config/v2ray.json
-  ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
+  if [[ $(read_json /etc/v2ray/config.json '.inbounds[0].streamSettings.network') != "domainsocket" ]]; then
+    colorEcho ${BLUE} "Setting v2Ray"
+    sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" ./config/v2ray.json
+    sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" ./config/v2ray.json
+    ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
+  fi
 
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
   set_proxy
 
   colorEcho ${BLUE} "Setting caddy"
   sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
-  /bin/cp -f ./config/Caddyfile /usr/local/etc
+  ${sudoCmd} /bin/cp -f ./config/Caddyfile /usr/local/etc/caddy
 
   # choose and copy a random  template for dummy web pages
   colorEcho ${BLUE} "Building dummy web site"
-  template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
+  local template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
   wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template}
   ${sudoCmd} mkdir -p /var/www/html
   ${sudoCmd} unzip -q ${template} -d /var/www/html
@@ -313,29 +364,22 @@ EOF
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   # stop nginx service for user who had used the old version of script
-  ${sudoCmd} systemctl stop nginx 2>/dev/null
-  ${sudoCmd} systemctl disable nginx 2>/dev/null
+  #${sudoCmd} systemctl stop nginx 2>/dev/null
+  #${sudoCmd} systemctl disable nginx 2>/dev/null
 
   # kill process occupying port 80
   ${sudoCmd} kill -9 $(lsof -t -i:80) 2>/dev/null
 
   # activate services
   colorEcho ${BLUE} "Activating services"
-  ${sudoCmd} systemctl daemon-reload
-  ${sudoCmd} systemctl enable ntp
-  ${sudoCmd} systemctl restart ntp
-  ${sudoCmd} systemctl enable docker
-  ${sudoCmd} systemctl restart docker
   ${sudoCmd} systemctl enable v2ray
-  ${sudoCmd} systemctl restart v2ray
+  ${sudoCmd} systemctl restart v2ray ## restart v2ray to enable new config
   ${sudoCmd} systemctl enable tls-shunt-proxy
-  ${sudoCmd} systemctl restart tls-shunt-proxy
+  ${sudoCmd} systemctl restart tls-shunt-proxy ## restart tls-shunt-proxy to enable new config
+  ${sudoCmd} systemctl enable caddy
+  ${sudoCmd} systemctl restart caddy
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
-
-  # activate caddy
-  colorEcho ${BLUE} "Activating caddy"
-  ${sudoCmd} docker run -d --restart=always -v /usr/local/etc/Caddyfile:/etc/Caddyfile -v $HOME/.caddy:/root/.caddy -p 80:80 abiosoft/caddy
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
   display_vmess_full
@@ -378,8 +422,8 @@ install_mtproto() {
     ${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c "www.fast.com" >/dev/null
 
     # generate random header from txt files
-    FAKE_TLS_HEADER="$(curl -s https://raw.githubusercontent.com/phlinhng/my-scripts/master/text/mainland_cdn.txt | shuf -n 1)"
-    secret="$(${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c ${FAKE_TLS_HEADER})"
+    local FAKE_TLS_HEADER="$(curl -s https://raw.githubusercontent.com/phlinhng/my-scripts/master/text/mainland_cdn.txt | shuf -n 1)"
+    local secret="$(${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c ${FAKE_TLS_HEADER})"
 
     # writing configurations & setting tls-shunt-proxy
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.installed" "true"
@@ -387,12 +431,11 @@ install_mtproto() {
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.secret" "\"${secret}\""
     set_proxy
 
-    # start mtproto ## reference https://raw.githubusercontent.com/9seconds/mtg/master/run.sh
-    ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 127.0.0.1:3128:3128 nineseconds/mtg:latest run "${secret}"
+    set_docker
 
     # activate service
     ${sudoCmd} systemctl enable docker
-    ${sudoCmd} systemctl restart docker
+    ${sudoCmd} systemctl start docker
     ${sudoCmd} systemctl enable tls-shunt-proxy
     ${sudoCmd} systemctl restart tls-shunt-proxy
     ${sudoCmd} systemctl daemon-reload
@@ -443,20 +486,21 @@ vps_tools() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB with Domainsocket automated script v1.0"
+  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB with Domainsocket automated script v${VERSION}"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
   check_status
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
-  COLUMNS=39
-  options=("安装TCP+TLS+WEB" "更新v2Ray-core" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置电报代理" "VPS工具")
+  COLUMNS=woof
+  options=("安装TCP+TLS+WEB" "更新v2ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置电报代理" "VPS工具")
   select opt in "${options[@]}"
   do
     case "${opt}" in
       "安装TCP+TLS+WEB") install_v2ray && continue_prompt ;;
-      "更新v2Ray-core") get_v2ray && continue_prompt ;;
+      "更新v2ray-core") get_v2ray && continue_prompt ;;
+      "更新tls-shunt-proxy") get_proxy && continue_prompt ;;
       "卸载TCP+TLS+WEB") rm_v2script ;;
       "显示vmess链接") display_vmess && continue_prompt ;;
       "管理订阅") v2sub && exit 0 ;;

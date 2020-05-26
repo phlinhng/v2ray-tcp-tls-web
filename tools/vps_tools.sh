@@ -53,11 +53,11 @@ fi
 
 # a trick to redisplay menu option
 show_menu() {
-  echo ""
   echo "1) 安装加速"
   echo "2) 设置Swap"
   echo "3) 卸载阿里云盾"
-  echo "4) 性能测试"
+  echo "4) 性能测试(LemonBench)"
+  echo "5) 性能测试(Oldking)"
 }
 
 continue_prompt() {
@@ -70,23 +70,29 @@ continue_prompt() {
 
 netSpeed() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
-  wget -q -N https://raw.githubusercontent.com/chiakge/Linux-NetSpeed/master/tcp.sh -O /tmp/tcp.sh && chmod +x /tmp/tcp.sh && ${sudoCmd} /tmp/tcp.sh
+  wget -q -N https://raw.githubusercontent.com/ylx2016/Linux-NetSpeed/master/tcp.sh -O /tmp/tcp.sh && chmod +x /tmp/tcp.sh && ${sudoCmd} /tmp/tcp.sh
 }
 
 setSwap() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
-  curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/tools/set_swap.sh | bash
+  curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/tools/set_swap.sh | bash
 }
 
 rmAliyundun() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
-  curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/tools/rm_aliyundun.sh | bash
+  curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/tools/rm_aliyundun.sh | bash
 }
 
 # credit: https://github.com/LemonBench/LemonBench
 LemonBench() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
-  curl -sL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash
+  curl -sL https://raw.githubusercontent.com/LemonBench/LemonBench/master/LemonBench.sh | bash -s -- --mode fast
+}
+
+# credit: https://www.oldking.net/350.html
+Oldking() {
+  ${sudoCmd} ${systemPackage} install wget -y -qq
+  wget -qO- https://git.io/Jvh0J | ${sudoCmd} bash
 }
 
 menu() {
@@ -100,10 +106,11 @@ menu() {
   select opt in "${options[@]}"
   do
     case "${opt}" in
-      "安装加速") netSpeed && continue_prompt;;
+      "安装加速") netSpeed && continue_prompt ;;
       "设置Swap") setSwap && continue_prompt ;;
       "卸载阿里云盾") rmAliyundun && continue_prompt ;;
-      "性能测试") LemonBench && exit 0;;
+      "性能测试(LemonBench)") LemonBench && exit 0 ;;
+      "性能测试(Oldking)") Oldking && exit 0 ;;
       *) break;;
     esac
   done

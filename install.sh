@@ -3,11 +3,10 @@ export LC_ALL=C
 export LANG=C
 export LANGUAGE=en_US.UTF-8
 
-branch="beta"
+branch="master"
+VERSION="$(curl -fsL https://api.github.com/repos/phlinhng/v2ray-tcp-tls-web/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/')"
 
-# /usr/local/etc/v2script ##config path
-# /usr/local/etc/v2script/tls-header ##domain for v2Ray
-# /usr/local/etc/v2script/subscription ##filename of main subscription
+# /usr/local/etc/v2script/config.json ##config path
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
@@ -51,17 +50,18 @@ fi
 
 # install requirements
 #${sudoCmd} ${systemPackage} update
-${sudoCmd} ${systemPackage} install curl wget jq -y -qq
+${sudoCmd} ${systemPackage} install curl wget jq lsof -y -qq
 
-mkdir -p /usr/local/etc/v2script
+${sudoCmd} mkdir -p /usr/local/etc/v2script
 
 if [ ! -f "/usr/local/etc/v2script/config.json" ]; then
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2script.json -O /usr/local/etc/v2script/config.json
+  ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2script.json -O /usr/local/etc/v2script/config.json
 fi
 
-wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2script.sh -O /usr/local/bin/v2script
-chmod +x /usr/local/bin/v2script
+${sudoCmd} wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2script.sh -O /usr/local/bin/v2script
+${sudoCmd} chmod +x /usr/local/bin/v2script
 
-wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2sub.sh -O /usr/local/bin/v2sub
-chmod +x /usr/local/bin/v2sub
+${sudoCmd} wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2sub.sh -O /usr/local/bin/v2sub
+${sudoCmd} chmod +x /usr/local/bin/v2sub
 
+jq -r ".version = \"${VERSION}\"" /usr/local/etc/v2script/config.json > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2script/config.json

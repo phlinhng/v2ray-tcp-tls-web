@@ -49,7 +49,7 @@ if [ ! -d "/usr/bin/v2ray" ] || [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
   return 1
 fi
 
-${sudoCmd} ${systemPackage} install curl -y
+${sudoCmd} ${systemPackage} install curl -y -qq
 
 # remove v2ray
 # Notice the two dashes (--) which are telling bash to not process anything following it as arguments to bash.
@@ -57,6 +57,9 @@ ${sudoCmd} ${systemPackage} install curl -y
 curl -sSL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 ${sudoCmd} rm -rf /etc/v2ray
 ${sudoCmd} deluser v2ray
+${sudoCmd} delgroup --only-if-empty v2ray
+${sudoCmd} crontab -l | grep -v 'geoip.dat' | ${sudoCmd} crontab -
+${sudoCmd} crontab -l | grep -v 'geosite.dat' | ${sudoCmd} crontab -
 
 # remove tls-shunt-server
 colorEcho ${BLUE} "Shutting down tls-shunt-proxy service."
@@ -79,7 +82,7 @@ colorEcho ${GREEN} "Removed tls-shunt-proxy successfully."
 # this will stop docker.service and remove every conatainer, image...etc created by docker but not docker itself
 # since uninstalling docker is complicated and may cause unstable to OS, if you want the OS to go back to clean state then reinstall the whole OS is suggested
 colorEcho ${BLUE} "Removing docker containers, images, networks, and images"
-${sudoCmd} docker stop $(docker ps -a -q)
+${sudoCmd} docker stop $(${sudoCmd} docker ps -a -q)
 ${sudoCmd} docker system prune --force
 colorEcho ${BLUE} "Shutting down docker service."
 ${sudoCmd} systemctl stop docker
