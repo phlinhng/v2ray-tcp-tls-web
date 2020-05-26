@@ -493,6 +493,8 @@ EOF
   ${sudoCmd} systemctl restart v2ray
   ${sudoCmd} systemctl daemon-reload
 
+  write_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare' "true"
+
   cfUrl="amp.cloudflare.com"
   currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
   json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"${port}\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"

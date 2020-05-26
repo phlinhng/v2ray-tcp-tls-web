@@ -1,7 +1,8 @@
 {
   "v2ray": {
     "installed": false,
-    "tlsHeader": ""
+    "tlsHeader": "",
+    "cloudflare": false
   },
   "sub": {
     "enabled": false,
