@@ -489,13 +489,13 @@ set_v2ray_wss() {
 
   local cfUrl="amp.cloudflare.com"
   local currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
-  local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":${sni}\"\",\"id\":\"${uuid}\",\"net\":ws\"\",\"path\":\"\/${wssPath}\",\"port\":\"${port}\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":ws\"\",\"path\":\"/${wssPath}\",\"port\":\"${port}\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
   local uri="$(printf "${json}" | base64)"
 
   # updating subscription
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
     local sub="$(printf "\nvmess://${uri}" | base64)"
-    jq -r ".sub.nodes += ['vmess://${uri}']" /usr/local/etc/v2scirpt/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2scirpt/config.json
+    jq -r ".sub.nodes += [vmess://${uri}]" /usr/local/etc/v2scirpt/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2scirpt/config.json
     printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
 
