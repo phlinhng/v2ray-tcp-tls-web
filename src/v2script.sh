@@ -234,7 +234,7 @@ get_caddy() {
     #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
 
     # create user for caddy
-    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s $(which nologin) -r -u 33 www-data
+    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s /sbin/nologin -r -u 33 www-data
   
     ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
     ${sudoCmd} mkdir -p /usr/local/etc/ssl/caddy && ${sudoCmd} chown -R root:www-data /usr/local/etc/ssl/caddy
@@ -318,7 +318,7 @@ WantedBy=multi-user.target
 EOF
     # add new user and overwrite v2ray.service
     # https://github.com/v2ray/v2ray-core/issues/1011
-    ${sudoCmd} useradd -d /etc/v2ray/ -M -s $(which nologin) v2ray
+    ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
     write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
@@ -479,8 +479,29 @@ set_v2ray_wss() {
       \"destOverride\": [ \"http\", \"tls\" ]
     }
   }"
-  
-  ${sudoCmd} setfacl -m u:v2ray:r ${certPath}
+
+  ${sudoCmd} mkdir -p /etc/ssl/v2ray
+  chown -R root:v2ray /usr/local/etc/ssl/caddy
+
+  local cert_sync=$(mktemp)
+  cat > ${cert_sync} <<-EOF
+#!/bin/bash
+site="${sni}"
+path="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/\$\{site\}"
+cd $(mktemp -d)
+touch \$\{site\}.key \$\{site\}.crt
+sudo cat "\$\{path\}/\$\{site\}.crt" >  "\$\{site\}.crt"
+sudo cat "\$\{path\}/\$\{site\}.key" >  "\$\{site\}.key"
+if [ -s "$\{site\}.crt" ] && [ -s "$\{site\}.key" ]
+then
+  mv "\$\{site\}.crt" "/etc/ssl/v2ray/\$\{site\}.crt"
+  mv "\$\{site\}.key" "/etc/ssl/v2ray/\$\{site\}.key"
+fi
+exit 0
+EOF
+  ${sudoCmd} mv ${cert_sync} /usr/local/etc/v2scirpt/cert_sync.sh && ${sudoCmd} chmod +x /usr/local/etc/v2scirpt/cert_sync.sh
+
+  (crontab -l 2>/dev/null; echo "0 8 * * * /usr/local/etc/v2scirpt/cert_sync.sh >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   # setting v2ray
   ${sudoCmd} /bin/cp /etc/v2ray/config.json /etc/v2ray/config.json.bak 2>/dev/null
