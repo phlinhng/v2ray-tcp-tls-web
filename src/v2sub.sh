@@ -166,9 +166,9 @@ generate_link() {
   fi
 
   local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
+  local uri="$(printf %s "${json}" | base64 --warp=0)"
   write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
-  local sub="$(printf %s "vmess://${uri}" | base64 | tr -d '\n')"
+  local sub="$(printf %s "vmess://${uri}" | base64 --warp=0)"
 
   local randomName="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
@@ -181,9 +181,9 @@ generate_link() {
     local wssPath="$(read_json /etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path' | tr -d '/')"
     local cfUrl="amp.cloudflare.com"
     local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${remark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
+    local uri="$(printf %s "${json}" | base64 --warp=0)"
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
-    local sub="$(printf '\n%s' "vmess://${uri}" | base64 | tr -d '\n')"
+    local sub="$(printf '\n%s' "vmess://${uri}" | base64 --warp=0)"
     printf %s "${sub}" | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
 
@@ -210,9 +210,9 @@ update_link() {
     fi
 
     local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
+    local uri="$(printf %s "${json}" | base64 --warp=0)"
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
-    local sub="$(printf %s "vmess://${uri}" | base64 | tr -d '\n')"
+    local sub="$(printf %s "vmess://${uri}" | base64 --warp=0)"
 
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
 
@@ -222,9 +222,9 @@ update_link() {
       local wssPath="$(read_json /etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path' | tr -d '/')"
       local cfUrl="amp.cloudflare.com"
       local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${remark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-      local uri="$(printf '\n%s' "${json}" | base64 | tr -d '\n')"
+      local uri="$(printf '\n%s' "${json}" | base64 --warp=0)"
       write_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
-      local sub="$(printf "\nvmess://${uri}" | base64 | tr -d '\n')"
+      local sub="$(printf "\nvmess://${uri}" | base64 --warp=0)"
       printf '\n%s' "${sub}" | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
     fi
 
@@ -262,7 +262,7 @@ display_link_more() {
   printf %s "${apiPrefix}quanx" | tr -d '\n' && printf "\n\n"
 
   colorEcho ${YELLOW} "Loon"
-  printf  %s "${apiPrefix}loon" | tr -d '\n' && printf "\n"
+  printf %s "${apiPrefix}loon" | tr -d '\n' && printf "\n"
 }
 
 install_api() {
