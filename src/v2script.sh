@@ -103,27 +103,6 @@ display_vmess() {
   fi
 }
 
-display_vmess_full() {
-  if [ ! -d "/usr/bin/v2ray" ]; then
-    colorEcho ${RED} "尚末安装v2Ray"
-    return 1
-  elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
-    colorEcho ${RED} "配置文件不存在"
-    return 1
-  fi
-
-  #${sudoCmd} ${systemPackage} install coreutils jq -y
-  local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-  local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-  local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri="$(printf %s "${json}" | base64 --wrap=0)"
-  write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
-
-  echo "${V2_DOMAIN}:443"
-  echo "${uuid} (aid: 0)" && echo ""
-  display_vmess
-}
-
 generate_link() {
   if [ ! -d "/usr/bin/v2ray" ]; then
     colorEcho ${RED} "尚末安装v2Ray"
@@ -309,15 +288,16 @@ set_v2ray_wss() {
       fi
     fi
 
+    local uuid_wss="$(read_json /etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
     local cfUrl="amp.cloudflare.com"
     local currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
-    local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    local uri="$(printf %s "${json}" | base64 --wrap=0)"
+    local json_wss="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid_wss}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local uri_wss="$(printf %s "${json_wss}" | base64 --wrap=0)"
 
     echo "${cfUrl}:443"
-    echo "${uuid} (aid: 0)"
+    echo "${uuid_wss} (aid: 0)"
     echo "Header: ${sni}, Path: /${wssPath}" && echo ""
-    echo "vmess://${uri}" | tr -d '\n' && printf "\n"
+    echo "vmess://${uri_wss}" | tr -d '\n' && printf "\n"
   else
     display_vmess
   fi
@@ -467,7 +447,16 @@ EOF
   ${sudoCmd} systemctl reset-failed
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
-  display_vmess_full
+
+  local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+  local uuid_tcp="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+  local json_tcp="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid_tcp}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local uri_tcp="$(printf %s "${json}" | base64 --wrap=0)"
+  write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri_tcp}\"" | tr -d '\n')"
+
+  echo "${V2_DOMAIN}:443"
+  echo "${uuid_tcp} (aid: 0)" && echo ""
+  display_vmess
 
   read -p "设置CDN (yes/no)? " wssConfirm
   case "${wssConfirm}" in
