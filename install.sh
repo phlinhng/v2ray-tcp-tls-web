@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=C
 export LANGUAGE=en_US.UTF-8
 
-branch="beta"
+branch="master"
 VERSION="$(curl -fsL https://api.github.com/repos/phlinhng/v2ray-tcp-tls-web/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/')"
 
 # /usr/local/etc/v2script/config.json ##config path
