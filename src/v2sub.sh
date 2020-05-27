@@ -162,13 +162,14 @@ generate_link() {
 
   local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
 
-  local uri="$(printf "${json}" | base64)"
-  local sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
+  local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
+  local sub="$(printf %s "vmess://${uri}" | tr -d '\n' | base64)"
 
   local randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
+  write_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
 
-  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+  printf %s "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
 }
 
@@ -192,8 +193,8 @@ update_link() {
     fi
 
     local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    local uri="$(printf "${json}" | base64)"
-    local sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
+    local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
+    local sub="$(printf %s "vmess://${uri}" | tr -d '\n' | base64)"
 
     echo "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
     echo "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | tr -d '\n' && printf "\n"
