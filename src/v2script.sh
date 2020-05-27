@@ -116,7 +116,7 @@ display_vmess_full() {
   local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
   local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
   local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri="$(printf %s "${json}" | base64 --warp=0)"
+  local uri="$(printf %s "${json}" | base64 --wrap=0)"
   write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
 
   echo "${V2_DOMAIN}:443"
@@ -152,8 +152,8 @@ generate_link() {
   fi
 
   local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri="$(printf %s "${json}" | base64 --warp=0)"
-  local sub="$(printf %s "vmess://${uri}" | base64 --warp=0)"
+  local uri="$(printf %s "${json}" | base64 --wrap=0)"
+  local sub="$(printf %s "vmess://${uri}" | base64 --wrap=0)"
 
   local randomName="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
@@ -168,9 +168,9 @@ generate_link() {
     local cfUrl="amp.cloudflare.com"
     local currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
     local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    local uri="$(printf %s "${json}" | base64 --warp=0)"
+    local uri="$(printf %s "${json}" | base64 --wrap=0)"
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
-    local sub="$(printf '\n%s' "vmess://${uri}" | base64 --warp=0)"
+    local sub="$(printf '\n%s' "vmess://${uri}" | base64 --wrap=0)"
     printf %s "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
 
@@ -285,12 +285,12 @@ set_v2ray_wss() {
     local cfUrl="amp.cloudflare.com"
     local currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
     local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    local uri="$(printf %s "${json}" | base64 --warp=0)"
+    local uri="$(printf %s "${json}" | base64 --wrap=0)"
 
     # updating subscription
     if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
       write_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
-      local sub="$(printf "\nvmess://${uri}" | base64 --warp=0)"
+      local sub="$(printf "\nvmess://${uri}" | base64 --wrap=0)"
       printf %s "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
     fi
 
