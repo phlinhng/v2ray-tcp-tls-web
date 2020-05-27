@@ -102,9 +102,6 @@ colorEcho ${GREEN} "Removed caddy successfully."
 colorEcho ${BLUE} "Removing docker containers, images, networks, and images"
 ${sudoCmd} docker stop $(${sudoCmd} docker ps -a -q)
 ${sudoCmd} docker system prune --force
-colorEcho ${BLUE} "Shutting down docker service."
-${sudoCmd} systemctl stop docker
-${sudoCmd} systemctl disable docker
 colorEcho ${GREEN} "Removed docker successfully."
 
 # remove script configuration files
