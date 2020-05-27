@@ -195,7 +195,7 @@ update_link() {
     local uri="$(printf "${json}" | base64)"
     local sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
 
-    printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+    echo "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
     echo "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | tr -d '\n' && printf "\n"
 
     colorEcho ${GREEN} "更新订阅完成"

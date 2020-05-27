@@ -159,7 +159,7 @@ generate_link() {
   local randomName="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
 
-  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/${randomName} >/dev/null
+  echo "${sub}" | ${sudoCmd} tee /var/www/html/${randomName} >/dev/null
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
 }
 
@@ -497,9 +497,9 @@ EOF
 
   # updating subscription
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
-    local sub="$(printf "\nvmess://${uri}" | base64)"
+    local sub="$(printf "vmess://${uri}" | base64)"
     jq -r ".sub.nodes += [${sub}]" /usr/local/etc/v2script/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2script/config.json
-    printf "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+    echo "${sub}" | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
 
   colorEcho ${GREEN} "开启备用CDN成功!"
