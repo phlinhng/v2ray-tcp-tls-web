@@ -224,14 +224,14 @@ set_proxy() {
 
 set_v2ray_wss() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') != "true" ]]; then
-    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    local uuid_wss="$(cat '/proc/sys/kernel/random/uuid')"
     local wssPath="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
     local sni="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
     local wssInbound="{\"protocol\": \"vmess\",
   \"port\": 3566,
   \"settings\": {
     \"clients\": [{
-      \"id\": \"${uuid}\",
+      \"id\": \"${uuid_wss}\",
       \"alterId\": 0
       }]
     },
@@ -279,7 +279,6 @@ set_v2ray_wss() {
         local json_wss="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid_wss}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${remark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
         local uri_wss="$(printf '\n%s' "${json_wss}" | base64 --wrap=0)"
         write_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss' "$(printf %s "\"vmess://${uri_wss}\"")"
-        local sub="$(printf "\nvmess://${uri}" | base64 --wrap=0)"
         local sub="$(printf '%s\n%s' "vmess://${uri_tcp}" "vmess://${uri_wss}" | base64 --wrap=0)"
         printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
       else
