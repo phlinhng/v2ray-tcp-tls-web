@@ -526,7 +526,7 @@ set_v2ray_wss_prompt() {
 check_status() {
   printf "脚本状态: "
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.clouflare') == "true" ]]; then
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
       colorEcho ${GREEN} "TCP+TLS, WSS+CDN"
     else
       colorEcho ${GREEN} "TCP+TLS"
