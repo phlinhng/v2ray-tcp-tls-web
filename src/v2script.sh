@@ -479,16 +479,19 @@ EOF
   echo "${uuid_tcp} (aid: 0)" && echo ""
   display_vmess
 
-  read -p "设置CDN (yes/no)? " wssConfirm
-  case "${wssConfirm}" in
-    y|Y|[yY][eE][sS] ) set_v2ray_wss_prompt ;;
-  esac
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') != "true" ]]; then
+    read -p "设置CDN (yes/no)? " wssConfirm
+    case "${wssConfirm}" in
+      y|Y|[yY][eE][sS] ) set_v2ray_wss_prompt ;;
+    esac
+  fi
 
-  read -p "生成订阅链接 (yes/no)? " linkConfirm
-  case "${linkConfirm}" in
-    y|Y|[yY][eE][sS] ) generate_link ;;
-    * ) return 0;;
-  esac
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') != "true" ]]; then
+    read -p "生成订阅链接 (yes/no)? " linkConfirm
+    case "${linkConfirm}" in
+      y|Y|[yY][eE][sS] ) generate_link ;;
+    esac
+  fi
 }
 
 rm_v2script() {
