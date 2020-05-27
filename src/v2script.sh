@@ -116,7 +116,7 @@ display_vmess_full() {
   #${sudoCmd} ${systemPackage} install coreutils jq -y
   local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
   local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-  local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
   local uri="$(printf "${json}" | base64)"
   write_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' "$(printf "\"vmess://${uri}\"" | tr -d '\n')"
 
@@ -228,18 +228,18 @@ set_proxy() {
 get_caddy() {
   if [ ! -f "/usr/local/bin/caddy" ]; then
     #${sudoCmd} ${systemPackage} install libcap2-bin -y -qq
-    
+
     curl -sL https://getcaddy.com | ${sudoCmd} bash -s personal
     # Give the caddy binary the ability to bind to privileged ports (e.g. 80, 443) as a non-root user
     #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
 
     # create user for caddy
-    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s /sbin/nologin -r -u 33 www-data
-  
+    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s $(which nologin) -r -u 33 www-data
+
     ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
     ${sudoCmd} mkdir -p /usr/local/etc/ssl/caddy && ${sudoCmd} chown -R root:www-data /usr/local/etc/ssl/caddy
     ${sudoCmd} chmod 0770 /usr/local/etc/ssl/caddy
-    
+
     wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/caddy.service -O /tmp/caddy.service
     ${sudoCmd} mv /tmp/caddy.service /etc/systemd/system/caddy.service
     ${sudoCmd} chown root:root /etc/systemd/system/caddy.service
@@ -305,7 +305,7 @@ WantedBy=multi-user.target
 EOF
     # add new user and overwrite v2ray.service
     # https://github.com/v2ray/v2ray-core/issues/1011
-    ${sudoCmd} useradd -d /etc/v2ray/ -M -s /sbin/nologin v2ray
+    ${sudoCmd} useradd -d /etc/v2ray/ -M -s $(which nologin) v2ray
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
     write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
@@ -488,7 +488,7 @@ EOF
   write_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare' "true"
 
   cfUrl="amp.cloudflare.com"
-  currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | base64 -d | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+  currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
   json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"${port}\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
   uri="$(printf "${json}" | base64)"
 
