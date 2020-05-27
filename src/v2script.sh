@@ -242,7 +242,7 @@ set_proxy() {
 }
 
 set_v2ray_wss() {
-  if [[ ! $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') != "true" ]]; then
     local uuid="$(cat '/proc/sys/kernel/random/uuid')"
     local wssPath="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
     local sni="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
@@ -506,16 +506,20 @@ install_mtproto() {
 
 set_v2ray_wss_prompt() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    echo "此选项会增加一个WS+TLS+CDN的连接入口做为备用连接方式"
-    echo "备用连接方式的速度、延迟可能不如TCP+TLS"
-    colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
-    colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
-    colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
-    read -p "确定设置CDN (yes/no)? " wssConfirm
-    case "${wssConfirm}" in
-      y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
-      * ) return 0 ;;
-    esac
+    if [[ ! $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
+      echo "此选项会增加一个WS+TLS+CDN的连接入口做为备用连接方式"
+      echo "备用连接方式的速度、延迟可能不如TCP+TLS"
+      colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
+      colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
+      colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
+      read -p "确定设置CDN (yes/no)? " wssConfirm
+      case "${wssConfirm}" in
+        y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
+        * ) return 0 ;;
+      esac
+    else
+      display_vmess
+    fi
   else
     colorEcho ${YELLOW} "请先安装TCP+TLS+WEB!"
     return 1
