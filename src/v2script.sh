@@ -302,6 +302,28 @@ set_v2ray_wss() {
   fi
 }
 
+set_v2ray_wss_prompt() {
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') != "true" ]]; then
+      echo "此选项会增加一个WS+TLS+CDN的连接入口做为备用连接方式"
+      echo "备用连接方式的速度、延迟可能不如TCP+TLS"
+      colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
+      colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
+      colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
+      read -p "确定设置CDN (yes/no)? " wssConfirm
+      case "${wssConfirm}" in
+        y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
+        * ) return 0 ;;
+      esac
+    else
+      display_vmess
+    fi
+  else
+    colorEcho ${YELLOW} "请先安装TCP+TLS+WEB!"
+    return 1
+  fi
+}
+
 get_caddy() {
   if [ ! -f "/usr/local/bin/caddy" ]; then
     #${sudoCmd} ${systemPackage} install libcap2-bin -y -qq
@@ -459,7 +481,7 @@ EOF
 
   read -p "设置CDN (yes/no)? " wssConfirm
   case "${wssConfirm}" in
-    y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
+    y|Y|[yY][eE][sS] ) set_v2ray_wss_prompt ;;
   esac
 
   read -p "生成订阅链接 (yes/no)? " linkConfirm
@@ -513,28 +535,6 @@ install_mtproto() {
   fi
 
   display_mtproto
-}
-
-set_v2ray_wss_prompt() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') != "true" ]]; then
-      echo "此选项会增加一个WS+TLS+CDN的连接入口做为备用连接方式"
-      echo "备用连接方式的速度、延迟可能不如TCP+TLS"
-      colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
-      colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
-      colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
-      read -p "确定设置CDN (yes/no)? " wssConfirm
-      case "${wssConfirm}" in
-        y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
-        * ) return 0 ;;
-      esac
-    else
-      display_vmess
-    fi
-  else
-    colorEcho ${YELLOW} "请先安装TCP+TLS+WEB!"
-    return 1
-  fi
 }
 
 check_status() {
