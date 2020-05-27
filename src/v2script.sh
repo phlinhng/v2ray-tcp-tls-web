@@ -92,7 +92,7 @@ continue_prompt() {
 }
 
 display_vmess() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.install') == "true" ]]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
     echo "$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]')" | tr -d '\n' && printf "\n"
     if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
       echo "$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[1]')" | tr -d '\n' && printf "\n"
