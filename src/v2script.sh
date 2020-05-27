@@ -92,12 +92,11 @@ continue_prompt() {
 }
 
 display_vmess() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.install') != "true" ]]; then
-    local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-    local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-    local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
-    echo "vmess://${uri}" | tr -d '\n' && printf "\n"
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.install') == "true" ]]; then
+    echo "$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]')" | tr -d '\n' && printf "\n"
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
+      echo "$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[1]')" | tr -d '\n' && printf "\n"
+    fi
   else
     colorEcho ${RED} "配置文件不存在"
     return 1
@@ -122,7 +121,7 @@ display_vmess_full() {
 
   echo "${V2_DOMAIN}:443"
   echo "${uuid} (aid: 0)" && echo ""
-  echo "vmess://${uri}" | tr -d '\n' && printf "\n"
+  display_vmess
 }
 
 generate_link() {
