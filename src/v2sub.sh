@@ -120,7 +120,7 @@ set_proxy() {
   fi
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
-    sed -i "s/FAKECDNPATH/$(read_json /etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path')/g" /tmp/config_new.yaml
+    sed -i "s/FAKECDNPATH/$(read_json /etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path' | tr -d '/')/g" /tmp/config_new.yaml
     sed -i "s/##CDN@//g" /tmp/config_new.yaml
   fi
 
