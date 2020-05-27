@@ -6,7 +6,11 @@
   },
   "sub": {
     "enabled": false,
-    "nodes": [],
+    "nodesList": {
+      "tcp": "",
+      "wss": "",
+      "trojan": ""
+    },
     "uri": "",
     "api": {
       "installed": false,
