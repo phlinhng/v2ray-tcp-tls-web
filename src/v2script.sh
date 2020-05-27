@@ -435,7 +435,7 @@ EOF
   # activate services
   colorEcho ${BLUE} "Activating services"
   ${sudoCmd} systemctl enable v2ray
-  ${sudoCmd} systemctl restart v2ray ## restart v2ray to enable new config
+  ${sudoCmd} systemctl restart v2ray 2>/dev/null ## restart v2ray to enable new config
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy ## restart tls-shunt-proxy to enable new config
   ${sudoCmd} systemctl enable caddy
