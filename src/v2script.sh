@@ -449,7 +449,6 @@ EOF
   read -p "设置CDN (yes/no)? " wssConfirm
   case "${wssConfirm}" in
     y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
-    * ) return 0 ;;
   esac
 
   read -p "生成订阅链接 (yes/no)? " linkConfirm
