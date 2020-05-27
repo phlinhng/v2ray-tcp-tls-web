@@ -8,7 +8,7 @@ vhosts:
     ##V2RAY@protocols: tls12,tls13
     ##V2RAY@http:
       ##CDN@paths:
-        ##CDN@- path: FAKECDNPATH/
+        ##CDN@- path: /FAKECDNPATH/
         ##CDN@  handler: proxyPass
         ##CDN@  args: 127.0.0.1:3566
       ##V2RAY@handler: fileServer
