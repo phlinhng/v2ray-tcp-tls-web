@@ -159,7 +159,7 @@ generate_link() {
   write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
   write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
 
-  printf %s "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+  printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]]; then
     local uuid="$(read_json /etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
