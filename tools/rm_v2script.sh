@@ -56,7 +56,7 @@ ${sudoCmd} ${systemPackage} install curl -y -qq
 # https://stackoverflow.com/questions/4642915/passing-parameters-to-bash-when-executing-a-script-fetched-by-curl
 curl -sSL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 ${sudoCmd} rm -rf /etc/v2ray
-${sudoCmd} rm -rf /etc/ssl/v2ray
+${sudoCmd} rm -rf /tmp/v2ray-ds
 ${sudoCmd} deluser v2ray
 ${sudoCmd} delgroup --only-if-empty v2ray
 ${sudoCmd} crontab -l | grep -v 'geoip.dat' | ${sudoCmd} crontab -
