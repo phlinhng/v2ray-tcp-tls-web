@@ -73,13 +73,14 @@ write_json() {
 show_menu() {
   echo ""
   echo "1) 安装TCP+TLS+WEB"
-  echo "2) 更新v2ray-core"
-  echo "3) 更新tls-shunt-proxy"
-  echo "4) 卸载TCP+TLS+WEB"
-  echo "5) 显示vmess链接"
-  echo "6) 管理订阅"
-  echo "7) 设置电报代理"
-  echo "8) VPS工具"
+  echo "2) 显示vmess链接"
+  echo "3) 管理订阅"
+  echo "4) 设置CDN"
+  echo "5) 设置电报代理"
+  echo "6) VPS工具"
+  echo "7) 更新v2ray-core"
+  echo "8) 更新tls-shunt-proxy"
+  echo "9) 卸载TCP+TLS+WEB"
 }
 
 continue_prompt() {
@@ -91,12 +92,11 @@ continue_prompt() {
 }
 
 display_vmess() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.install') != "true" ]]; then
-    local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-    local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-    local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-    local uri="$(printf "${json}" | base64)"
-    echo "vmess://${uri}" | tr -d '\n' && printf "\n"
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+    echo "$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp')" | tr -d '\n' && printf "\n"
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
+      echo "$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss')" | tr -d '\n' && printf "\n"
+    fi
   else
     colorEcho ${RED} "配置文件不存在"
     return 1
@@ -115,13 +115,13 @@ display_vmess_full() {
   #${sudoCmd} ${systemPackage} install coreutils jq -y
   local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
   local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-  local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri="$(printf "${json}" | base64)"
-  write_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' "$(printf "\"vmess://${uri}\"" | tr -d '\n')"
+  local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
+  write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
 
   echo "${V2_DOMAIN}:443"
   echo "${uuid} (aid: 0)" && echo ""
-  echo "vmess://${uri}" | tr -d '\n' && printf "\n"
+  display_vmess
 }
 
 generate_link() {
@@ -148,17 +148,29 @@ generate_link() {
   read -p "输入节点名称[留空则使用默认值]: " remark
 
   if [ -z "${remark}" ]; then
-    remark="${V2_DOMAIN}:443"
+    remark="${V2_DOMAIN}"
   fi
 
   local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri="$(printf "${json}" | base64)"
-  local sub="$(printf "vmess://${uri}" | tr -d '\n' | base64)"
+  local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
+  local sub="$(printf %s "vmess://${uri}" | base64 | tr -d '\n')"
 
-  local randomName="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
+  local randomName="$(uuidgen | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
+  write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
 
-  printf "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/${randomName} >/dev/null
+  printf %s "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]]; then
+    local cfUrl="amp.cloudflare.com"
+    local currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+    local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"${port}\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
+    write_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
+    local sub="$(printf "\nvmess://${uri}" | base64 | tr -d '\n')"
+    printf %s "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+  fi
+
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
 }
 
@@ -211,6 +223,11 @@ set_proxy() {
     sed -i "s/##V2RAY@//g" /tmp/config_new.yaml
   fi
 
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
+    sed -i "s/FAKECDNPATH/$(read_json /etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path')/g" /tmp/config_new.yaml
+    sed -i "s/##CDN@//g" /tmp/config_new.yaml
+  fi
+
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.installed') == "true" ]]; then
     sed -i "s/FAKEAPIDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader')/g" /tmp/config_new.yaml
     sed -i "s/##SUBAPI@//g" /tmp/config_new.yaml
@@ -224,21 +241,79 @@ set_proxy() {
   ${sudoCmd} /bin/cp -f /tmp/config_new.yaml /etc/tls-shunt-proxy/config.yaml
 }
 
+set_v2ray_wss() {
+  if [[ ! $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
+    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    local wssPath="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+    local sni="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+    local wssInbound="{\"protocol\": \"vmess\",
+  \"port\": 3566,
+  \"settings\": {
+    \"clients\": [{
+      \"id\": \"${uuid}\",
+      \"alterId\": 0
+      }]
+    },
+  \"streamSettings\": {
+      \"network\": \"ws\",
+      \"wsSettings\": {
+        \"path\": \"/${wssPath}\"
+      }
+    },
+    \"sniffing\": {
+      \"enabled\": true,
+      \"destOverride\": [ \"http\", \"tls\" ]
+    }
+  }"
+
+    # setting v2ray
+    ${sudoCmd} /bin/cp /etc/v2ray/config.json /etc/v2ray/config.json.bak 2>/dev/null
+    jq -r ".inbounds += [${wssInbound}]" /etc/v2ray/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /etc/v2ray/config.json
+    write_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare' "true"
+
+    set_proxy
+
+    ${sudoCmd} systemctl restart v2ray 2>/dev/null
+    ${sudoCmd} systemctl restart tls-shunt-proxy 2>/dev/null
+    ${sudoCmd} systemctl daemon-reload
+
+    colorEcho ${GREEN} "设置CDN成功!"
+
+    local cfUrl="amp.cloudflare.com"
+    local currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+    local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
+
+    # updating subscription
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
+      write_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
+      local sub="$(printf "\nvmess://${uri}" | base64 | tr -d '\n')"
+      printf %s "${sub}" | tr -d '\n' | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+    fi
+
+    echo "${cfUrl}:443"
+    echo "${uuid} (aid: 0)"
+    echo "Header: ${sni}, Path: /${wssPath}" && echo ""
+    echo "vmess://${uri}" | tr -d '\n' && printf "\n"
+  else
+    display_vmess
+  fi
+}
+
 get_caddy() {
   if [ ! -f "/usr/local/bin/caddy" ]; then
     #${sudoCmd} ${systemPackage} install libcap2-bin -y -qq
-    
+
     curl -sL https://getcaddy.com | ${sudoCmd} bash -s personal
     # Give the caddy binary the ability to bind to privileged ports (e.g. 80, 443) as a non-root user
     #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
 
     # create user for caddy
     ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s $(which nologin) -r -u 33 www-data
-  
     ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
     ${sudoCmd} mkdir -p /usr/local/etc/ssl/caddy && ${sudoCmd} chown -R root:www-data /usr/local/etc/ssl/caddy
     ${sudoCmd} chmod 0770 /usr/local/etc/ssl/caddy
-    
+
     wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/caddy.service -O /tmp/caddy.service
     ${sudoCmd} mv /tmp/caddy.service /etc/systemd/system/caddy.service
     ${sudoCmd} chown root:root /etc/systemd/system/caddy.service
@@ -333,6 +408,10 @@ EOF
     sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" ./config/v2ray.json
     sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" ./config/v2ray.json
     ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
+
+    # set crontab to auto update geoip.dat and geosite.dat
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
   fi
 
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
@@ -366,6 +445,12 @@ EOF
 
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
   display_vmess_full
+
+  read -p "设置CDN (yes/no)? " wssConfirm
+  case "${wssConfirm}" in
+    y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
+    * ) return 0 ;;
+  esac
 
   read -p "生成订阅链接 (yes/no)? " linkConfirm
   case "${linkConfirm}" in
@@ -404,8 +489,8 @@ install_mtproto() {
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.installed" "true"
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.fakeTlsHeader" "\"${FAKE_TLS_HEADER}\""
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.secret" "\"${secret}\""
-    set_proxy
 
+    set_proxy
     set_docker
 
     # activate service
@@ -420,10 +505,32 @@ install_mtproto() {
   display_mtproto
 }
 
+set_v2ray_wss_prompt() {
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+    echo "此选项会增加一个WS+TLS+CDN的连接入口做为备用连接方式"
+    echo "备用连接方式的速度、延迟可能不如TCP+TLS"
+    colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
+    colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
+    colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
+    read -p "确定设置CDN (yes/no)? " wssConfirm
+    case "${wssConfirm}" in
+      y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
+      * ) return 0 ;;
+    esac
+  else
+    colorEcho ${YELLOW} "请先安装TCP+TLS+WEB!"
+    return 1
+  fi
+}
+
 check_status() {
   printf "脚本状态: "
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    colorEcho ${GREEN} "己安装"
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.clouflare') == "true" ]]; then
+      colorEcho ${GREEN} "TCP+TLS, WSS+CDN"
+    else
+      colorEcho ${GREEN} "TCP+TLS"
+    fi
   else
     colorEcho ${YELLOW} "未安装"
   fi
@@ -456,7 +563,7 @@ check_status() {
 
 vps_tools() {
   ${sudoCmd} ${systemPackage} install wget -y -qq
-  wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh -O /tmp/vps_tools.sh && chmod +x /tmp/vps_tools.sh && ${sudoCmd} /tmp/vps_tools.sh
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh -O /tmp/vps_tools.sh && chmod +x /tmp/vps_tools.sh && ${sudoCmd} /tmp/vps_tools.sh
   exit 0
 }
 
@@ -469,18 +576,19 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=woof
-  options=("安装TCP+TLS+WEB" "更新v2ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置电报代理" "VPS工具")
+  options=("安装TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置CDN" "设置电报代理" "VPS工具" "更新v2ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB")
   select opt in "${options[@]}"
   do
     case "${opt}" in
       "安装TCP+TLS+WEB") install_v2ray && continue_prompt ;;
+      "显示vmess链接") display_vmess && continue_prompt ;;
+      "管理订阅") v2sub && exit 0 ;;
+      "设置CDN") set_v2ray_wss_prompt && continue_prompt ;;
+      "设置电报代理") install_mtproto && continue_prompt ;;
+      "VPS工具") vps_tools ;;
       "更新v2ray-core") get_v2ray && continue_prompt ;;
       "更新tls-shunt-proxy") get_proxy && continue_prompt ;;
       "卸载TCP+TLS+WEB") rm_v2script ;;
-      "显示vmess链接") display_vmess && continue_prompt ;;
-      "管理订阅") v2sub && exit 0 ;;
-      "设置电报代理") install_mtproto && continue_prompt;;
-      "VPS工具") vps_tools ;;
       *) break ;;
     esac
   done

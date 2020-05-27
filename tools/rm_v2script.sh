@@ -56,6 +56,7 @@ ${sudoCmd} ${systemPackage} install curl -y -qq
 # https://stackoverflow.com/questions/4642915/passing-parameters-to-bash-when-executing-a-script-fetched-by-curl
 curl -sSL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 ${sudoCmd} rm -rf /etc/v2ray
+${sudoCmd} rm -rf /etc/ssl/v2ray
 ${sudoCmd} deluser v2ray
 ${sudoCmd} delgroup --only-if-empty v2ray
 ${sudoCmd} crontab -l | grep -v 'geoip.dat' | ${sudoCmd} crontab -
@@ -77,6 +78,23 @@ colorEcho ${BLUE} "Removing tls-shunt-proxy user & group."
 ${sudoCmd} deluser tls-shunt-proxy
 ${sudoCmd} delgroup --only-if-empty tls-shunt-proxy
 colorEcho ${GREEN} "Removed tls-shunt-proxy successfully."
+
+# remove tls-shunt-server
+colorEcho ${BLUE} "Shutting down caddy service."
+${sudoCmd} systemctl stop caddy
+${sudoCmd} systemctl disable caddy
+${sudoCmd} rm -f /etc/systemd/system/caddy.service
+${sudoCmd} rm -f /etc/systemd/system/caddy.service # and symlinks that might be related
+${sudoCmd} systemctl daemon-reload
+${sudoCmd} systemctl reset-failed
+colorEcho ${BLUE} "Removing caddy files."
+${sudoCmd} rm -rf /usr/local/bin/caddy
+${sudoCmd} rm -rf /usr/local/etc/caddy
+${sudoCmd} rm -rf /usr/local/etc/ssl/caddy
+colorEcho ${BLUE} "Removing caddy user & group."
+${sudoCmd} deluser www-data
+${sudoCmd} delgroup --only-if-empty www-data
+colorEcho ${GREEN} "Removed caddy successfully."
 
 # docker
 # this will stop docker.service and remove every conatainer, image...etc created by docker but not docker itself

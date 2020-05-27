@@ -1,11 +1,16 @@
 {
   "v2ray": {
     "installed": false,
-    "tlsHeader": ""
+    "tlsHeader": "",
+    "cloudflare": false
   },
   "sub": {
     "enabled": false,
-    "nodes": [],
+    "nodesList": {
+      "tcp": "",
+      "wss": "",
+      "trojan": ""
+    },
     "uri": "",
     "api": {
       "installed": false,
