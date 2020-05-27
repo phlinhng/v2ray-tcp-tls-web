@@ -15,9 +15,6 @@ v2script
 2. TCP+TLS has lower delay by saving 1-RTT from ws handshaking
 3. TCP+TLS is not compatible with cloudflare free CDN plan as WSS does.
 
-## Note
-`tls-shunt-proxy` can proxify websocket traffic but it is not compatible with CDN (and may not add support to this feature in forseeable future) so there is no benefit to use `tls-shunt-proxy` with ws. Please check [@phlinhng/v2ray-caddy-cf](https://github.com/phlinhng/v2ray-caddy-cf) instead if you prefer to set v2Ray in WS+TLS+WEB mode.
-
 # Related work
 + [@phlinhng/v2ray-caddy-cf](https://github.com/phlinhng/v2ray-caddy-cf): automated script for v2Ray (WS+TLS+Web)
 + [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor): subscription manager
