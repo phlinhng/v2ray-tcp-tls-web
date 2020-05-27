@@ -309,6 +309,10 @@ EOF
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
     write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
     ${sudoCmd} timedatectl set-ntp true
+
+    # set crontab to auto update geoip.dat and geosite.dat
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
   fi
 
   # install tls-shunt-proxy
@@ -345,14 +349,6 @@ EOF
   ${sudoCmd} mkdir -p /var/www/html
   ${sudoCmd} unzip -q ${template} -d /var/www/html
   ${sudoCmd} /bin/cp -f ./custom/robots.txt /var/www/html/robots.txt
-
-  # set crontab to auto update geoip.dat and geosite.dat
-  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
-  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
-
-  # stop nginx service for user who had used the old version of script
-  #${sudoCmd} systemctl stop nginx 2>/dev/null
-  #${sudoCmd} systemctl disable nginx 2>/dev/null
 
   # kill process occupying port 80
   ${sudoCmd} kill -9 $(lsof -t -i:80) 2>/dev/null
