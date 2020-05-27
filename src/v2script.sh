@@ -255,23 +255,10 @@ install_v2ray() {
   read -p "解析到本VPS的域名: " V2_DOMAIN
   write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
 
-  # install requirements
-  # coreutils: for base64 command
-  # jq: json toolkits
-  # unzip: to decompress web templates
-  ${sudoCmd} ${systemPackage} update -qq
-  ${sudoCmd} ${systemPackage} install curl coreutils wget jq unzip -y -qq
-
   cd $(mktemp -d)
   wget -q https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
   unzip -q ${branch}.zip && rm -f ${branch}.zip ## will unzip the source to current path and remove the archive file
   cd v2ray-tcp-tls-web-${branch}
-
-  if [ ! -d "/usr/local/etc/v2script" ]; then
-    mkdir -p /usr/local/etc/v2script ## folder for scripts configuration
-  elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
-    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
-  fi
 
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
@@ -407,17 +394,9 @@ display_mtproto() {
 
 install_mtproto() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') != "true" ]]; then
-    ${sudoCmd} ${systemPackage} update -qq
-    ${sudoCmd} ${systemPackage} install curl -y -qq
-
-    if [ ! -d "/usr/local/etc/v2script" ]; then
-      ${sudoCmd} mkdir -p /usr/local/etc/v2script ## folder for scripts configuration
-    elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
-      wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2scirpt.json -O /usr/local/etc/v2script/config.json
-    fi
-
     get_proxy
     get_docker
+
     # pre-run this to pull image
     ${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c "www.fast.com" >/dev/null
 
