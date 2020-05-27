@@ -290,7 +290,7 @@ install_api() {
     set_docker
     set_proxy
 
-    ${sudoCmd} systemctl start tls-shunt-proxy
+    ${sudoCmd} systemctl restart tls-shunt-proxy
     ${sudoCmd} systemctl daemon-reload
 
     colorEcho ${GREEN} "subscription manager api has been set up."
