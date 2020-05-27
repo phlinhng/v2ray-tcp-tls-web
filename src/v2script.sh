@@ -118,6 +118,7 @@ display_vmess_full() {
   local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
   local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
   local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
+  write_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
 
   echo "${V2_DOMAIN}:443"
   echo "${uuid} (aid: 0)" && echo ""
@@ -157,7 +158,7 @@ generate_link() {
 
   local randomName="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
   write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
-  write_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' "$(printf "\"vmess://${uri}\"" | tr -d '\n')"
+  write_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' "$(printf %s "\"vmess://${uri}\"" | tr -d '\n')"
 
   printf %s "${sub}" | tr -d '\n' | ${sudoCmd} tee /var/www/html/${randomName} >/dev/null
   echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
