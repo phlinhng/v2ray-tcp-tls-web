@@ -161,7 +161,6 @@ generate_link() {
   fi
 
   local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-
   local uri="$(printf %s "${json}" | base64 | tr -d '\n')"
   local sub="$(printf %s "vmess://${uri}" | base64 | tr -d '\n')"
 
