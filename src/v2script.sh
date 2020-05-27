@@ -422,12 +422,13 @@ install_mtproto() {
 }
 
 set_v2ray_wss() {
-  local ports=(2053 2083 2087 2096 8443)
-  local port="${ports[RANDOM%5]}"
-  local uuid="$(cat '/proc/sys/kernel/random/uuid')"
-  local wssPath="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  local sni="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
-  local wssInbound="{\"protocol\": \"vmess\",
+  if [[ ! $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
+    local ports=(2053 2083 2087 2096 8443)
+    local port="${ports[RANDOM%5]}"
+    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    local wssPath="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+    local sni="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+    local wssInbound="{\"protocol\": \"vmess\",
   \"port\": ${port},
   \"settings\": {
     \"clients\": [{
@@ -455,12 +456,12 @@ set_v2ray_wss() {
     }
   }"
 
-  ${sudoCmd} mkdir -p /etc/ssl/v2ray
-  ${sudoCmd} chown -R root:v2ray /etc/ssl/v2ray
+    ${sudoCmd} mkdir -p /etc/ssl/v2ray
+    ${sudoCmd} chown -R root:v2ray /etc/ssl/v2ray
 
-  # not elegant way to resolve certificate permissons problem
-  local cert_sync=$(mktemp)
-  cat > ${cert_sync} <<-EOF
+    # not elegant way to resolve certificate permissons problem
+    local cert_sync=$(mktemp)
+    cat > ${cert_sync} <<-EOF
 #!/bin/bash
 site="${sni}"
 path="/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/\${site}"
@@ -476,38 +477,41 @@ fi
 exit 0
 EOF
 
-  ${sudoCmd} mv ${cert_sync} /usr/local/etc/v2script/cert_sync.sh && ${sudoCmd} chmod +x /usr/local/etc/v2script/cert_sync.sh && /usr/local/etc/v2script/cert_sync.sh
-  if [[ ! $(crontab -l | grep "cert_sync") ]]; then
-    (crontab -l 2>/dev/null; echo "0 8 * * * /usr/local/etc/v2script/cert_sync.sh >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    ${sudoCmd} mv ${cert_sync} /usr/local/etc/v2script/cert_sync.sh && ${sudoCmd} chmod +x /usr/local/etc/v2script/cert_sync.sh && /usr/local/etc/v2script/cert_sync.sh
+    if [[ ! $(crontab -l | grep "cert_sync") ]]; then
+      (crontab -l 2>/dev/null; echo "0 8 * * * /usr/local/etc/v2script/cert_sync.sh >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    fi
+
+    # setting v2ray
+    ${sudoCmd} /bin/cp /etc/v2ray/config.json /etc/v2ray/config.json.bak 2>/dev/null
+    jq -r ".inbounds += [${wssInbound}]" /etc/v2ray/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /etc/v2ray/config.json
+
+    ${sudoCmd} systemctl restart v2ray
+    ${sudoCmd} systemctl daemon-reload
+
+    write_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare' "true"
+
+    colorEcho ${GREEN} "开启备用CDN成功!"
+
+    local cfUrl="amp.cloudflare.com"
+    local currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+    local json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"${port}\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local uri="$(printf "${json}" | base64)"
+
+    # updating subscription
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
+      local sub="$(printf "vmess://${uri}" | base64)"
+      jq -r ".sub.nodes += [${sub}]" /usr/local/etc/v2script/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2script/config.json
+      echo "${sub}" | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+    fi
+
+    echo "${cfUrl}:${port}"
+    echo "${uuid} (aid: 0)"
+    echo "Header: ${sni}, Path: /${wssPath}" && echo ""
+    echo "vmess://${uri}" | tr -d '\n' && printf "\n"
+  else
+    echo "should display vmess"
   fi
-
-  # setting v2ray
-  ${sudoCmd} /bin/cp /etc/v2ray/config.json /etc/v2ray/config.json.bak 2>/dev/null
-  jq -r ".inbounds += [${wssInbound}]" /etc/v2ray/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /etc/v2ray/config.json
-
-  ${sudoCmd} systemctl restart v2ray
-  ${sudoCmd} systemctl daemon-reload
-
-  write_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare' "true"
-
-  cfUrl="amp.cloudflare.com"
-  currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodes[0]' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
-  json="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"${port}\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  uri="$(printf "${json}" | base64)"
-
-  # updating subscription
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
-    local sub="$(printf "vmess://${uri}" | base64)"
-    jq -r ".sub.nodes += [${sub}]" /usr/local/etc/v2script/config.json  > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2script/config.json
-    echo "${sub}" | ${sudoCmd} tee -a /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
-  fi
-
-  colorEcho ${GREEN} "开启备用CDN成功!"
-
-  echo "${cfUrl}:${port}"
-  echo "${uuid} (aid: 0)"
-  echo "Header: ${sni}, Path: /${wssPath}" && echo ""
-  echo "vmess://${uri}" | tr -d '\n' && printf "\n"
 }
 
 set_v2ray_wss_prompt() {
