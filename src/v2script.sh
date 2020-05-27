@@ -506,7 +506,7 @@ install_mtproto() {
 
 set_v2ray_wss_prompt() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    if [[ ! $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') != "true" ]]; then
       echo "此选项会增加一个WS+TLS+CDN的连接入口做为备用连接方式"
       echo "备用连接方式的速度、延迟可能不如TCP+TLS"
       colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
