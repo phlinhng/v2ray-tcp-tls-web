@@ -210,6 +210,11 @@ set_proxy() {
     sed -i "s/##CDN@//g" /tmp/config_new.yaml
   fi
 
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
+    sed -i "s/FAKETJDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader')/g" /tmp/config_new.yaml
+    sed -i "s/##TROJAN@//g" /tmp/config_new.yaml
+  fi
+
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.installed') == "true" ]]; then
     sed -i "s/FAKEAPIDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader')/g" /tmp/config_new.yaml
     sed -i "s/##SUBAPI@//g" /tmp/config_new.yaml
@@ -224,20 +229,34 @@ set_proxy() {
 }
 
 get_trojan() {
-  colorEcho ${BLUE} "Getting the latest version of trojan-go"
-  local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
-  echo "latest_version"
-  local trojan-go_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
+  if [ ! -f "/usr/bin/trojan-go" ]; then
+    colorEcho ${BLUE} "trojan-go is not installed. start installation"
 
-  cd $(mktemp -d)
-  wget ${trojan-go_link} -O trojan-go.zip
-  unzip trojan-go.zip && rm -rf trojan-go.zip
-  ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+    colorEcho ${BLUE} "Getting the latest version of trojan-go"
+    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    echo "latest_version"
+    local trojan-go_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
 
-  if [ ! -f "/etc/systemd/system/trojan-go.service" ]; then
+    cd $(mktemp -d)
+    wget ${trojan-go_link} -O trojan-go.zip
+    unzip trojan-go.zip && rm -rf trojan-go.zip
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+
     colorEcho ${BLUE} "Building trojan-go.service"
     ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
+
+    colorEcho ${GREEN} "trojan-go is installed."
+  else
+    colorEcho ${BLUE} "Getting the latest version of trojan-go"
+    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    echo "latest_version"
+    local trojan-go_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
+    cd $(mktemp -d)
+    wget ${trojan-go_link} -O trojan-go.zip
+    unzip trojan-go.zip
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
   fi
+  
 }
 
 set_v2ray_wss() {
@@ -363,6 +382,34 @@ get_caddy() {
   fi
 }
 
+set_caddy() {
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/Caddyfile -O /tmp/Caddyfile
+
+  sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader')/g" /tmp/Caddyfile
+
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
+    echo "" >> /tmp/Caddyfile
+    cat >> /tmp/Caddyfile <<-EOF
+$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'):80 {
+    redir https://$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'){uri}
+}
+EOF
+  fi
+
+  ${sudoCmd} /bin/cp -f /tmp/Caddyfile /usr/local/etc/caddy
+}
+
+build_web() {
+  if [ ! -f "/var/www/html/index.html"]; then
+    # choose and copy a random  template for dummy web pages
+    local template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
+    wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template} -O /tmp/template.zip
+    ${sudoCmd} mkdir -p /var/www/html
+    ${sudoCmd} unzip -q /tmp/template.zip -d /var/www/html
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/robots.txt -O /var/www/html/robots.txt
+  fi
+}
+
 get_v2ray() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
   curl -sL https://install.direct/go.sh | ${sudoCmd} bash
@@ -371,11 +418,6 @@ get_v2ray() {
 install_v2ray() {
   read -p "解析到本VPS的域名: " V2_DOMAIN
   write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
-
-  cd $(mktemp -d)
-  wget -q https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
-  unzip -q ${branch}.zip && rm -f ${branch}.zip ## will unzip the source to current path and remove the archive file
-  cd v2ray-tcp-tls-web-${branch}
 
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
@@ -447,29 +489,20 @@ EOF
   # create config files
   if [[ $(read_json /etc/v2ray/config.json '.inbounds[0].streamSettings.network') != "domainsocket" ]]; then
     colorEcho ${BLUE} "Setting v2Ray"
-    sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" ./config/v2ray.json
-    sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" ./config/v2ray.json
-    ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
-
-    # set crontab to auto update geoip.dat and geosite.dat
-    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
-    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2ray.json -O /tmp/v2ray.json
+    sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" /tmp/v2ray.json
+    sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" /tmp/v2ray.json
+    ${sudoCmd} /bin/cp -f /tmp/v2ray.json /etc/v2ray/config.json
   fi
 
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
   set_proxy
 
   colorEcho ${BLUE} "Setting caddy"
-  sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/Caddyfile
-  ${sudoCmd} /bin/cp -f ./config/Caddyfile /usr/local/etc/caddy
+  set_caddy
 
-  # choose and copy a random  template for dummy web pages
   colorEcho ${BLUE} "Building dummy web site"
-  local template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
-  wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template}
-  ${sudoCmd} mkdir -p /var/www/html
-  ${sudoCmd} unzip -q ${template} -d /var/www/html
-  ${sudoCmd} /bin/cp -f ./custom/robots.txt /var/www/html/robots.txt
+  build_web
 
   # kill process occupying port 80
   ${sudoCmd} kill -9 $(lsof -t -i:80) 2>/dev/null
@@ -510,6 +543,18 @@ EOF
       y|Y|[yY][eE][sS] ) generate_link ;;
     esac
   fi
+}
+
+install_trojan() {
+  read -p "解析到本VPS的域名: " TJ_DOMAIN
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "${TJ_DOMAIN}" ]] || [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader') == "${TJ_DOMAIN}" ]]; then
+      colorEcho ${RED} "域名 ${TJ_DOMAIN} 与现有域名重复,  请使用别的域名"
+      show_menu
+      return 1
+    fi
+  fi
+  write_json /usr/local/etc/v2script/config.json ".trojan.tlsHeader" "\"${TJ_DOMAIN}\""
 }
 
 rm_v2script() {
