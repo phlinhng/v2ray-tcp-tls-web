@@ -2,8 +2,8 @@
   "run_type": "server",
   "local_addr": "127.0.0.1",
   "local_port": 3567,
-  "remote_addr": "127.0.0.1",
-  "remote_port": 443,
+  "remote_addr": "1.1.1.1",
+  "remote_port": 80,
   "log_level": 5,
   "password": [
     "FAKETROJANPWD"
