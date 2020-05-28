@@ -32,7 +32,7 @@ vhosts:
       ##MTPROTO@handler: proxyPass
       ##MTPROTO@args: 127.0.0.1:3128
 
-  ##TROJAN@- name: FAKETROJANDOMAIN
+  ##TROJAN@- name: FAKETJDOMAIN
     ##TROJAN@tlsoffloading: true
     ##TROJAN@managedcert: true
     ##TROJAN@alpn: h2,http/1.1

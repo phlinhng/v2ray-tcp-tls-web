@@ -124,6 +124,11 @@ set_proxy() {
     sed -i "s/##CDN@//g" /tmp/config_new.yaml
   fi
 
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
+    sed -i "s/FAKETJDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader')/g" /tmp/config_new.yaml
+    sed -i "s/##TROJAN@//g" /tmp/config_new.yaml
+  fi
+
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.installed') == "true" ]]; then
     sed -i "s/FAKEAPIDOMAIN/$(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader')/g" /tmp/config_new.yaml
     sed -i "s/##SUBAPI@//g" /tmp/config_new.yaml

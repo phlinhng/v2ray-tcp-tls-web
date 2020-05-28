@@ -223,6 +223,23 @@ set_proxy() {
   ${sudoCmd} /bin/cp -f /tmp/config_new.yaml /etc/tls-shunt-proxy/config.yaml
 }
 
+get_trojan() {
+  colorEcho ${BLUE} "Getting the latest version of trojan-go"
+  local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+  echo "latest_version"
+  local trojan-go_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
+
+  cd $(mktemp -d)
+  wget ${trojan-go_link} -O trojan-go.zip
+  unzip trojan-go.zip && rm -rf trojan-go.zip
+  ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+
+  if [ ! -f "/etc/systemd/system/trojan-go.service" ]; then
+    colorEcho ${BLUE} "Building trojan-go.service"
+    ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
+  fi
+}
+
 set_v2ray_wss() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') != "true" ]]; then
     local uuid_wss="$(cat '/proc/sys/kernel/random/uuid')"
@@ -329,7 +346,7 @@ get_caddy() {
   if [ ! -f "/usr/local/bin/caddy" ]; then
     #${sudoCmd} ${systemPackage} install libcap2-bin -y -qq
 
-    curl -sL https://getcaddy.com | ${sudoCmd} bash -s personal
+    curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/getcaddy.sh | ${sudoCmd} bash -s personal
     # Give the caddy binary the ability to bind to privileged ports (e.g. 80, 443) as a non-root user
     #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
 
