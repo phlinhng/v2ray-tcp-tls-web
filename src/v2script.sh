@@ -555,6 +555,45 @@ install_trojan() {
     fi
   fi
   write_json /usr/local/etc/v2script/config.json ".trojan.tlsHeader" "\"${TJ_DOMAIN}\""
+
+  get_trojan
+
+  # create config files
+  if [ ! -f "/etc/trojan-go/config.json" ]; then
+    colorEcho ${BLUE} "Setting trojan-go"
+    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/trojan-go.json -O /tmp/trojan-go.json
+    sed -i "s/FAKETROJANPWD/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)/g" /tmp/trojan-go.json
+    ${sudoCmd} /bin/cp -f /tmp/trojan-go.json /etc/trojan-go/config.json
+  fi
+
+  colorEcho ${BLUE} "Setting tls-shunt-proxy"
+  set_proxy
+
+  colorEcho ${BLUE} "Setting caddy"
+  set_caddy
+
+  colorEcho ${BLUE} "Building dummy web site"
+  build_web
+
+  # activate services
+  colorEcho ${BLUE} "Activating services"
+  ${sudoCmd} systemctl enable trojan-go
+  ${sudoCmd} systemctl restart trojan-go 2>/dev/null ## restart trojan-go  to enable new config
+  ${sudoCmd} systemctl enable tls-shunt-proxy
+  ${sudoCmd} systemctl restart tls-shunt-proxy ## restart tls-shunt-proxy to enable new config
+  ${sudoCmd} systemctl enable caddy
+  ${sudoCmd} systemctl restart caddy
+  ${sudoCmd} systemctl daemon-reload
+  ${sudoCmd} systemctl reset-failed
+
+  colorEcho ${GREEN} "安装trojan-go成功!"
+
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') != "true" ]]; then
+    read -p "生成订阅链接 (yes/no)? " linkConfirm
+    case "${linkConfirm}" in
+      y|Y|[yY][eE][sS] ) generate_link ;;
+    esac
+  fi
 }
 
 rm_v2script() {
