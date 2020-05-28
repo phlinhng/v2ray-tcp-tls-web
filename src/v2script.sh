@@ -152,7 +152,8 @@ generate_link() {
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
 
-  echo "https://${V2_DOMAIN}/${randomName}" | tr -d '\n' && printf "\n"
+  printf '%s\n' "https://${V2_DOMAIN}/${randomName}"
+  printf '%s\n' "二维码: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=sub://$(printf %s 'https://${V2_DOMAIN}/${randomName}' | base64 --wrap=0)"
 }
 
 get_docker() {
