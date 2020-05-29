@@ -610,6 +610,7 @@ get_trojan() {
     local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
 
     ${sudoCmd} mkdir -p "/usr/bin/trojan-go"
+    ${sudoCmd} mkdir -p "/etc/trojan-go"
 
     cd $(mktemp -d)
     wget "${trojango_link}" -O trojan-go.zip
@@ -629,9 +630,9 @@ get_trojan() {
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
     local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
     echo "latest_version"
-    local trojan-go_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
+    local trojango_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
     cd $(mktemp -d)
-    wget ${trojan-go_link} -O trojan-go.zip
+    wget ${trojango_link} -O trojan-go.zip
     unzip trojan-go.zip
     ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
   fi
