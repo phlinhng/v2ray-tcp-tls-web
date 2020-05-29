@@ -208,8 +208,6 @@ sync_nodes() {
     local sub="$(printf '%s' "trojan://{uri_torjan}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
-
-  display_link_main
 }
 
 generate_link() {
@@ -243,7 +241,7 @@ generate_link() {
     v2_remark="null"
   fi
 
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
     read -p "输入 Trojan 节点名称 [留空则使用默认值]: " tj_remark
     if [ -z "${tj_remark}" ]; then
       tj_remark="${TJ_DOMAIN}"
@@ -254,6 +252,7 @@ generate_link() {
 
   sync_nodes "${v2_remark}" "${tj_remark}"
   colorEcho ${GREEN} "己生成订阅"
+  display_link_main
 }
 
 update_link() {
@@ -276,7 +275,7 @@ update_link() {
       v2_remark="null"
     fi
 
-    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
       local tj_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' | urlDecode)"
       read -p "输入 Trojan 节点名称[留空则使用默认值]: " tj_remark
       if [ -z "${tj_remark}" ]; then
@@ -287,8 +286,8 @@ update_link() {
     fi
 
     sync_nodes "${v2_remark}" "${tj_remark}"
-
     colorEcho ${GREEN} "己更新订阅"
+    display_link_main
   else
     generate_link
   fi

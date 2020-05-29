@@ -69,6 +69,14 @@ write_json() {
   jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key = value]
 
+urlEncode() {
+  printf %s "$1" | jq -s -R -r @uri
+}
+
+urlDecode() {
+  printf "${_//%/\\x}"
+}
+
 # a trick to redisplay menu option
 show_menu() {
   echo ""
@@ -201,7 +209,7 @@ generate_link() {
     v2_remark="null"
   fi
 
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
     read -rp "输入 Trojan 节点名称 [留空则使用默认值]: " tj_remark
     if [ -z "${tj_remark}" ]; then
       tj_remark="${TJ_DOMAIN}"
@@ -212,36 +220,7 @@ generate_link() {
 
   sync_nodes "${v2_remark}" "${tj_remark}"
   colorEcho ${GREEN} "己生成订阅"
-}
-
-update_link() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
-    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-      local v2_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
-      read -rp "输入 V2Ray 节点名称 [留空则使用现有值 ${v2_currentRemark}]: " v2_remark
-      if [ -z "${v2_remark}" ]; then
-        v2_remark="${v2_currentRemark}"
-      fi
-    else
-      v2_remark="null"
-    fi
-
-    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-      local tj_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' | urlDecode)"
-      read -rp "输入 Trojan 节点名称[留空则使用默认值]: " tj_remark
-      if [ -z "${tj_remark}" ]; then
-        tj_remark="${tj_currentRemark}"
-      fi
-    else
-      tj_remark="null"
-    fi
-
-    sync_nodes "${v2_remark}" "${tj_remark}"
-
-    colorEcho ${GREEN} "己更新订阅"
-  else
-    generate_link
-  fi
+  display_link_main
 }
 
 subscription_prompt() {
@@ -252,7 +231,19 @@ subscription_prompt() {
       * ) return 0 ;;
     esac
   else
-    update_link
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
+      local v2_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
+    else
+      local v2_currentRemark="null"
+    fi
+
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
+      local tj_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' | urlDecode)"
+    else
+      local tj_currentRemark="null"
+    fi
+
+    sync_nodes "${v2_currentRemark}" "${tj_currentRemark}"
   fi
 }
 
@@ -378,7 +369,7 @@ $(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'):80 {
 EOF
   fi
 
-  ${sudoCmd} /bin/cp -f ${caddyserver_file} /usr/local/etc/caddy
+  ${sudoCmd} /bin/cp -f ${caddyserver_file} /usr/local/etc/caddy/Caddyfile
 }
 
 build_web() {
@@ -687,6 +678,13 @@ install_trojan() {
   ${sudoCmd} systemctl reset-failed
 
   colorEcho ${GREEN} "安装 trojan-go 成功!"
+
+  local uuid_torjan="$(read_json /etc/trojan-go/config.json '.password[0]')"
+  local uri_torjan="${TJ_DOMAIN}@:443?peer=#$(urlEncode '${TJ_DOMAIN}')"
+  write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://{uri_torjan}\"")"
+
+  echo "trojan://{uri_torjan}"
+  display_vmess
 
   subscription_prompt
 }
