@@ -524,6 +524,7 @@ install_v2ray() {
   # prevent some bug
   ${sudoCmd} rm -rf /usr/local/etc/ssl/caddy/*
   ${sudoCmd} rm -f /usr/local/etc/Caddyfile # path for old version v2script
+  ${sudoCmd} rm -rf /tmp/v2ray-ds # prevent v2ray booting issues after reinstalling
 
   # create config files
   if [[ $(read_json /etc/v2ray/config.json '.inbounds[0].streamSettings.network') != "domainsocket" ]]; then
