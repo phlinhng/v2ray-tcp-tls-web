@@ -107,6 +107,7 @@ ${sudoCmd} systemctl reset-failed
 colorEcho ${BLUE} "Removing trojan-go files."
 ${sudoCmd} rm -rf /usr/bin/trojan-go
 ${sudoCmd} rm -rf /etc/trojan-go
+${sudoCmd} rm -rf /etc/ssl/trojan-go
 colorEcho ${GREEN} "Removed trojan-go successfully."
 
 # docker

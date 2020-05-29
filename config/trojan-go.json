@@ -9,6 +9,8 @@
     "FAKETROJANPWD"
   ],
   "ssl": {
+    "cert": "/etc/ssl/trojan-go/trojan.crt",
+    "key": "/etc/ssl/trojan-go/trojan.key",
     "serve_plain_text": true
   }
 }

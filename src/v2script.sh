@@ -613,6 +613,7 @@ get_trojan() {
 
     ${sudoCmd} mkdir -p "/usr/bin/trojan-go"
     ${sudoCmd} mkdir -p "/etc/trojan-go"
+    ${sudoCmd} mkdir -p "/etc/ssl/trojan-go"
 
     cd $(mktemp -d)
     wget -nv "${trojango_link}" -O trojan-go.zip
@@ -622,6 +623,11 @@ get_trojan() {
 
     colorEcho ${BLUE} "Building trojan-go.service"
     ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
+
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/trojan-go/geoip.dat
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/trojan-go/geosite.dat
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/trojan.crt -O /etc/ssl/trojan-go/trojan.crt && ${sudoCmd} chmod 444 /etc/ssl/trojan-go/trojan.crt
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/trojan.key -O /etc/ssl/trojan-go/trojan.key && ${sudoCmd} chmod 444 /etc/ssl/trojan-go/trojan.key
 
     # set crontab to auto update geoip.dat and geosite.dat
     (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/trojan-go/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
