@@ -345,26 +345,26 @@ set_caddy() {
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     cat >> ${caddyserver_file} <<-EOF
-$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'):80 {
-    redir https://$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'){uri}
+$(jq --raw-output '.v2ray.tlsHeader' /usr/local/etc/v2script/config.json):80 {
+    redir https://$(jq --raw-output '.v2ray.tlsHeader' /usr/local/etc/v2script/config.json){uri}
 }
 EOF
     echo "" >> ${caddyserver_file}
     cat >> ${caddyserver_file} <<-EOF
-$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'):80 {
-    redir https://$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'){uri}
+$(jq --raw-output '.trojan.tlsHeader' /usr/local/etc/v2script/config.json):80 {
+    redir https://$(jq --raw-output '.trojan.tlsHeader' /usr/local/etc/v2script/config.json){uri}
 }
 EOF
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
     cat >> ${caddyserver_file} <<-EOF
-$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'):80 {
-    redir https://$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'){uri}
+$(jq --raw-output '.v2ray.tlsHeader' /usr/local/etc/v2script/config.json):80 {
+    redir https://$(jq --raw-output '.v2ray.tlsHeader' /usr/local/etc/v2script/config.json){uri}
 }
 EOF
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     cat >> ${caddyserver_file} <<-EOF
-$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'):80 {
-    redir https://$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'){uri}
+$(jq --raw-output '.trojan.tlsHeader' /usr/local/etc/v2script/config.json):80 {
+    redir https://$(jq --raw-output '.trojan.tlsHeader' /usr/local/etc/v2script/config.json){uri}
 }
 EOF
   fi
@@ -613,7 +613,7 @@ get_trojan() {
     ${sudoCmd} mkdir -p "/etc/trojan-go"
 
     cd $(mktemp -d)
-    wget "${trojango_link}" -O trojan-go.zip
+    wget -nv "${trojango_link}" -O trojan-go.zip
     unzip trojan-go.zip && rm -rf trojan-go.zip
     ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
     write_json /usr/local/etc/v2script/config.json ".trojan.installed" "true"
@@ -632,7 +632,7 @@ get_trojan() {
     echo "latest_version"
     local trojango_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
     cd $(mktemp -d)
-    wget ${trojango_link} -O trojan-go.zip
+    wget -nv ${trojango_link} -O trojan-go.zip
     unzip trojan-go.zip
     ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
   fi
