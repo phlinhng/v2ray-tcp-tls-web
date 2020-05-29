@@ -1,3 +1,0 @@
-FAKEV2DOMAIN:80 {
-    redir https://FAKEV2DOMAIN{uri}
-}
