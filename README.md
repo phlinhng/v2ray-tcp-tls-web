@@ -11,7 +11,7 @@ v2script
 ```
 
 ## Screenshot
-![](https://github.com/phlinhng/v2ray-tcp-tls-web/raw/master/image/v2script_menu.jpeg | width=80)
+<img src="https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/image/v2script_menu.jpeg" alt="alt text" width="640">
 
 ## TCP+TLS vs WS+TLS
 1. TCP+TLS has faster connection speed than WS+TLS benifit from that TCP is naturally faster than websocket
