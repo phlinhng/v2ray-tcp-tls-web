@@ -101,7 +101,7 @@ show_menu() {
 continue_prompt() {
   read -rp "继续其他操作 (yes/no)? " choice
   case "${choice}" in
-    y|Y|[yY][eE][sS] ) show_menu ;;
+    [yY]|[yY][eE][sS] ) show_menu ;;
     * ) exit 0;;
   esac
 }
