@@ -753,8 +753,12 @@ check_status() {
   fi
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
-    printf '%s\n' "订阅链接: "
-    colorEcho ${GREEN} "$(display_link_main)"
+    printf '%s' "订阅链接: "
+    if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
+      colorEcho ${GREEN} "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
+    elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
+      colorEcho ${GREEN} "https://${TJ_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
+    fi
   fi
 
   printf "电报代理: "
