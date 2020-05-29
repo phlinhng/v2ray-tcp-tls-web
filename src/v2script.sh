@@ -347,7 +347,7 @@ $(jq --raw-output '.trojan.tlsHeader' /usr/local/etc/v2script/config.json):80 {
 EOF
   fi
 
-  ${sudoCmd} /bin/cp -f ${caddyserver_file} /usr/local/etc/caddy/Caddyfile
+  ${sudoCmd} /bin/cp -f ${caddyserver_file} /usr/local/etc/caddy/Caddyfile && ${sudoCmd} chmod 644 /usr/local/etc/caddy/Caddyfile
 }
 
 build_web() {
