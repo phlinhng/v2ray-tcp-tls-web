@@ -660,7 +660,7 @@ install_trojan() {
   # activate services
   colorEcho ${BLUE} "Activating services"
   ${sudoCmd} systemctl enable trojan-go
-  ${sudoCmd} systemctl restart trojan-go 2>/dev/null ## restart trojan-go  to enable new config
+  ${sudoCmd} systemctl restart trojan-go 2>/dev/null ## restart trojan-go to enable new config
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy ## restart tls-shunt-proxy to enable new config
   ${sudoCmd} systemctl enable caddy
