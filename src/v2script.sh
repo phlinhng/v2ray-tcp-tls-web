@@ -381,7 +381,7 @@ EOF
 }
 
 build_web() {
-  if [ ! -f "/var/www/html/index.html"]; then
+  if [ ! -f "/var/www/html/index.html" ]; then
     # choose and copy a random  template for dummy web pages
     local template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
     wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template} -O /tmp/template.zip
