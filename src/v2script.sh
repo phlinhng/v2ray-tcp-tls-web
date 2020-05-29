@@ -321,33 +321,67 @@ set_proxy() {
   ${sudoCmd} /bin/cp -f /tmp/config_new.yaml /etc/tls-shunt-proxy/config.yaml
 }
 
-get_trojan() {
-  if [ ! -f "/usr/bin/trojan-go" ]; then
-    colorEcho ${BLUE} "trojan-go is not installed. start installation"
+get_caddy() {
+  if [ ! -f "/usr/local/bin/caddy" ]; then
+    #${sudoCmd} ${systemPackage} install libcap2-bin -y -qq
 
-    colorEcho ${BLUE} "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
-    echo "latest_version"
-    local trojan-go_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
+    curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/getcaddy.sh | ${sudoCmd} bash -s personal
+    # Give the caddy binary the ability to bind to privileged ports (e.g. 80, 443) as a non-root user
+    #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
 
-    cd $(mktemp -d)
-    wget ${trojan-go_link} -O trojan-go.zip
-    unzip trojan-go.zip && rm -rf trojan-go.zip
-    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+    # create user for caddy
+    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s $(${sudoCmd} which nologin) -r -u 33 www-data
+    ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
+    ${sudoCmd} mkdir -p /usr/local/etc/ssl/caddy && ${sudoCmd} chown -R root:www-data /usr/local/etc/ssl/caddy
+    ${sudoCmd} chmod 0770 /usr/local/etc/ssl/caddy
 
-    colorEcho ${BLUE} "Building trojan-go.service"
-    ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
+    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/caddy.service -O /tmp/caddy.service
+    ${sudoCmd} mv /tmp/caddy.service /etc/systemd/system/caddy.service
+    ${sudoCmd} chown root:root /etc/systemd/system/caddy.service
+    ${sudoCmd} chmod 644 /etc/systemd/system/caddy.service
+  fi
+}
 
-    colorEcho ${GREEN} "trojan-go is installed."
-  else
-    colorEcho ${BLUE} "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
-    echo "latest_version"
-    local trojan-go_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
-    cd $(mktemp -d)
-    wget ${trojan-go_link} -O trojan-go.zip
-    unzip trojan-go.zip
-    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+set_caddy() {
+  local caddyserver_file=$(mktemp)
+
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
+    cat >> ${caddyserver_file} <<-EOF
+$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'):80 {
+    redir https://$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'){uri}
+}
+EOF
+    echo "" >> ${caddyserver_file}
+    cat >> ${caddyserver_file} <<-EOF
+$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'):80 {
+    redir https://$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'){uri}
+}
+EOF
+  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
+    cat >> ${caddyserver_file} <<-EOF
+$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'):80 {
+    redir https://$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'){uri}
+}
+EOF
+  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]
+    cat >> ${caddyserver_file} <<-EOF
+$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'):80 {
+    redir https://$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'){uri}
+}
+EOF
+  fi
+
+  ${sudoCmd} /bin/cp -f ${caddyserver_file} /usr/local/etc/caddy
+}
+
+build_web() {
+  if [ ! -f "/var/www/html/index.html"]; then
+    # choose and copy a random  template for dummy web pages
+    local template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
+    wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template} -O /tmp/template.zip
+    ${sudoCmd} mkdir -p /var/www/html
+    ${sudoCmd} unzip -q /tmp/template.zip -d /var/www/html
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/robots.txt -O /var/www/html/robots.txt
   fi
 }
 
@@ -424,70 +458,6 @@ set_v2ray_wss_prompt() {
   else
     colorEcho ${YELLOW} "请先安装TCP+TLS+WEB!"
     return 1
-  fi
-}
-
-get_caddy() {
-  if [ ! -f "/usr/local/bin/caddy" ]; then
-    #${sudoCmd} ${systemPackage} install libcap2-bin -y -qq
-
-    curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/getcaddy.sh | ${sudoCmd} bash -s personal
-    # Give the caddy binary the ability to bind to privileged ports (e.g. 80, 443) as a non-root user
-    #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
-
-    # create user for caddy
-    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s $(${sudoCmd} which nologin) -r -u 33 www-data
-    ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
-    ${sudoCmd} mkdir -p /usr/local/etc/ssl/caddy && ${sudoCmd} chown -R root:www-data /usr/local/etc/ssl/caddy
-    ${sudoCmd} chmod 0770 /usr/local/etc/ssl/caddy
-
-    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/caddy.service -O /tmp/caddy.service
-    ${sudoCmd} mv /tmp/caddy.service /etc/systemd/system/caddy.service
-    ${sudoCmd} chown root:root /etc/systemd/system/caddy.service
-    ${sudoCmd} chmod 644 /etc/systemd/system/caddy.service
-  fi
-}
-
-set_caddy() {
-  local caddyserver_file=$(mktemp)
-
-  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    cat >> ${caddyserver_file} <<-EOF
-$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'):80 {
-    redir https://$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'){uri}
-}
-EOF
-    echo "" >> ${caddyserver_file}
-    cat >> ${caddyserver_file} <<-EOF
-$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'):80 {
-    redir https://$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'){uri}
-}
-EOF
-  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
-    cat >> ${caddyserver_file} <<-EOF
-$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'):80 {
-    redir https://$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'){uri}
-}
-EOF
-  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]
-    cat >> ${caddyserver_file} <<-EOF
-$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'):80 {
-    redir https://$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'){uri}
-}
-EOF
-  fi
-
-  ${sudoCmd} /bin/cp -f ${caddyserver_file} /usr/local/etc/caddy
-}
-
-build_web() {
-  if [ ! -f "/var/www/html/index.html"]; then
-    # choose and copy a random  template for dummy web pages
-    local template="$(curl -s https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt | shuf -n  1)"
-    wget -q https://raw.githubusercontent.com/phlinhng/web-templates/master/${template} -O /tmp/template.zip
-    ${sudoCmd} mkdir -p /var/www/html
-    ${sudoCmd} unzip -q /tmp/template.zip -d /var/www/html
-    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/robots.txt -O /var/www/html/robots.txt
   fi
 }
 
@@ -623,6 +593,36 @@ install_v2ray() {
   fi
 
   subscription_prompt
+}
+
+get_trojan() {
+  if [ ! -f "/usr/bin/trojan-go" ]; then
+    colorEcho ${BLUE} "trojan-go is not installed. start installation"
+
+    colorEcho ${BLUE} "Getting the latest version of trojan-go"
+    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    echo "latest_version"
+    local trojan-go_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
+
+    cd $(mktemp -d)
+    wget ${trojan-go_link} -O trojan-go.zip
+    unzip trojan-go.zip && rm -rf trojan-go.zip
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+
+    colorEcho ${BLUE} "Building trojan-go.service"
+    ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
+
+    colorEcho ${GREEN} "trojan-go is installed."
+  else
+    colorEcho ${BLUE} "Getting the latest version of trojan-go"
+    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    echo "latest_version"
+    local trojan-go_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
+    cd $(mktemp -d)
+    wget ${trojan-go_link} -O trojan-go.zip
+    unzip trojan-go.zip
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+  fi
 }
 
 install_trojan() {
