@@ -45,10 +45,6 @@ colorEcho() {
   echo -e "\033[${1}${@:2}\033[0m" 1>& 2
 }
 
-if [ ! -d "/usr/bin/v2ray" ] || [ ! -d "/usr/bin/trojan-go" ] || [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
-  exit 1
-fi
-
 ${sudoCmd} ${systemPackage} install curl -y -qq
 
 # remove v2ray
