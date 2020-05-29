@@ -10,6 +10,9 @@ The above command will download the script, save it to `/usr/local/bin/v2script`
 v2script
 ```
 
+## Screenshot
+![](https://github.com/phlinhng/v2ray-tcp-tls-web/raw/master/image/v2script_menu.jpeg | width=80)
+
 ## TCP+TLS vs WS+TLS
 1. TCP+TLS has faster connection speed than WS+TLS benifit from that TCP is naturally faster than websocket
 2. TCP+TLS has lower delay by saving 1-RTT from ws handshaking
