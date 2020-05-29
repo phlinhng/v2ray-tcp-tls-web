@@ -279,7 +279,7 @@ update_link() {
 
     if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
       local tj_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' | sed 's/^trojan:\/\/.+#//g' | urlDecode)"
-      read -p "输入 Trojan 节点名称[留空则使用默认值]: " tj_remark
+      read -p "输入 Trojan 节点名称 [留空则使用现有值 ${tj_currentRemark}]: " tj_remark
       if [ -z "${tj_remark}" ]; then
         tj_remark="${tj_currentRemark}"
       fi
