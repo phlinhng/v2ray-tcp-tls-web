@@ -187,25 +187,25 @@ sync_nodes() {
   fi
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    local uuid_torjan="$(read_json /etc/trojan-go/config.json '.password[0]')"
-    local uri_torjan="${TJ_DOMAIN}@:443?peer=#$(urlEncode '${tj_remark}')"
-    write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://{uri_torjan}\"")"
+    local uuid_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
+    local uri_trojan="${TJ_DOMAIN}@:443?peer=#$(urlEncode '${tj_remark}')"
+    write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://${uri_trojan}\"")"
   fi
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    local sub="$(printf '%s\n%s\n%s' "vmess://${uri_tcp}" "vmess://${uri_wss}"  "trojan://{uri_torjan}" | base64 --wrap=0)"
+    local sub="$(printf '%s\n%s\n%s' "vmess://${uri_tcp}" "vmess://${uri_wss}"  "trojan://${uri_trojan}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]]; then
     local sub="$(printf '%s\n%s' "vmess://${uri_tcp}" "vmess://${uri_wss}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    local sub="$(printf '%s\n%s' "vmess://${uri_tcp}" "trojan://{uri_torjan}" | base64 --wrap=0)"
+    local sub="$(printf '%s\n%s' "vmess://${uri_tcp}" "trojan://${uri_trojan}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
     local sub="$(printf '%s' "vmess://${uri_tcp}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    local sub="$(printf '%s' "trojan://{uri_torjan}" | base64 --wrap=0)"
+    local sub="$(printf '%s' "trojan://${uri_trojan}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
 }

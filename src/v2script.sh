@@ -161,25 +161,25 @@ sync_nodes() {
   fi
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    local uuid_torjan="$(read_json /etc/trojan-go/config.json '.password[0]')"
-    local uri_torjan="${TJ_DOMAIN}@:443?peer=#$(urlEncode '${tj_remark}')"
-    write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://{uri_torjan}\"")"
+    local uuid_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
+    local uri_trojan="${TJ_DOMAIN}@:443?peer=#$(urlEncode '${tj_remark}')"
+    write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://${uri_trojan}\"")"
   fi
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    local sub="$(printf '%s\n%s\n%s' "vmess://${uri_tcp}" "vmess://${uri_wss}"  "trojan://{uri_torjan}" | base64 --wrap=0)"
+    local sub="$(printf '%s\n%s\n%s' "vmess://${uri_tcp}" "vmess://${uri_wss}"  "trojan://${uri_trojan}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]]; then
     local sub="$(printf '%s\n%s' "vmess://${uri_tcp}" "vmess://${uri_wss}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    local sub="$(printf '%s\n%s' "vmess://${uri_tcp}" "trojan://{uri_torjan}" | base64 --wrap=0)"
+    local sub="$(printf '%s\n%s' "vmess://${uri_tcp}" "trojan://${uri_trojan}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
     local sub="$(printf '%s' "vmess://${uri_tcp}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    local sub="$(printf '%s' "trojan://{uri_torjan}" | base64 --wrap=0)"
+    local sub="$(printf '%s' "trojan://${uri_trojan}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
 
@@ -606,13 +606,13 @@ get_trojan() {
 
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
     local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
-    echo "latest_version"
-    local trojan-go_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
+    echo "${latest_version}"
+    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
 
     ${sudoCmd} mkdir -p "/usr/bin/trojan-go"
 
     cd $(mktemp -d)
-    wget ${trojan-go_link} -O trojan-go.zip
+    wget "${trojango_link}" -O trojan-go.zip
     unzip trojan-go.zip && rm -rf trojan-go.zip
     ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
     write_json /usr/local/etc/v2script/config.json ".trojan.installed" "true"
@@ -680,11 +680,11 @@ install_trojan() {
 
   colorEcho ${GREEN} "安装 trojan-go 成功!"
 
-  local uuid_torjan="$(read_json /etc/trojan-go/config.json '.password[0]')"
-  local uri_torjan="${TJ_DOMAIN}@:443?peer=#$(urlEncode '${TJ_DOMAIN}')"
-  write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://{uri_torjan}\"")"
+  local uuid_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
+  local uri_trojan="${TJ_DOMAIN}@:443?peer=#$(urlEncode '${TJ_DOMAIN}')"
+  write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://${uri_trojan}\"")"
 
-  echo "trojan://{uri_torjan}"
+  echo "trojan://${uri_trojan}"
   display_vmess
 
   subscription_prompt
