@@ -90,7 +90,7 @@ show_menu() {
 }
 
 continue_prompt() {
-  read -p "继续其他操作 (yes/no)? " choice
+  read -rp "继续其他操作 (yes/no)? " choice
   case "${choice}" in
     y|Y|[yY][eE][sS] ) show_menu ;;
     * ) exit 0;;
@@ -192,7 +192,7 @@ generate_link() {
   local TJ_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader')"
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    read -p "输入 V2Ray 节点名称 [留空则使用默认值]: " v2_remark
+    read -rp "输入 V2Ray 节点名称 [留空则使用默认值]: " v2_remark
     if [ -z "${v2_remark}" ]; then
       v2_remark="${V2_DOMAIN}"
     fi
@@ -201,7 +201,7 @@ generate_link() {
   fi
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    read -p "输入 Trojan 节点名称 [留空则使用默认值]: " tj_remark
+    read -rp "输入 Trojan 节点名称 [留空则使用默认值]: " tj_remark
     if [ -z "${tj_remark}" ]; then
       tj_remark="${TJ_DOMAIN}"
     fi
@@ -217,7 +217,7 @@ update_link() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
     if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
       local v2_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
-      read -p "输入 V2Ray 节点名称 [留空则使用现有值 ${v2_currentRemark}]: " v2_remark
+      read -rp "输入 V2Ray 节点名称 [留空则使用现有值 ${v2_currentRemark}]: " v2_remark
       if [ -z "${v2_remark}" ]; then
         v2_remark="${v2_currentRemark}"
       fi
@@ -227,7 +227,7 @@ update_link() {
 
     if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
       local tj_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' | urlDecode)"
-      read -p "输入 Trojan 节点名称[留空则使用默认值]: " tj_remark
+      read -rp "输入 Trojan 节点名称[留空则使用默认值]: " tj_remark
       if [ -z "${tj_remark}" ]; then
         tj_remark="${tj_currentRemark}"
       fi
@@ -245,7 +245,7 @@ update_link() {
 
 subscription_prompt() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') != "true" ]]; then
-    read -p "生成订阅链接 (yes/no)? " linkConfirm
+    read -rp "生成订阅链接 (yes/no)? " linkConfirm
     case "${linkConfirm}" in
       y|Y|[yY][eE][sS] ) generate_link ;;
       * ) return 0 ;;
@@ -453,7 +453,7 @@ set_v2ray_wss_prompt() {
       colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
       colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
       colorEcho ${YELLOW} "请确保域名己解析到 Cloudflare 并设置成 \"DNS Only\" (云朵为灰色)"
-      read -p "确定设置CDN (yes/no)? " wssConfirm
+      read -rp "确定设置CDN (yes/no)? " wssConfirm
       case "${wssConfirm}" in
         y|Y|[yY][eE][sS] ) set_v2ray_wss ;;
         * ) return 0 ;;
@@ -529,7 +529,7 @@ EOF
 }
 
 install_v2ray() {
-  read -p "解析到本 VPS 的域名: " V2_DOMAIN
+  read -rp "解析到本 VPS 的域名: " V2_DOMAIN
   if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
     if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader') == "${V2_DOMAIN}" ]] || [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader') == "${V2_DOMAIN}" ]]; then
       colorEcho ${RED} "域名 ${V2_DOMAIN} 与现有域名重复,  请使用别的域名"
@@ -599,7 +599,7 @@ install_v2ray() {
   display_vmess
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') != "true" ]]; then
-    read -p "设置 CDN (yes/no)? " wssConfirm
+    read -rp "设置 CDN (yes/no)? " wssConfirm
     case "${wssConfirm}" in
       y|Y|[yY][eE][sS] ) set_v2ray_wss_prompt ;;
     esac
@@ -643,7 +643,7 @@ get_trojan() {
 }
 
 install_trojan() {
-  read -p "解析到本 VPS 的域名: " TJ_DOMAIN
+  read -rp "解析到本 VPS 的域名: " TJ_DOMAIN
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
     if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "${TJ_DOMAIN}" ]] || [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader') == "${TJ_DOMAIN}" ]]; then
       colorEcho ${RED} "域名 ${TJ_DOMAIN} 与现有域名重复,  请使用别的域名"
@@ -796,8 +796,8 @@ menu() {
   COLUMNS=woof
   #options=("安装TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置CDN" "设置电报代理" "VPS工具" "更新v2ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB")
   #select opt in "${options[@]}"
-  read -rp "选择操作 [输入任意值或按 Ctrl+C 退出]: " opt
-  do
+  while true; do
+    read -rp "选择操作 [输入任意值或按 Ctrl+C 退出]: " opt
     case "${opt}" in
       "0") install_v2ray && continue_prompt ;;
       "1") install_trojan && continue_prompt ;;
