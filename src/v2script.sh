@@ -157,14 +157,20 @@ sync_nodes() {
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://{uri_torjan}\"")"
   fi
 
-  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     local sub="$(printf '%s\n%s\n%s' "vmess://${uri_tcp}" "vmess://${uri_wss}"  "trojan://{uri_torjan}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]]; then
     local sub="$(printf '%s\n%s' "vmess://${uri_tcp}" "vmess://${uri_wss}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
-  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]
+  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
+    local sub="$(printf '%s\n%s' "vmess://${uri_tcp}" "trojan://{uri_torjan}" | base64 --wrap=0)"
+    printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
     local sub="$(printf '%s' "vmess://${uri_tcp}" | base64 --wrap=0)"
+    printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
+  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
+    local sub="$(printf '%s' "trojan://{uri_torjan}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
 
@@ -523,7 +529,14 @@ EOF
 }
 
 install_v2ray() {
-  read -p "解析到本VPS的域名: " V2_DOMAIN
+  read -p "解析到本 VPS 的域名: " V2_DOMAIN
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
+    if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader') == "${V2_DOMAIN}" ]] || [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader') == "${V2_DOMAIN}" ]]; then
+      colorEcho ${RED} "域名 ${V2_DOMAIN} 与现有域名重复,  请使用别的域名"
+      show_menu
+      return 1
+    fi
+  fi
   write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
 
   # install v2ray-core
@@ -573,7 +586,7 @@ install_v2ray() {
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
-  colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
+  colorEcho ${GREEN} "安装 TCP+TLS+WEB 成功!"
 
   local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
   local uuid_tcp="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
@@ -586,7 +599,7 @@ install_v2ray() {
   display_vmess
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') != "true" ]]; then
-    read -p "设置CDN (yes/no)? " wssConfirm
+    read -p "设置 CDN (yes/no)? " wssConfirm
     case "${wssConfirm}" in
       y|Y|[yY][eE][sS] ) set_v2ray_wss_prompt ;;
     esac
@@ -626,7 +639,7 @@ get_trojan() {
 }
 
 install_trojan() {
-  read -p "解析到本VPS的域名: " TJ_DOMAIN
+  read -p "解析到本 VPS 的域名: " TJ_DOMAIN
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
     if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "${TJ_DOMAIN}" ]] || [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader') == "${TJ_DOMAIN}" ]]; then
       colorEcho ${RED} "域名 ${TJ_DOMAIN} 与现有域名重复,  请使用别的域名"
@@ -666,7 +679,7 @@ install_trojan() {
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
-  colorEcho ${GREEN} "安装trojan-go成功!"
+  colorEcho ${GREEN} "安装 trojan-go 成功!"
 
   subscription_prompt
 }
@@ -718,34 +731,40 @@ install_mtproto() {
 }
 
 check_status() {
-  printf "脚本状态: "
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
-      colorEcho ${GREEN} "TCP+TLS, WSS+CDN"
-    else
-      colorEcho ${GREEN} "TCP+TLS"
-    fi
+  printf "目前配置: "
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
+    colorEcho ${GREEN} "V2Ray (TCP+TLS, WSS+CDN), Trojan"
+  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]]; then
+    colorEcho ${GREEN} "V2Ray (TCP+TLS, WSS+CDN)"
+  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
+    colorEcho ${GREEN} "V2Ray (TCP+TLS), Trojan"
+  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
+    colorEcho ${GREEN} "Trojan"
+  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
+    colorEcho ${GREEN} "Trojan"
   else
-    colorEcho ${YELLOW} "未安装"
+    colorEcho ${YELLOW} "未安装代理"
   fi
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
-    printf "订阅链接: "
-    colorEcho ${GREEN} "https://$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
+    printf '%s\n' "订阅链接: "
+    colorEcho ${GREEN} "$(display_link_main)"
   fi
 
   printf "电报代理: "
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "false" ]] && [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') != "true" ]] && [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') != "true" ]] && [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
     colorEcho ${GREEN} "tg://proxy?server=`curl -s https://api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
-  elif [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
+  elif [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
     colorEcho ${GREEN} "tg://proxy?server=$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
+  elif [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
+    colorEcho ${GREEN} "tg://proxy?server=$(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader')&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
   else
     colorEcho ${YELLOW} "未设置"
   fi
 
   if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
     echo ""
-    colorEcho ${YELLOW} "检测到Swap未开启 建议启用"
+    colorEcho ${YELLOW} "检测到 Swap 未开启 建议启用"
   fi
 
   if [ -f /usr/sbin/aliyun-service ]; then
@@ -762,7 +781,7 @@ vps_tools() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "v2Ray TCP+TLS+WEB with Domainsocket automated script v${VERSION}"
+  colorEcho ${YELLOW} "V2Ray & Trojan automated script v${VERSION}"
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
@@ -773,7 +792,7 @@ menu() {
   COLUMNS=woof
   #options=("安装TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置CDN" "设置电报代理" "VPS工具" "更新v2ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB")
   #select opt in "${options[@]}"
-  read -rp "选择操作[输入任意值或按Ctrl+C退出]: " opt
+  read -rp "选择操作 [输入任意值或按 Ctrl+C 退出]: " opt
   do
     case "${opt}" in
       "0") install_v2ray && continue_prompt ;;
