@@ -211,8 +211,8 @@ sync_nodes() {
 }
 
 generate_link() {
-  if [ ! -d "/usr/bin/v2ray" ] || [ ! -f "/usr/bin/trojan-go" ]; then
-    colorEcho ${RED} "尚末安装V2Ray或Trojan"
+  if [ ! -d "/usr/bin/v2ray" ] || [ ! -d "/usr/bin/trojan-go" ]; then
+    colorEcho ${RED} "尚末安装 V2Ray 或 Trojan"
     return 1
   elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
     colorEcho ${RED} "配置文件不存在"
@@ -258,8 +258,8 @@ generate_link() {
 }
 
 update_link() {
-  if [ ! -d "/usr/bin/v2ray" ] || [ ! -f "/usr/bin/trojan-go" ]; then
-    colorEcho ${RED} "尚末安装V2Ray或Trojan"
+  if [ ! -d "/usr/bin/v2ray" ] || [ ! -d "/usr/bin/trojan-go" ]; then
+    colorEcho ${RED} "尚末安装 V2Ray 或 Trojan"
     return 1
   elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
     colorEcho ${RED} "配置文件不存在"
@@ -353,8 +353,8 @@ install_api() {
 }
 
 display_link() {
-  if [ ! -d "/usr/bin/v2ray" ]; then
-    colorEcho ${RED} "尚末安装v2Ray"
+  if [ ! -d "/usr/bin/v2ray" ] || [ ! -d "/usr/bin/trojan-go" ]; then
+    colorEcho ${RED} "尚末安装 V2Ray 或 Trojan"
     return 1
   elif [ ! -f "/usr/local/etc/v2script/config.json" ]; then
     colorEcho ${RED} "配置文件不存在"
