@@ -45,10 +45,6 @@ colorEcho() {
   echo -e "\033[${1}${@:2}\033[0m" 1>& 2
 }
 
-if [ ! -d "/usr/bin/v2ray" ] || [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
-  return 1
-fi
-
 ${sudoCmd} ${systemPackage} install curl -y -qq
 
 # remove v2ray
@@ -79,7 +75,7 @@ ${sudoCmd} deluser tls-shunt-proxy
 ${sudoCmd} delgroup --only-if-empty tls-shunt-proxy
 colorEcho ${GREEN} "Removed tls-shunt-proxy successfully."
 
-# remove tls-shunt-server
+# remove caddy
 colorEcho ${BLUE} "Shutting down caddy service."
 ${sudoCmd} systemctl stop caddy
 ${sudoCmd} systemctl disable caddy
@@ -96,11 +92,25 @@ ${sudoCmd} deluser www-data
 ${sudoCmd} delgroup --only-if-empty www-data
 colorEcho ${GREEN} "Removed caddy successfully."
 
+# remove trojan-go
+colorEcho ${BLUE} "Shutting down trojan-go service."
+${sudoCmd} systemctl stop trojan-go
+${sudoCmd} systemctl disable trojan-go
+${sudoCmd} rm -f /etc/systemd/system/trojan-go.service
+${sudoCmd} rm -f /etc/systemd/system/trojan-go.service # and symlinks that might be related
+${sudoCmd} systemctl daemon-reload
+${sudoCmd} systemctl reset-failed
+colorEcho ${BLUE} "Removing trojan-go files."
+${sudoCmd} rm -rf /usr/bin/trojan-go
+${sudoCmd} rm -rf /etc/trojan-go
+${sudoCmd} rm -rf /etc/ssl/trojan-go
+colorEcho ${GREEN} "Removed trojan-go successfully."
+
 # docker
 # this will stop docker.service and remove every conatainer, image...etc created by docker but not docker itself
 # since uninstalling docker is complicated and may cause unstable to OS, if you want the OS to go back to clean state then reinstall the whole OS is suggested
 colorEcho ${BLUE} "Removing docker containers, images, networks, and images"
-${sudoCmd} docker stop $(${sudoCmd} docker ps -a -q)
+${sudoCmd} docker stop $(${sudoCmd} docker ps -a -q) 2>/dev/null
 ${sudoCmd} docker system prune --force
 colorEcho ${GREEN} "Removed docker successfully."
 

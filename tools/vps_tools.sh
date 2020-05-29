@@ -102,7 +102,7 @@ menu() {
 
   PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=39
-  options=("安装加速" "设置Swap" "卸载阿里云盾" "性能测试")
+  options=("安装加速" "设置Swap" "卸载阿里云盾" "性能测试(LemonBench)" "性能测试(Oldking)")
   select opt in "${options[@]}"
   do
     case "${opt}" in

@@ -23,5 +23,9 @@
     "fakeTlsHeader": "",
     "secret": ""
   },
+  "trojan": {
+    "installed": false,
+    "tlsHeader": ""
+  },
   "version": ""
 }
