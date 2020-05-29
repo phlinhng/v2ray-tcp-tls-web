@@ -774,8 +774,6 @@ check_status() {
   if [ -f /usr/sbin/aliyun-service ]; then
     colorEcho ${RED} "检测到阿里云监测服务 建议卸载"
   fi
-
-  echo ""
 }
 
 vps_tools() {
