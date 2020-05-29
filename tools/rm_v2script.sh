@@ -46,7 +46,7 @@ colorEcho() {
 }
 
 if [ ! -d "/usr/bin/v2ray" ] || [ ! -d "/usr/bin/trojan-go" ] || [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
-  return 1
+  exit 1
 fi
 
 ${sudoCmd} ${systemPackage} install curl -y -qq
