@@ -188,7 +188,7 @@ sync_nodes() {
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     local uuid_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
-    local uri_trojan="${uuid_trojan}@${TJ_DOMAIN}:443?peer=#$(urlEncode "${TJ_DOMAIN}")"
+    local uri_trojan="${uuid_trojan}@${TJ_DOMAIN}:443?peer=#$(urlEncode "${tj_remark}")"
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://${uri_trojan}\"")"
   fi
 
@@ -278,7 +278,7 @@ update_link() {
     fi
 
     if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
-      local tj_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' | urlDecode)"
+      local tj_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' | sed 's/^trojan:\/\/.+#//g' | urlDecode)"
       read -p "输入 Trojan 节点名称[留空则使用默认值]: " tj_remark
       if [ -z "${tj_remark}" ]; then
         tj_remark="${tj_currentRemark}"
