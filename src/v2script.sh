@@ -193,9 +193,11 @@ generate_link() {
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" != "" ]]; then
     ${sudoCmd} rm -f /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')
-    local randomName="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
-    write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
+    write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"\""
   fi
+
+  local randomName="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 16)" #random file name for subscription
+  write_json /usr/local/etc/v2script/config.json '.sub.uri' "\"${randomName}\""
 
   local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
   local TJ_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader')"
@@ -220,7 +222,6 @@ generate_link() {
 
   sync_nodes "${v2_remark}" "${tj_remark}"
   colorEcho ${GREEN} "己生成订阅"
-  display_link_main
 }
 
 subscription_prompt() {
