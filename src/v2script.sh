@@ -77,27 +77,6 @@ urlDecode() {
   printf "${_//%/\\x}"
 }
 
-# a trick to redisplay menu option
-show_menu() {
-  echo ""
-  echo "----------安装代理----------"
-  echo "0) 安装 V2Ray TCP+TLS+WEB"
-  echo "1) 安装 trojan-go"
-  echo "----------显示配置----------"
-  echo "2) 显示链接"
-  echo "3) 管理订阅"
-  echo "----------各种工具----------"
-  echo "4) 设置 CDN"
-  echo "5) 设置电报代理"
-  echo "6) VPS 工具"
-  echo "----------组件管理----------"
-  echo "7) 更新 v2ray-core"
-  echo "8) 更新 tls-shunt-proxy"
-  echo "9) 更新 trojan-go"
-  echo "10) 卸载脚本"
-  echo ""
-}
-
 continue_prompt() {
   read -rp "继续其他操作 (yes/no)? " choice
   case "${choice}" in
@@ -743,6 +722,12 @@ install_mtproto() {
   display_mtproto
 }
 
+vps_tools() {
+  ${sudoCmd} ${systemPackage} install wget -y -qq
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh -O /tmp/vps_tools.sh && chmod +x /tmp/vps_tools.sh && ${sudoCmd} /tmp/vps_tools.sh
+  exit 0
+}
+
 check_status() {
   printf "目前配置: "
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
@@ -789,10 +774,24 @@ check_status() {
   fi
 }
 
-vps_tools() {
-  ${sudoCmd} ${systemPackage} install wget -y -qq
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh -O /tmp/vps_tools.sh && chmod +x /tmp/vps_tools.sh && ${sudoCmd} /tmp/vps_tools.sh
-  exit 0
+show_menu() {
+  echo ""
+  echo "----------安装代理----------"
+  echo "0) 安装 V2Ray TCP+TLS+WEB"
+  echo "1) 安装 trojan-go"
+  echo "----------显示配置----------"
+  echo "2) 显示链接"
+  echo "3) 管理订阅"
+  echo "----------各种工具----------"
+  echo "4) 设置 CDN"
+  echo "5) 设置电报代理"
+  echo "6) VPS 工具"
+  echo "----------组件管理----------"
+  echo "7) 更新 v2ray-core"
+  echo "8) 更新 tls-shunt-proxy"
+  echo "9) 更新 trojan-go"
+  echo "10) 卸载脚本"
+  echo ""
 }
 
 menu() {
