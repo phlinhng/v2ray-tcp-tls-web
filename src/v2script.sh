@@ -610,18 +610,20 @@ install_v2ray() {
 }
 
 get_trojan() {
-  if [ ! -f "/usr/bin/trojan-go" ]; then
+  if [ ! -d "/usr/bin/trojan-go" ]; then
     colorEcho ${BLUE} "trojan-go is not installed. start installation"
 
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
     local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
     echo "latest_version"
-    local trojan-go_link=$(https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip)
+    local trojan-go_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
+
+    ${sudoCmd} mkdir -p "/usr/bin/trojan-go"
 
     cd $(mktemp -d)
     wget ${trojan-go_link} -O trojan-go.zip
     unzip trojan-go.zip && rm -rf trojan-go.zip
-    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
 
     colorEcho ${BLUE} "Building trojan-go.service"
     ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
