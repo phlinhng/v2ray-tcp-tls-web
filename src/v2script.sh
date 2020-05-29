@@ -101,7 +101,7 @@ show_menu() {
 continue_prompt() {
   read -rp "继续其他操作 (yes/no)? " choice
   case "${choice}" in
-    [yY]|[yY][eE][sS] ) show_menu ;;
+    [yY]|[yY][eE][sS] ) return 0 ;;
     * ) exit 0;;
   esac
 }
@@ -801,13 +801,11 @@ menu() {
   echo ""
 
   check_status
-  show_menu
 
-  #PS3="选择操作[输入任意值或按Ctrl+C退出]: "
   COLUMNS=woof
-  #options=("安装TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置CDN" "设置电报代理" "VPS工具" "更新v2ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB")
-  #select opt in "${options[@]}"
+
   while true; do
+    show_menu
     read -rp "选择操作 [输入任意值退出]: " opt
     case "${opt}" in
       "0") install_v2ray && continue_prompt ;;
