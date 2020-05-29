@@ -319,15 +319,14 @@ display_link_more() {
 
 install_api() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') == "true" ]]; then
-    read -p "用于API的域名 (出于安全考虑，请使用和v2Ray不同的子域名): " api_domain
-    if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]]; then
-      if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "${api_domain}" ]]; then
-        colorEcho ${RED} "域名 ${api_domain} 与现有v2Ray域名相同"
-        show_menu
-        return 1
+    while true; do
+      read -p "用于API的域名 (出于安全考虑，请使用和v2Ray不同的子域名): " api_domain
+      if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "${api_domain}" ]] || [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader') == "${api_domainN}" ]]; then
+        colorEcho ${RED} "域名 ${api_domain} 与现有域名重复,  请使用别的域名"
+      else
+        break
       fi
-    fi
-    ${sudoCmd} ${systemPackage} install curl -y -qq
+    done
     get_docker
 
     # set up api
