@@ -205,7 +205,7 @@ subscription_prompt() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.enabled') != "true" ]]; then
     read -rp "生成订阅链接 (yes/no)? " linkConfirm
     case "${linkConfirm}" in
-      y|Y|[yY][eE][sS] ) generate_link ;;
+      y|Y|[yY][eE][sS] ) generate_link && display_link_main ;;
       * ) return 0 ;;
     esac
   else
