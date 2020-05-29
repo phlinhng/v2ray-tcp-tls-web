@@ -646,6 +646,8 @@ install_trojan() {
     ${sudoCmd} /bin/cp -f /tmp/trojan-go.json /etc/trojan-go/config.json
   fi
 
+  get_proxy
+
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
   set_proxy
 
