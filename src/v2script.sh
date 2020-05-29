@@ -651,6 +651,8 @@ install_trojan() {
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
   set_proxy
 
+  get_caddy
+
   colorEcho ${BLUE} "Setting caddy"
   set_caddy
 
