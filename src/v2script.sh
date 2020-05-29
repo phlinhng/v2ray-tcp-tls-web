@@ -87,6 +87,7 @@ show_menu() {
   echo "8) 更新 tls-shunt-proxy"
   echo "9) 更新 trojan-go"
   echo "10) 卸载脚本"
+  echo ""
 }
 
 continue_prompt() {
@@ -795,7 +796,7 @@ menu() {
   #options=("安装TCP+TLS+WEB" "显示vmess链接" "管理订阅" "设置CDN" "设置电报代理" "VPS工具" "更新v2ray-core" "更新tls-shunt-proxy" "卸载TCP+TLS+WEB")
   #select opt in "${options[@]}"
   while true; do
-    read -rp "选择操作 [输入任意值或按 Ctrl+C 退出]: " opt
+    read -rp "选择操作 [输入任意值退出]: " opt
     case "${opt}" in
       "0") install_v2ray && continue_prompt ;;
       "1") install_trojan && continue_prompt ;;
