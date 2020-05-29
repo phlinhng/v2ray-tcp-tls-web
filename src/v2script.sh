@@ -739,7 +739,7 @@ check_status() {
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     colorEcho ${GREEN} "V2Ray (TCP+TLS), Trojan"
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
-    colorEcho ${GREEN} "Trojan"
+    colorEcho ${GREEN} "V2Ray (TCP+TLS)"
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     colorEcho ${GREEN} "Trojan"
   else
