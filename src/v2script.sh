@@ -369,7 +369,7 @@ $(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'):80 {
     redir https://$(read_json /usr/local/etc/v2script/config.json 'v2ray.tlsHeader'){uri}
 }
 EOF
-  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]
+  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     cat >> ${caddyserver_file} <<-EOF
 $(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'):80 {
     redir https://$(read_json /usr/local/etc/v2script/config.json 'trojan.tlsHeader'){uri}
