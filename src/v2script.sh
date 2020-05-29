@@ -522,7 +522,6 @@ install_v2ray() {
   get_caddy
 
   # prevent some bug
-  ${sudoCmd} rm -rf /var/www/html
   ${sudoCmd} rm -rf /usr/local/etc/ssl/caddy/*
   ${sudoCmd} rm -f /usr/local/etc/Caddyfile # path for old version v2script
 
