@@ -141,7 +141,7 @@ sync_nodes() {
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     local uuid_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
-    local uri_trojan="${TJ_DOMAIN}@:443?peer=#$(urlEncode "${TJ_DOMAIN}")"
+    local uri_trojan="${uuid_trojan}@${TJ_DOMAIN}:443?peer=#$(urlEncode "${TJ_DOMAIN}")"
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://${uri_trojan}\"")"
   fi
 
@@ -668,7 +668,7 @@ install_trojan() {
   colorEcho ${GREEN} "安装 trojan-go 成功!"
 
   local uuid_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
-  local uri_trojan="${TJ_DOMAIN}@:443?peer=#$(urlEncode "${TJ_DOMAIN}")"
+  local uri_trojan="${uuid_trojan}@${TJ_DOMAIN}:443?peer=#$(urlEncode "${TJ_DOMAIN}")"
   write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://${uri_trojan}\"")"
 
   printf '%s\n\n' "trojan://${uri_trojan}"
