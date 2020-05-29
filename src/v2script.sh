@@ -380,6 +380,8 @@ build_web() {
     ${sudoCmd} mkdir -p /var/www/html
     ${sudoCmd} unzip -q /tmp/template.zip -d /var/www/html
     ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/robots.txt -O /var/www/html/robots.txt
+  else
+    echo "Dummy website existed. Skip building."
   fi
 }
 
@@ -685,7 +687,7 @@ install_trojan() {
   local uri_trojan="${TJ_DOMAIN}@:443?peer=#$(urlEncode '${TJ_DOMAIN}')"
   write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://${uri_trojan}\"")"
 
-  echo "trojan://${uri_trojan}"
+  printf '%s\n\n' "trojan://${uri_trojan}"
   display_vmess
 
   subscription_prompt
