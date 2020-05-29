@@ -104,15 +104,15 @@ display_link_main() {
   local TJ_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader')"
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     printf '%s\n' "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
-    printf '%s\n\n' "二维码: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=sub://$(printf %s 'https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')' | base64 --wrap=0)"
+    printf '%s\n\n' "二维码: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=sub://$(printf %s "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | base64 --wrap=0)"
     printf '%s\n' "https://${TJ_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
-    printf '%s\n' "二维码: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=sub://$(printf %s 'https://${TJ_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')' | base64 --wrap=0)"
+    printf '%s\n' "二维码: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=sub://$(printf %s "https://${TJ_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | base64 --wrap=0)"
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
     printf '%s\n' "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
-    printf '%s\n' "二维码: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=sub://$(printf %s 'https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')' | base64 --wrap=0)"
+    printf '%s\n' "二维码: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=sub://$(printf %s "https://${V2_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | base64 --wrap=0)"
   elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     printf '%s\n' "https://${TJ_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')"
-    printf '%s\n' "二维码: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=sub://$(printf %s 'https://${TJ_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')' | base64 --wrap=0)"
+    printf '%s\n' "二维码: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=sub://$(printf %s "https://${TJ_DOMAIN}/$(read_json /usr/local/etc/v2script/config.json '.sub.uri')" | base64 --wrap=0)"
   fi
 }
 
@@ -141,7 +141,7 @@ sync_nodes() {
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
     local uuid_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
-    local uri_trojan="${TJ_DOMAIN}@:443?peer=#$(printf %s "${TJ_DOMAIN}" | urlEncode)"
+    local uri_trojan="${TJ_DOMAIN}@:443?peer=#$(urlEncode "${TJ_DOMAIN}")"
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://${uri_trojan}\"")"
   fi
 
@@ -668,7 +668,7 @@ install_trojan() {
   colorEcho ${GREEN} "安装 trojan-go 成功!"
 
   local uuid_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
-  local uri_trojan="${TJ_DOMAIN}@:443?peer=#$(printf %s "${TJ_DOMAIN}" | urlEncode)"
+  local uri_trojan="${TJ_DOMAIN}@:443?peer=#$(urlEncode "${TJ_DOMAIN}")"
   write_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' "$(printf %s "\"trojan://${uri_trojan}\"")"
 
   printf '%s\n\n' "trojan://${uri_trojan}"
