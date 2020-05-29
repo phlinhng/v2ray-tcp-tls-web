@@ -625,6 +625,10 @@ get_trojan() {
     colorEcho ${BLUE} "Building trojan-go.service"
     ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
 
+    # set crontab to auto update geoip.dat and geosite.dat
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/trojan-go/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/trojan-go/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+
     colorEcho ${GREEN} "trojan-go is installed."
   else
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
@@ -634,7 +638,7 @@ get_trojan() {
     cd $(mktemp -d)
     wget ${trojan-go_link} -O trojan-go.zip
     unzip trojan-go.zip
-    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
   fi
 }
 
