@@ -182,8 +182,6 @@ sync_nodes() {
     local sub="$(printf '%s' "trojan://${uri_trojan}" | base64 --wrap=0)"
     printf %s "${sub}" | ${sudoCmd} tee /var/www/html/$(read_json /usr/local/etc/v2script/config.json '.sub.uri') >/dev/null
   fi
-
-  display_link_main
 }
 
 generate_link() {
