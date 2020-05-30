@@ -122,6 +122,7 @@ install_trojan() {
     read -rp "解析到本 VPS 的域名: " TJ_DOMAIN
     if checkIP "${TJ_DOMAIN}"; then
       colorEcho ${GREEN} "域名 ${TJ_DOMAIN} 解析正确, 即将开始安装"
+      break
     else
       colorEcho ${RED} "域名 ${TJ_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
       read -rp "若您确定域名解析正确, 可以继续进行安装作业. 强制继续? (yes/no/quit)" forceConfirm
