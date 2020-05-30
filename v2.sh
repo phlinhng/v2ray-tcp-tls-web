@@ -3,14 +3,10 @@
 # lite version
 
 export LC_ALL=C
-export LANG=C
+export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
 branch="master"
-
-# /usr/local/bin/v2script ##main
-# /usr/local/bin/v2sub ##subscription manager
-# /usr/local/etc/v2script/config.json ##config
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
