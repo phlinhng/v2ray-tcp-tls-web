@@ -117,6 +117,18 @@ get_trojan() {
   colorEcho ${GREEN} "trojan-go is installed."
 }
 
+get_cert() {
+  ${sudoCmd} trojan-go -autocert request
+  ${sudoCmd} mv server.crt /etc/ssl/trojan-go/server.crt
+  ${sudoCmd} mv server.key /etc/ssl/trojan-go/server.key
+  ${sudoCmd} mv user.key /etc/ssl/trojan-go/user.key
+  ${sudoCmd} mv domain_info.json /etc/ssl/trojan-go/domain_info.json
+
+  (crontab -l 2>/dev/null; echo "5 4 3 * * systemctl stop trojan-go") | ${sudoCmd} crontab -
+  (crontab -l 2>/dev/null; echo "5 4 3 * * cd /etc/ssl/trojan-go && trojan-go -autocert renew") | ${sudoCmd} crontab -
+  (crontab -l 2>/dev/null; echo "5 4 3 * * systemctl restart trojan-go") | ${sudoCmd} crontab -
+}
+
 install_trojan() {
   while true; do
     read -rp "解析到本 VPS 的域名: " TJ_DOMAIN
@@ -138,14 +150,11 @@ install_trojan() {
 
   cd "$(mktemp -d)"
 
+  # install trojan-go
   get_trojan
 
+  # apply for ssl certificates and set auto renew
   get_cert
-  ${sudoCmd} ./trojan-go -autocert request
-  ${sudoCmd} server.crt /etc/ssl/trojan-go/trojan.crt
-  ${sudoCmd} server.key /etc/ssl/trojan-go/trojan.key
-  ${sudoCmd} user.key /etc/ssl/trojan-go/user.key
-
 
   # create config files
   if [ ! -f "/etc/trojan-go/config.json" ]; then
