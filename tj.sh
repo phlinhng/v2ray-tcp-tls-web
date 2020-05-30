@@ -70,6 +70,10 @@ write_json() {
   jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key = value]
 
+urlEncode() {
+  printf %s "$1" | jq -s -R -r @uri
+}
+
 checkIP() {
   local realIP="$(curl -s https://api.ipify.org)"
   local resolvedIP="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
