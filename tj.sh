@@ -133,11 +133,19 @@ install_trojan() {
     fi
   done
 
+  ${sudoCmd} ${systemPackage} update -qq
+  ${sudoCmd} ${systemPackage} install curl wget jq unzip -y -qq
+
   cd "$(mktemp -d)"
 
   get_trojan
 
-  # TODO: use certbot to auto generate certificate
+  get_cert
+  ${sudoCmd} ./trojan-go -autocert request
+  ${sudoCmd} server.crt /etc/ssl/trojan-go/trojan.crt
+  ${sudoCmd} server.key /etc/ssl/trojan-go/trojan.key
+  ${sudoCmd} user.key /etc/ssl/trojan-go/user.key
+
 
   # create config files
   if [ ! -f "/etc/trojan-go/config.json" ]; then
