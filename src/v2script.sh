@@ -516,10 +516,7 @@ install_v2ray() {
     read -rp "解析到本 VPS 的域名: " V2_DOMAIN
     if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader') == "${V2_DOMAIN}" ]] || [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader') == "${V2_DOMAIN}" ]]; then
       colorEcho ${RED} "域名 ${V2_DOMAIN} 与现有域名重复,  请使用别的域名"
-    else
-      break
-    fi
-    if checkIP "${V2_DOMAIN}"; then
+    else if checkIP "${V2_DOMAIN}"; then
       colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始安装"
       break
     else
@@ -654,10 +651,7 @@ install_trojan() {
     read -rp "解析到本 VPS 的域名: " TJ_DOMAIN
     if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "${TJ_DOMAIN}" ]] || [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader') == "${TJ_DOMAIN}" ]]; then
       colorEcho ${RED} "域名 ${TJ_DOMAIN} 与现有域名重复,  请使用别的域名"
-    else
-      break
-    fi
-    if checkIP "${TJ_DOMAIN}"; then
+    else if checkIP "${TJ_DOMAIN}"; then
       colorEcho ${GREEN} "域名 ${TJ_DOMAIN} 解析正确, 即将开始安装"
       break
     else
