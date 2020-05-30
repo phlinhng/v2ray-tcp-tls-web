@@ -363,6 +363,17 @@ build_web() {
   fi
 }
 
+checkIP() {
+  local realIP="$(curl -s https://api.ipify.org)"
+  local resolvedIP="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
+
+  if [[ "${realIP}" == "${resolvedIP}" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 set_v2ray_wss() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') != "true" ]]; then
     local uuid_wss="$(cat '/proc/sys/kernel/random/uuid')"
@@ -508,8 +519,20 @@ install_v2ray() {
     else
       break
     fi
+    if checkIP "${V2_DOMAIN}"; then
+      colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始安装"
+    else
+      colorEcho ${RED} "域名 ${V2_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
+      read -rp "若您确保域名解析正确, 可以继续进行安装作业. 强制继续? (yes/no/quit)" forceConfirm
+      case "${forceConfirm}" in
+        [yY]|[yY][eE][sS] ) break ;;
+        [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
+      esac
+    fi
   done
   write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
+
+
 
   # install v2ray-core
   build_v2ray
@@ -632,6 +655,16 @@ install_trojan() {
       colorEcho ${RED} "域名 ${TJ_DOMAIN} 与现有域名重复,  请使用别的域名"
     else
       break
+    fi
+    if checkIP "${TJ_DOMAIN}"; then
+      colorEcho ${GREEN} "域名 ${TJ_DOMAIN} 解析正确, 即将开始安装"
+    else
+      colorEcho ${RED} "域名 ${TJ_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
+      read -rp "若您确保域名解析正确, 可以继续进行安装作业. 强制继续? (yes/no/quit)" forceConfirm
+      case "${forceConfirm}" in
+        [yY]|[yY][eE][sS] ) break ;;
+        [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
+      esac
     fi
   done
   write_json /usr/local/etc/v2script/config.json ".trojan.tlsHeader" "\"${TJ_DOMAIN}\""
