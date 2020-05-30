@@ -106,7 +106,6 @@ get_trojan() {
   wget -nv "${trojango_link}" -O trojan-go.zip
   unzip trojan-go.zip && rm -rf trojan-go.zip
   ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
-  write_json /usr/local/etc/v2script/config.json ".trojan.installed" "true"
 
   colorEcho ${BLUE} "Building trojan-go.service"
   ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
