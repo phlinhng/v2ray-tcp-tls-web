@@ -18,5 +18,5 @@ v2script
 + [x] Switch to docker ~~nginx~~ caddy
 + [ ] Add CentOS Support
 + [x] Random webpage template
-+ [ ] Check if domain resloved correctly before coutinue
++ [x] Check if domain resloved correctly before coutinue
 + [x] Support [trojan-go](https://github.com/p4gefau1t/trojan-go)
