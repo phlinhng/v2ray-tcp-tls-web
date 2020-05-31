@@ -1,9 +1,9 @@
-# v2ray tcp+tls+web (beta)
-automated script for v2Ray (TCP+TLS+Web)
+# V2RAY TCP+TLS+WEB / WSS+CDN and Trojan-go (dev)
+automated script for V2Ray (TCP+TLS+Web), V2Ray (WSS+CDN), and Trojan-go
 
 ## Usage
-```
-bash <(curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/beta/install.sh) && v2script
+```sh
+bash <(curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/install.sh) && v2script
 ```
 The above command will download the script, save it to `/usr/local/bin/v2script`, make it excutable and start it. To run the script again once installed, just use the following command:
 ```

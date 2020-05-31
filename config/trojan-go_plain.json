@@ -1,0 +1,16 @@
+{
+  "run_type": "server",
+  "local_addr": "127.0.0.1",
+  "local_port": 3567,
+  "remote_addr": "1.1.1.1",
+  "remote_port": 80,
+  "log_level": 3,
+  "password": [
+    "FAKETROJANPWD"
+  ],
+  "ssl": {
+    "cert": "/etc/ssl/trojan-go/server.crt",
+    "key": "/etc/ssl/trojan-go/server.key",
+    "serve_plain_text": true
+  }
+}

@@ -347,7 +347,7 @@ $(jq --raw-output '.trojan.tlsHeader' /usr/local/etc/v2script/config.json):80 {
 EOF
   fi
 
-  ${sudoCmd} /bin/cp -f ${caddyserver_file} /usr/local/etc/caddy/Caddyfile
+  ${sudoCmd} /bin/cp -f ${caddyserver_file} /usr/local/etc/caddy/Caddyfile && ${sudoCmd} chmod 644 /usr/local/etc/caddy/Caddyfile
 }
 
 build_web() {
@@ -360,6 +360,17 @@ build_web() {
     ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/robots.txt -O /var/www/html/robots.txt
   else
     echo "Dummy website existed. Skip building."
+  fi
+}
+
+checkIP() {
+  local realIP="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/custom/ip_api`)"
+  local resolvedIP="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
+
+  if [[ "${realIP}" == "${resolvedIP}" ]]; then
+    return 0
+  else
+    return 1
   fi
 }
 
@@ -505,8 +516,16 @@ install_v2ray() {
     read -rp "解析到本 VPS 的域名: " V2_DOMAIN
     if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader') == "${V2_DOMAIN}" ]] || [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader') == "${V2_DOMAIN}" ]]; then
       colorEcho ${RED} "域名 ${V2_DOMAIN} 与现有域名重复,  请使用别的域名"
-    else
+    elif checkIP "${V2_DOMAIN}"; then
+      colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始安装"
       break
+    else
+      colorEcho ${RED} "域名 ${V2_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
+      read -rp "若您确定域名解析正确, 可以继续进行安装作业. 强制继续? (yes/no/quit) " forceConfirm
+      case "${forceConfirm}" in
+        [yY]|[yY][eE][sS] ) break ;;
+        [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
+      esac
     fi
   done
   write_json /usr/local/etc/v2script/config.json ".v2ray.tlsHeader" "\"${V2_DOMAIN}\""
@@ -524,6 +543,7 @@ install_v2ray() {
   # prevent some bug
   ${sudoCmd} rm -rf /usr/local/etc/ssl/caddy/*
   ${sudoCmd} rm -f /usr/local/etc/Caddyfile # path for old version v2script
+  ${sudoCmd} rm -rf /tmp/v2ray-ds # prevent v2ray booting issues after reinstalling
 
   # create config files
   if [[ $(read_json /etc/v2ray/config.json '.inbounds[0].streamSettings.network') != "domainsocket" ]]; then
@@ -603,8 +623,8 @@ get_trojan() {
 
     ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/trojan-go/geoip.dat
     ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/trojan-go/geosite.dat
-    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/trojan.crt -O /etc/ssl/trojan-go/trojan.crt && ${sudoCmd} chmod 444 /etc/ssl/trojan-go/trojan.crt
-    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/trojan.key -O /etc/ssl/trojan-go/trojan.key && ${sudoCmd} chmod 444 /etc/ssl/trojan-go/trojan.key
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/trojan.crt -O /etc/ssl/trojan-go/server.crt && ${sudoCmd} chmod 444 /etc/ssl/trojan-go/server.crt
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/trojan.key -O /etc/ssl/trojan-go/server.key && ${sudoCmd} chmod 444 /etc/ssl/trojan-go/server.key
 
     # set crontab to auto update geoip.dat and geosite.dat
     (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/trojan-go/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
@@ -629,8 +649,16 @@ install_trojan() {
     read -rp "解析到本 VPS 的域名: " TJ_DOMAIN
     if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "${TJ_DOMAIN}" ]] || [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.tlsHeader') == "${TJ_DOMAIN}" ]]; then
       colorEcho ${RED} "域名 ${TJ_DOMAIN} 与现有域名重复,  请使用别的域名"
-    else
+    elif checkIP "${TJ_DOMAIN}"; then
+      colorEcho ${GREEN} "域名 ${TJ_DOMAIN} 解析正确, 即将开始安装"
       break
+    else
+      colorEcho ${RED} "域名 ${TJ_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
+      read -rp "若您确定域名解析正确, 可以继续进行安装作业. 强制继续? (yes/no/quit) " forceConfirm
+      case "${forceConfirm}" in
+        [yY]|[yY][eE][sS] ) break ;;
+        [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
+      esac
     fi
   done
   write_json /usr/local/etc/v2script/config.json ".trojan.tlsHeader" "\"${TJ_DOMAIN}\""
@@ -640,7 +668,7 @@ install_trojan() {
   # create config files
   if [ ! -f "/etc/trojan-go/config.json" ]; then
     colorEcho ${BLUE} "Setting trojan-go"
-    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/trojan-go.json -O /tmp/trojan-go.json
+    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/trojan-go_plain.json -O /tmp/trojan-go.json
     sed -i "s/FAKETROJANPWD/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)/g" /tmp/trojan-go.json
     ${sudoCmd} /bin/cp -f /tmp/trojan-go.json /etc/trojan-go/config.json
   fi

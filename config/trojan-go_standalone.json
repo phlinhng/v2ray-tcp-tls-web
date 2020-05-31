@@ -1,7 +1,7 @@
 {
   "run_type": "server",
   "local_addr": "127.0.0.1",
-  "local_port": 3567,
+  "local_port": 443,
   "remote_addr": "1.1.1.1",
   "remote_port": 80,
   "log_level": 3,
@@ -9,8 +9,7 @@
     "FAKETROJANPWD"
   ],
   "ssl": {
-    "cert": "/etc/ssl/trojan-go/trojan.crt",
-    "key": "/etc/ssl/trojan-go/trojan.key",
-    "serve_plain_text": true
+    "cert": "/etc/ssl/trojan-go/server.crt",
+    "key": "/etc/ssl/trojan-go/server.key"
   }
 }

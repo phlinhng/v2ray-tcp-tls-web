@@ -3,14 +3,10 @@
 # lite version
 
 export LC_ALL=C
-export LANG=C
+export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
 branch="master"
-
-# /usr/local/bin/v2script ##main
-# /usr/local/bin/v2sub ##subscription manager
-# /usr/local/etc/v2script/config.json ##config
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
@@ -70,6 +66,17 @@ write_json() {
   jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key = value]
 
+checkIP() {
+  local realIP="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/custom/ip_api`)"
+  local resolvedIP="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
+
+  if [[ "${realIP}" == "${resolvedIP}" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 get_proxy() {
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
     colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
@@ -84,7 +91,20 @@ get_v2ray() {
 }
 
 install_v2ray() {
-  read -p "解析到本VPS的域名: " V2_DOMAIN
+  while true; do
+    read -p "解析到本VPS的域名: " V2_DOMAIN
+    if checkIP "${V2_DOMAIN}"; then
+      colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始安装"
+      break
+    else
+      colorEcho ${RED} "域名 ${V2_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
+      read -rp "若您确定域名解析正确, 可以继续进行安装作业. 强制继续? (yes/no/quit) " forceConfirm
+      case "${forceConfirm}" in
+        [yY]|[yY][eE][sS] ) break ;;
+        [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
+      esac
+    fi
+  done
 
   # install requirements
   # coreutils: for base64 command
@@ -95,9 +115,6 @@ install_v2ray() {
   ${sudoCmd} ${systemPackage} install curl coreutils wget jq unzip -y -qq
 
   cd $(mktemp -d)
-  wget -q https://github.com/phlinhng/v2ray-tcp-tls-web/archive/${branch}.zip
-  unzip -q ${branch}.zip && rm -f ${branch}.zip ## will unzip the source to current path and remove the archive file
-  cd v2ray-tcp-tls-web-${branch}
 
   # install v2ray-core
   if [ ! -d "/usr/bin/v2ray" ]; then
@@ -145,6 +162,10 @@ EOF
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
     ${sudoCmd} timedatectl set-ntp true
+
+    # set crontab to auto update geoip.dat and geosite.dat
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
   fi
 
   # install tls-shunt-proxy
@@ -155,15 +176,16 @@ EOF
 
   # create config files
   colorEcho ${BLUE} "Setting v2Ray"
-  sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" ./config/v2ray.json
-  sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" ./config/v2ray.json
-  ${sudoCmd} /bin/cp -f ./config/v2ray.json /etc/v2ray/config.json
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2ray.json -O /tmp/v2ray.json
+  sed -i "s/FAKEPORT/$(read_json /etc/v2ray/config.json '.inbounds[0].port')/g" /tmp/v2ray.json
+  sed -i "s/FAKEUUID/$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" /tmp/v2ray.json
+  ${sudoCmd} /bin/cp -f /tmp/v2ray.json /etc/v2ray/config.json
 
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
-  ${sudoCmd} /bin/cp /etc/tls-shunt-proxy/config.yaml /etc/tls-shunt-proxy/config.yaml.bak 2>/dev/null
-  sed -i "s/FAKEV2DOMAIN/${V2_DOMAIN}/g" ./config/config.yaml
-  sed -i "s/##V2RAY@//g" ./config/config.yaml
-  ${sudoCmd} /bin/cp -f ./config/config.yaml /etc/tls-shunt-proxy/config.yaml
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/tls-shunt-proxy.yaml -O /tmp/config_new.yaml
+  sed -i "s/FAKEV2DOMAIN/$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')/g" /tmp/config_new.yaml
+  sed -i "s/##V2RAY@//g" /tmp/config_new.yaml
+  ${sudoCmd} /bin/cp -f /tmp/config_new.yaml /etc/tls-shunt-proxy/config.yaml
 
   # choose and copy a random  template for dummy web pages
   colorEcho ${BLUE} "Building dummy web site"
@@ -172,10 +194,6 @@ EOF
   ${sudoCmd} mkdir -p /var/www/html
   ${sudoCmd} unzip -q ${template} -d /var/www/html
   ${sudoCmd} /bin/cp -f ./custom/robots.txt /var/www/html/robots.txt
-
-  # set crontab to auto update geoip.dat and geosite.dat
-  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
-  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   # activate services
   colorEcho ${BLUE} "Activating services"
@@ -190,11 +208,11 @@ EOF
   colorEcho ${GREEN} "安装TCP+TLS+WEB成功!"
   local uuid="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
   local json="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}:443\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri="$(printf "${json}" | base64)"
+  local uri="$(printf "${json}" | base64 --wrap=0)"
 
-  echo "${V2_DOMAIN}:443"
-  echo "${uuid} (aid: 0)" && echo ""
-  echo "vmess://${uri}" | tr -d '\n' && printf "\n"
+  printf '%s\n' "${V2_DOMAIN}:443"
+  printf '%s\n\n' "${uuid} (aid: 0)"
+  printf '%s\n' "vmess://${uri}"
 }
 
 install_v2ray
