@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
-branch="master"
+branch="dev"
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
@@ -760,6 +760,13 @@ vps_tools() {
   exit 0
 }
 
+cert_status() {
+  echo ""
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]];then
+    printf '%s: %s' "V2Ray域名"
+  fi
+}
+
 check_status() {
   printf "目前配置: "
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
@@ -818,11 +825,12 @@ show_menu() {
   echo "4) 设置 CDN"
   echo "5) 设置电报代理"
   echo "6) VPS 工具"
+  echo "7) 检查证书状态"
   echo "----------组件管理----------"
-  echo "7) 更新 v2ray-core"
-  echo "8) 更新 tls-shunt-proxy"
-  echo "9) 更新 trojan-go"
-  echo "10) 卸载脚本"
+  echo "8) 更新 v2ray-core"
+  echo "9) 更新 tls-shunt-proxy"
+  echo "10) 更新 trojan-go"
+  echo "11) 卸载脚本"
   echo ""
 }
 
@@ -846,10 +854,11 @@ menu() {
       "4") set_v2ray_wss_prompt && continue_prompt ;;
       "5") install_mtproto && continue_prompt ;;
       "6") vps_tools ;;
-      "7") get_v2ray && continue_prompt ;;
-      "8") get_proxy && continue_prompt ;;
-      "9") get_trojan && continue_prompt ;;
-      "10") rm_v2script ;;
+      "7") cert_status && continue_prompt ;;
+      "8") get_v2ray && continue_prompt ;;
+      "9") get_proxy && continue_prompt ;;
+      "10") get_trojan && continue_prompt ;;
+      "11") rm_v2script ;;
       *) break ;;
     esac
   done
