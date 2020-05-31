@@ -81,14 +81,6 @@ checkIP() {
   fi
 }
 
-get_proxy() {
-  if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
-    colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
-    curl -sL https://raw.githubusercontent.com/liberal-boy/tls-shunt-proxy/master/dist/install.sh | ${sudoCmd} bash
-    colorEcho ${GREEN} "tls-shunt-proxy is installed."
-  fi
-}
-
 get_trojan() {
   colorEcho ${BLUE} "Getting the latest version of trojan-go"
   local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
