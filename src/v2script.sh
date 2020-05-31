@@ -787,7 +787,7 @@ check_status() {
 
   printf "电报代理: "
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') != "true" ]] && [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') != "true" ]] && [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
-    colorEcho ${GREEN} "tg://proxy?server=`curl -s https://api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
+    colorEcho ${GREEN} "tg://proxy?server=`curl -s api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
   elif [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
     colorEcho ${GREEN} "tg://proxy?server=$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
   elif [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
