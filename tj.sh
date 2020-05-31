@@ -92,7 +92,7 @@ get_trojan() {
   ${sudoCmd} mkdir -p "/etc/ssl/trojan-go"
 
   wget -nv "${trojango_link}" -O trojan-go.zip
-  unzip trojan-go.zip && rm -rf trojan-go.zip
+  unzip -q trojan-go.zip && rm -rf trojan-go.zip
   ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
 
   colorEcho ${BLUE} "Building trojan-go.service"

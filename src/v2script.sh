@@ -614,7 +614,7 @@ get_trojan() {
 
     cd $(mktemp -d)
     wget -nv "${trojango_link}" -O trojan-go.zip
-    unzip trojan-go.zip && rm -rf trojan-go.zip
+    unzip -q trojan-go.zip && rm -rf trojan-go.zip
     ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
     write_json /usr/local/etc/v2script/config.json ".trojan.installed" "true"
 
