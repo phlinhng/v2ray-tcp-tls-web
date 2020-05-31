@@ -67,7 +67,7 @@ write_json() {
 } ## write_json [path-to-file] [key = value]
 
 checkIP() {
-  local realIP="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/custom/ip_api`)"
+  local realIP="$(curl -s https://api.ipify.org)"
   local resolvedIP="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
 
   if [[ "${realIP}" == "${resolvedIP}" ]]; then
