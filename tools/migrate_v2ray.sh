@@ -34,11 +34,14 @@ read_json() {
 if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]] && [ -d "/usr/bin/v2ray" ]; then
   # remove v2ray installed with old script
   ${sudoCmd} bash <(curl -sL https://install.direct/go.sh) --remove
+
   # remove log folder and domainsocket folder
   ${sudoCmd} rm -rf /var/log/v2ray
   ${sudoCmd} rm -rf /tmp/v2ray-ds
+
   # move config folder
   ${sudoCmd} mv /etc/v2ray/ /usr/local/etc/
+
   # remove cronatab with old path of geo*.dat
   ${sudoCmd} crontab -l | grep -v '/usr/bin/v2ray/geoip.dat' | ${sudoCmd} crontab -
   ${sudoCmd} crontab -l | grep -v '/usr/bin/v2ray/geosite.dat' | ${sudoCmd} crontab -
@@ -50,7 +53,7 @@ if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "tr
   # install v2ray fhs
   ${sudoCmd} bash <(curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
 
-    # rebuild v2ray.service
+  # rebuild v2ray.service
   colorEcho ${BLUE} "Building v2ray.service for domainsocket"
   local ds_service=$(mktemp)
   cat > ${ds_service} <<-EOF
