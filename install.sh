@@ -56,6 +56,9 @@ ${sudoCmd} mkdir -p /usr/local/etc/v2script
 
 if [ ! -f "/usr/local/etc/v2script/config.json" ]; then
   ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2script.json -O /usr/local/etc/v2script/config.json
+elif [ -f "/usr/local/etc/v2script/config.json" ] && [ -d "/usr/bin/v2ray" ]; then
+  echo "migrating v2ray to new path"
+  ${sudoCmd} bash <(curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/migrate_v2ray.sh)
 fi
 
 ${sudoCmd} wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2script.sh -O /usr/local/bin/v2script
