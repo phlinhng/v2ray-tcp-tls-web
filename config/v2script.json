@@ -16,7 +16,8 @@
       "installed": false,
       "tlsHeader": "",
       "path": "/"
-    }
+    },
+    "clash": false
   },
   "mtproto": {
     "installed": false,

@@ -163,6 +163,37 @@ display_link_main() {
   fi
 }
 
+sync_clash() {
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.sub.clash')" == "true" ]]
+    local v2_remark=$1
+    local tj_remark=$2
+
+    local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
+    local TJ_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader')"
+
+    local yaml_tcp='- { name: "%s", type: vmess, server: %s, port: 443, uuid: %s, alterId: 0, cipher: none, tls: true }'
+    local yaml_wss='- { name: "%s", type: vmess, server: %s, port: 443, uuid: %s, alterId: 0, cipher: none, network: ws, ws-path: /%s, ws-headers: {Host: %s}, tls: true }'
+    local yaml_trojan='- { name: "%s", type: trojan, server: %s, port: 443, password: %s}'
+
+    if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
+      local uuid_tcp="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+      local config_tcp=`printf "${yaml_tcp}" "${v2_remark}" "${V2_DOMAIN}" "${uuid_tcp}"`
+    fi
+
+    if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]]; then
+      local cfUrl="amp.cloudflare.com"
+      local wssPath="$(read_json /etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path' | tr -d '/')"
+      local uuid_wss="$(read_json /etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
+      local config_wss=`printf "${yaml_wss}" "${v2_remark}" "${cfUrl}" "${uuid_wss}" "${wssPath}" "${V2_DOMAIN}"`
+    fi
+
+    if [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
+      local uuid_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
+      local config_trojan=`printf "${yaml_trojan}" "${tj_remark}" "${TJ_DOMAIN}" "${uuid_trojan}"`
+    fi
+  fi
+}
+
 sync_nodes() {
   local v2_remark=$1
   local tj_remark=$2
