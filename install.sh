@@ -6,11 +6,6 @@ export LANGUAGE=en_US.UTF-8
 branch="dev"
 VERSION="$(curl -fsL https://api.github.com/repos/phlinhng/v2ray-tcp-tls-web/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/')"
 
-# /usr/local/etc/v2script/config.json ##config path
-
-# /usr/local/bin/v2script ##main
-# /usr/local/bin/v2sub ##subscription manager
-
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
 else
