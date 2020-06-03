@@ -96,6 +96,9 @@ ${sudoCmd} deluser www-data
 ${sudoCmd} delgroup --only-if-empty www-data
 colorEcho ${GREEN} "Removed caddy successfully."
 
+colorEcho ${BLUE} "Removing dummy site."
+${sudoCmd} rm -rf  /var/www/html
+
 # remove trojan-go
 colorEcho ${BLUE} "Shutting down trojan-go service."
 ${sudoCmd} systemctl stop trojan-go
