@@ -764,15 +764,27 @@ vps_tools() {
 }
 
 cert_status() {
-  echo ""
+  printf "\n"
+
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]];then
     local V2_DOMAIN=`read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader'`
     if [ -d "/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${V2_DOMAIN}" ]; then
-      printf "%s\t%s\t%s${green}\n" "V2Ray域名" "${V2_DOMAIN}" "正常" | expand -t 32
+      printf "%s\t%s\t%s${green}\n" "[V2Ray]" "${V2_DOMAIN}" "正常" | expand -t 32
     else
-      printf "%s\t%s\t%s${red}\n" "V2Ray域名" "${V2_DOMAIN}" "异常" | expand -t 32
+      printf "%s\t%s\t%s${red}\n" "[V2Ray]" "${V2_DOMAIN}" "异常" | expand -t 32
     fi
   fi
+
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]];then
+    local TJ_DOMAIN=`read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader'`
+    if [ -d "/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${TJ_DOMAIN}" ]; then
+      printf "%s\t%s\t%s${green}\n" "[Trojan]" "${TJ_DOMAIN}" "正常" | expand -t 32
+    else
+      printf "%s\t%s\t%s${red}\n" "[Trojan]" "${TJ_DOMAIN}" "异常" | expand -t 32
+    fi
+  fi
+
+  printf "\n"
 }
 
 check_status() {
@@ -825,7 +837,7 @@ show_menu() {
   echo ""
   echo "----------安装代理----------"
   echo "0) 安装 V2Ray TCP+TLS+WEB"
-  echo "1) 安装 trojan-go"
+  echo "1) 安装 Trojan-go"
   echo "----------显示配置----------"
   echo "2) 显示链接"
   echo "3) 管理订阅"
