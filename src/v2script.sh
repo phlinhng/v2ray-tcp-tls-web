@@ -614,7 +614,7 @@ get_trojan() {
 
     ${sudoCmd} mkdir -p "/usr/bin/trojan-go"
     ${sudoCmd} mkdir -p "/etc/trojan-go"
-    ${sudoCmd} mkdir -p "/etc/ssl/trojan-go"
+    #${sudoCmd} mkdir -p "/etc/ssl/trojan-go"
 
     cd $(mktemp -d)
     wget -nv "${trojango_link}" -O trojan-go.zip
