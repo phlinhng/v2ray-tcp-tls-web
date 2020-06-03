@@ -26,8 +26,9 @@ colorEcho(){
   echo -e "\033[${1}${@:2}\033[0m" 1>& 2
 }
 
-red="\033[0;${RED}\033[0m"
-green="\033[0;${GREEN}\033[0m"
+red="\033[0;${RED}"
+green="\033[0;${GREEN}"
+nocolor="\033[0m"
 
 #copied & modified from atrandys trojan scripts
 #copy from 秋水逸冰 ss scripts
@@ -769,18 +770,18 @@ cert_status() {
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]];then
     local V2_DOMAIN=`read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader'`
     if [ -d "/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${V2_DOMAIN}" ]; then
-      printf "%s\t%s\t%s${green}\n" "[V2Ray]" "${V2_DOMAIN}" "正常" | expand -t 32
+      printf "%s\t%s\t${green}%s${nocolor}\n" "[V2Ray]" "${V2_DOMAIN}" "正常" | expand -t 32
     else
-      printf "%s\t%s\t%s${red}\n" "[V2Ray]" "${V2_DOMAIN}" "异常" | expand -t 32
+      printf "%s\t%s\t${red}%s${nocolor}\n" "[V2Ray]" "${V2_DOMAIN}" "异常" | expand -t 32
     fi
   fi
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]];then
     local TJ_DOMAIN=`read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader'`
     if [ -d "/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${TJ_DOMAIN}" ]; then
-      printf "%s\t%s\t%s${green}\n" "[Trojan]" "${TJ_DOMAIN}" "正常" | expand -t 32
+      printf "%s\t%s\t%${green}%s${nocolor}\n" "[Trojan]" "${TJ_DOMAIN}" "正常" | expand -t 32
     else
-      printf "%s\t%s\t%s${red}\n" "[Trojan]" "${TJ_DOMAIN}" "异常" | expand -t 32
+      printf "%s\t%s\t${red}%s${nocolor}\n" "[Trojan]" "${TJ_DOMAIN}" "异常" | expand -t 32
     fi
   fi
 
