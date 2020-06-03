@@ -107,6 +107,8 @@ colorEcho ${BLUE} "Removing trojan-go files."
 ${sudoCmd} rm -rf /usr/bin/trojan-go
 ${sudoCmd} rm -rf /etc/trojan-go
 ${sudoCmd} rm -rf /etc/ssl/trojan-go
+${sudoCmd} crontab -l | grep -v 'trojan-go/geoip.dat' | ${sudoCmd} crontab -
+${sudoCmd} crontab -l | grep -v 'trojan-go/geosite.dat' | ${sudoCmd} crontab -
 colorEcho ${GREEN} "Removed trojan-go successfully."
 
 # docker

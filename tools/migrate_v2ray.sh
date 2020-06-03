@@ -32,6 +32,10 @@ read_json() {
 } ## read_json [path-to-file] [key]
 
 if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]] && [ -d "/usr/bin/v2ray" ]; then
+  # stop v2ray service
+  ${sudoCmd} systemctl stop v2ray 2>/dev/null
+  ${sudoCmd} systemctl disable v2ray 2>/dev/null
+
   # remove v2ray installed with old script
   ${sudoCmd} bash <(curl -sL https://install.direct/go.sh) --remove
 
@@ -45,10 +49,6 @@ if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "tr
   # remove cronatab with old path of geo*.dat
   ${sudoCmd} crontab -l | grep -v '/usr/bin/v2ray/geoip.dat' | ${sudoCmd} crontab -
   ${sudoCmd} crontab -l | grep -v '/usr/bin/v2ray/geosite.dat' | ${sudoCmd} crontab -
-
-  # set crontab to auto update geoip.dat and geosite.dat
-  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/lib/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
-  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/lib/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   # install v2ray fhs
   ${sudoCmd} bash <(curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
@@ -95,6 +95,10 @@ RestartPreventExitStatus=23
 WantedBy=multi-user.target
 EOF
   ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
+
+  # set crontab to auto update geoip.dat and geosite.dat
+  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/lib/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/lib/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl enable v2ray 2>/dev/null
