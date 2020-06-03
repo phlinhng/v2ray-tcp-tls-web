@@ -779,7 +779,7 @@ cert_status() {
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]];then
     local TJ_DOMAIN=`read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader'`
     if [ -d "/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${TJ_DOMAIN}" ]; then
-      printf "%s\t%s\t%${green}%s${nocolor}\n" "[Trojan]" "${TJ_DOMAIN}" "正常" | expand -t 24
+      printf "%s\t%s\t${green}%s${nocolor}\n" "[Trojan]" "${TJ_DOMAIN}" "正常" | expand -t 24
     else
       printf "%s\t%s\t${red}%s${nocolor}\n" "[Trojan]" "${TJ_DOMAIN}" "异常" | expand -t 24
     fi
