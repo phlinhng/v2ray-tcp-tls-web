@@ -86,15 +86,19 @@ Proxy Group:
 
 # url-test 通过指定的 URL 测试并选择延迟最低的节点
 - { name: "🏆URLTest", type: url-test, proxies: [ "V2Ray (TCP+TLS)", "V2Ray (WSS)", "Trojan" ], url: "http://www.gstatic.com/generate_204", interval: 300 }
+- { name: "🏆URLTest", type: url-test, proxies: [ "V2Ray (TCP+TLS)", "Trojan" ], url: "http://www.gstatic.com/generate_204", interval: 300 }
 
 # fallback 通过指定的 URL 测试并选择可用的节点，当 1 故障不可用时自动切换到 2 以此类推
 - { name: "📡VMess", type: fallback, proxies: [ "V2Ray (TCP+TLS)", "V2Ray (WSS)" ], url: "http://www.gstatic.com/generate_204", interval: 300 }
+- { name: "📡VMess", type: fallback, proxies: [ "V2Ray (TCP+TLS)" ], url: "http://www.gstatic.com/generate_204", interval: 300 }
 
 # load-balance: 负载均衡
 # - { name: "LoadBalance", type: load-balance, proxies: ["1", "2", "3", "4"], url: "http://www.gstatic.com/generate_204", interval: 300 }
 
 # 代理节点选择
 - { name: "🚀PROXY", type: select, proxies: [ "🏆URLTest", "📡VMess", "Trojan" ] }
+- { name: "🚀PROXY", type: select, proxies: [ "🏆URLTest", "📡VMess" ] }
+
 
 # 白名单模式 PROXY，黑名单模式 DIRECT
 - { name: "🧩Final", type: select, proxies: [ "🚀PROXY", "DIRECT" ] }
