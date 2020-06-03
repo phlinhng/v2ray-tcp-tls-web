@@ -26,6 +26,9 @@ colorEcho(){
   echo -e "\033[${1}${@:2}\033[0m" 1>& 2
 }
 
+red="\033[0;${RED}\033[0m"
+green="\033[0;${GREEN}\033[0m"
+
 #copied & modified from atrandys trojan scripts
 #copy from 秋水逸冰 ss scripts
 if [[ -f /etc/redhat-release ]]; then
@@ -763,7 +766,12 @@ vps_tools() {
 cert_status() {
   echo ""
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]];then
-    printf '%s: %s' "V2Ray域名"
+    local V2_DOMAIN=`read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader'`
+    if [ -d "/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${V2_DOMAIN}" ]; then
+      printf "%s\t%s\t%s${green}\n" "V2Ray域名" "${V2_DOMAIN}" "正常" | expand -t 32
+    else
+      printf "%s\t%s\t%s${red}\n" "V2Ray域名" "${V2_DOMAIN}" "异常" | expand -t 32
+    fi
   fi
 }
 
