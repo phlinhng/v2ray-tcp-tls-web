@@ -51,7 +51,7 @@ if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "tr
 
   # rebuild v2ray.service
   colorEcho ${BLUE} "Building v2ray.service for domainsocket"
-  local ds_service=$(mktemp)
+  ds_service=$(mktemp)
   cat > ${ds_service} <<-EOF
 [Unit]
 Description=V2Ray - A unified platform for anti-censorship
