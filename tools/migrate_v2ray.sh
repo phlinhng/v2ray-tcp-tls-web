@@ -11,17 +11,6 @@ else
   sudoCmd=""
 fi
 
-# copied from v2ray official script
-# colour code
-RED="31m"      # Error message
-GREEN="32m"    # Success message
-YELLOW="33m"   # Warning message
-BLUE="36m"     # Info message
-# colour function
-colorEcho(){
-  echo -e "\033[${1}${@:2}\033[0m" 1>& 2
-}
-
 read_json() {
   # jq [key] [path-to-file]
   ${sudoCmd} jq --raw-output $2 $1 2>/dev/null | tr -d '\n'
@@ -50,7 +39,6 @@ if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "tr
   ${sudoCmd} bash <(curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
 
   # rebuild v2ray.service
-  colorEcho ${BLUE} "Building v2ray.service for domainsocket"
   ds_service=$(mktemp)
   cat > ${ds_service} <<-EOF
 [Unit]
