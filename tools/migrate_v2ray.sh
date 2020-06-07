@@ -40,6 +40,11 @@ if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "tr
   # install v2ray fhs
   ${sudoCmd} bash <(curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
 
+  # update geoip.dat, geosite.dat
+  ${sudoCmd} mkdir -p /usr/local/lib/v2ray
+  ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/lib/v2ray/geoip.dat
+  ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/lib/v2ray/geosite.dat
+
   # rebuild v2ray.service
   ds_service=$(mktemp)
   cat > ${ds_service} <<-EOF
