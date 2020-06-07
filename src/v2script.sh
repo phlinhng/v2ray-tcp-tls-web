@@ -460,7 +460,7 @@ get_v2ray() {
 }
 
 build_v2ray() {
-  if [[ ! -f "/usr/local/bin/v2ray" ]]; then
+  if [ ! -f "/usr/local/bin/v2ray" ]; then
     get_v2ray
     colorEcho ${BLUE} "Building v2ray.service for domainsocket"
     local ds_service=$(mktemp)
@@ -507,6 +507,7 @@ EOF
     ${sudoCmd} useradd -d /usr/local/etc/v2ray/ -M -s $(${sudoCmd} which nologin) v2ray
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
+    ${sudoCmd} mkdir -p /usr/local/etc/v2ray
     write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
     ${sudoCmd} timedatectl set-ntp true
 
