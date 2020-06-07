@@ -507,9 +507,13 @@ EOF
     ${sudoCmd} useradd -d /usr/local/etc/v2ray/ -M -s $(${sudoCmd} which nologin) v2ray
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
-    ${sudoCmd} mkdir -p /usr/local/etc/v2ray
     write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
     ${sudoCmd} timedatectl set-ntp true
+
+    ${sudoCmd} mkdir -p /usr/local/etc/v2ray
+    ${sudoCmd} mkdir -p /usr/local/lib/v2ray
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/lib/v2ray/geoip.dat
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/lib/v2ray/geosite.dat
 
     # set crontab to auto update geoip.dat and geosite.dat
     (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/lib/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
