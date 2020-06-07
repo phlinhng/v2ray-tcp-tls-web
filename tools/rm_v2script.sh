@@ -50,7 +50,7 @@ ${sudoCmd} ${systemPackage} install curl -y -qq
 # remove v2ray
 # Notice the two dashes (--) which are telling bash to not process anything following it as arguments to bash.
 # https://stackoverflow.com/questions/4642915/passing-parameters-to-bash-when-executing-a-script-fetched-by-curl
-curl -sL ttps://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
+curl -sL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 ${sudoCmd} rm -rf /etc/v2ray
 curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash -s -- --remove
 ${sudoCmd} rm -rf /usr/local/etc/v2ray
