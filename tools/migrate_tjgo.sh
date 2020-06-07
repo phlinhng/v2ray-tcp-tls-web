@@ -22,10 +22,19 @@ if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "t
   ${sudoCmd} rm -f /etc/ssl/trojan-go/server*
   ${sudoCmd} cp /etc/trojan-go/config.json /etc/trojan-go/config.json.bak
 
-  local currentPassword="$(read_json "/etc/trojan-go/config.json.bak" ".password[0]")"
+  currentPassword="$(read_json "/etc/trojan-go/config.json.bak" ".password[0]")"
   wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/trojan-go_plain.json -O /tmp/trojan-go.json
   sed -i "s/FAKETROJANPWD/"${currentPassword}"/g" /tmp/trojan-go.json
   ${sudoCmd} /bin/cp -f /tmp/trojan-go.json /etc/trojan-go/config.json
+
+  latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+  echo "${latest_version}"
+  trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
+
+  mkdir -p /tmp/trojan-go
+  wget -nv "${trojango_link}" -O /tmp/trojan-go.zip
+  unzip -d /tmp/trojan-go /tmp/trojan-go.zip
+  ${sudoCmd} mv /tmp/trojan-go/trojan-go /usr/bin/trojan-go/trojan-go
 
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl restart trojan-go 2>/dev/null
