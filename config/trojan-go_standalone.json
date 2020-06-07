@@ -11,5 +11,11 @@
   "ssl": {
     "cert": "/etc/ssl/trojan-go/server.crt",
     "key": "/etc/ssl/trojan-go/server.key"
+  },
+  "router": {
+    "enabled": true,
+    "block": [
+      "geoip:private"
+    ]
   }
 }
