@@ -8,9 +8,14 @@
   "password": [
     "FAKETROJANPWD"
   ],
-  "ssl": {
-    "cert": "/etc/ssl/trojan-go/server.crt",
-    "key": "/etc/ssl/trojan-go/server.key",
-    "serve_plain_text": true
+  "transport_plugin": {
+    "enabled": true,
+    "type": "plaintext"
+  },
+  "router":{
+    "enabled": true,
+    "block": [
+      "geoip:private"
+    ]
   }
 }

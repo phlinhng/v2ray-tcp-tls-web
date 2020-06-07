@@ -6,11 +6,6 @@ export LANGUAGE=en_US.UTF-8
 branch="master"
 VERSION="$(curl -fsL https://api.github.com/repos/phlinhng/v2ray-tcp-tls-web/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/')"
 
-# /usr/local/etc/v2script/config.json ##config path
-
-# /usr/local/bin/v2script ##main
-# /usr/local/bin/v2sub ##subscription manager
-
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
 else
@@ -56,6 +51,9 @@ ${sudoCmd} mkdir -p /usr/local/etc/v2script
 
 if [ ! -f "/usr/local/etc/v2script/config.json" ]; then
   ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2script.json -O /usr/local/etc/v2script/config.json
+elif [ -f "/usr/local/etc/v2script/config.json" ]; then
+  ${sudoCmd} bash <(curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/migrate_v2ray.sh)
+  ${sudoCmd} bash <(curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/migrate_tjgo.sh)
 fi
 
 ${sudoCmd} wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2script.sh -O /usr/local/bin/v2script

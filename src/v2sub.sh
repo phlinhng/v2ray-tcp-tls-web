@@ -124,7 +124,7 @@ set_proxy() {
   fi
 
   if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare') == "true" ]]; then
-    sed -i "s/FAKECDNPATH/$(read_json /etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path' | tr -d '/')/g" /tmp/config_new.yaml
+    sed -i "s/FAKECDNPATH/$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path' | tr -d '/')/g" /tmp/config_new.yaml
     sed -i "s/##CDN@//g" /tmp/config_new.yaml
   fi
 
@@ -171,7 +171,7 @@ sync_nodes() {
   local TJ_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader')"
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
-    local uuid_tcp="$(read_json /etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+    local uuid_tcp="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
     local json_tcp="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid_tcp}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${v2_remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
     local uri_tcp="$(printf %s "${json_tcp}" | base64 --wrap=0)"
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri_tcp}\"")"
@@ -179,8 +179,8 @@ sync_nodes() {
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]]; then
     local cfUrl="www.digitalocean.com"
-    local wssPath="$(read_json /etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path' | tr -d '/')"
-    local uuid_wss="$(read_json /etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
+    local wssPath="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path' | tr -d '/')"
+    local uuid_wss="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
     local json_wss="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${V2_DOMAIN}\",\"id\":\"${uuid_wss}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${v2_remark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
     local uri_wss="$(printf %s "${json_wss}" | base64 --wrap=0)"
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss' "$(printf %s "\"vmess://${uri_wss}\"")"
