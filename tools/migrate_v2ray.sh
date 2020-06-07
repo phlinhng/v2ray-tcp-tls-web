@@ -17,6 +17,8 @@ read_json() {
 } ## read_json [path-to-file] [key]
 
 if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]] && [ -d "/usr/bin/v2ray" ]; then
+  echo -e "\033[0;33mMigrating v2ray to new path\033[0m"
+
   # stop v2ray service
   ${sudoCmd} systemctl stop v2ray 2>/dev/null
   ${sudoCmd} systemctl disable v2ray 2>/dev/null

@@ -627,8 +627,6 @@ get_trojan() {
 
     ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/trojan-go/geoip.dat
     ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/trojan-go/geosite.dat
-    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/trojan.crt -O /etc/ssl/trojan-go/server.crt && ${sudoCmd} chmod 444 /etc/ssl/trojan-go/server.crt
-    ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/trojan.key -O /etc/ssl/trojan-go/server.key && ${sudoCmd} chmod 444 /etc/ssl/trojan-go/server.key
 
     # set crontab to auto update geoip.dat and geosite.dat
     (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/trojan-go/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -

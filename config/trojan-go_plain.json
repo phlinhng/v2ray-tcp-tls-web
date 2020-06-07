@@ -11,5 +11,11 @@
   "transport_plugin": {
     "enabled": true,
     "type": "plaintext"
+  },
+  "router":{
+    "enabled": true,
+    "block": [
+      "geoip:private"
+    ]
   }
 }
