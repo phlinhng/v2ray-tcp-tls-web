@@ -554,7 +554,7 @@ install_v2ray() {
   if [[ $(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].streamSettings.network') != "domainsocket" ]]; then
     colorEcho ${BLUE} "Setting v2Ray"
     wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/v2ray.json -O /tmp/v2ray.json
-    sed -i "s/FAKEPORT/$(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].port')/g" /tmp/v2ray.json
+    sed -i "s/FAKEPORT/$(cat '/proc/sys/kernel/random/uuid')/g" /tmp/v2ray.json
     sed -i "s/FAKEUUID/$(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')/g" /tmp/v2ray.json
     ${sudoCmd} /bin/cp -f /tmp/v2ray.json /usr/local/etc/v2ray/config.json
   fi
