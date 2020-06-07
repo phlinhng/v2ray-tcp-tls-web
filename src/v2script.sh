@@ -456,7 +456,7 @@ set_v2ray_wss_prompt() {
 }
 
 get_v2ray() {
-  ${sudoCmd} bash <(curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
+  curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash
 }
 
 build_v2ray() {
