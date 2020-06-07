@@ -425,6 +425,7 @@ set_v2ray_wss() {
     echo "${uuid_wss} (aid: 0)"
     echo "Header: ${sni}, Path: /${wssPath}" && echo ""
     echo "vmess://${uri_wss}" | tr -d '\n' && printf "\n"
+    write_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss' "$(printf %s "\"vmess://${uri_wss}\"" | tr -d '\n')"
 
     subscription_prompt
   else
