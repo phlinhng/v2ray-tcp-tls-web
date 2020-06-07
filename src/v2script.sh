@@ -220,7 +220,7 @@ subscription_prompt() {
     fi
 
     if [[ $(read_json /usr/local/etc/v2script/config.json '.trojan.installed') == "true" ]]; then
-      local tj_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' | urlDecode)"
+      local tj_currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.trojan' | sed 's/^trojan:\/\/.+#//g' | urlDecode)"
     else
       local tj_currentRemark="null"
     fi
