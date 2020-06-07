@@ -460,7 +460,7 @@ get_v2ray() {
 }
 
 build_v2ray() {
-  if [ ! -f "/usr/local/bin/v2ray" ]; then
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') != "true" ]]; then
     get_v2ray
     colorEcho ${BLUE} "Building v2ray.service for domainsocket"
     local ds_service=$(mktemp)
