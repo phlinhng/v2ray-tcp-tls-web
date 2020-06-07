@@ -24,7 +24,7 @@ if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "tr
   ${sudoCmd} systemctl disable v2ray 2>/dev/null
 
   # remove v2ray installed with old script
-  curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash -s -- --remove
+  curl -sL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 
   # remove log folder and domainsocket folder
   ${sudoCmd} rm -rf /var/log/v2ray
