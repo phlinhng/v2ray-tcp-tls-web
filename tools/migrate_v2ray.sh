@@ -24,7 +24,7 @@ if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "tr
   ${sudoCmd} systemctl disable v2ray 2>/dev/null
 
   # remove v2ray installed with old script
-  ${sudoCmd} bash <(curl -sL https://install.direct/go.sh) --remove
+  curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash -s -- --remove
 
   # remove log folder and domainsocket folder
   ${sudoCmd} rm -rf /var/log/v2ray
@@ -38,7 +38,7 @@ if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "tr
   ${sudoCmd} crontab -l | grep -v '/usr/bin/v2ray/geosite.dat' | ${sudoCmd} crontab -
 
   # install v2ray fhs
-  ${sudoCmd} bash <(curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
+  curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash
 
   # update geoip.dat, geosite.dat
   ${sudoCmd} mkdir -p /usr/local/lib/v2ray
