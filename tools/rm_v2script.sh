@@ -51,13 +51,14 @@ ${sudoCmd} ${systemPackage} install curl -y -qq
 # Notice the two dashes (--) which are telling bash to not process anything following it as arguments to bash.
 # https://stackoverflow.com/questions/4642915/passing-parameters-to-bash-when-executing-a-script-fetched-by-curl
 curl -sL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
-colorEcho ${BLUE} "Shutting down caddy service."
+colorEcho ${BLUE} "Shutting down v2ray service."
 ${sudoCmd} systemctl stop v2ray
 ${sudoCmd} systemctl disable caddy
 ${sudoCmd} rm -f /etc/systemd/system/v2ray.service
 ${sudoCmd} rm -f /etc/systemd/system/v2ray.service
 ${sudoCmd} rm -f /etc/systemd/system/v2ray@.service
 ${sudoCmd} rm -f /etc/systemd/system/v2ray@.service
+colorEcho ${BLUE} "Removing v2ray files."
 ${sudoCmd} rm -rf /etc/v2ray
 ${sudoCmd} rm -rf /usr/local/bin/v2ray
 ${sudoCmd} rm -rf /usr/local/bin/v2ctl
@@ -65,10 +66,13 @@ ${sudoCmd} rm -rf /usr/local/etc/v2ray
 ${sudoCmd} rm -rf /usr/local/lib/v2ray
 ${sudoCmd} rm -rf /var/log/v2ray
 ${sudoCmd} rm -rf /tmp/v2ray-ds
+colorEcho ${BLUE} "Removing v2ray user & group."
 ${sudoCmd} deluser v2ray
 ${sudoCmd} delgroup --only-if-empty v2ray
+colorEcho ${BLUE} "Removing v2ray crontab"
 ${sudoCmd} crontab -l | grep -v 'v2ray/geoip.dat' | ${sudoCmd} crontab -
 ${sudoCmd} crontab -l | grep -v 'v2ray/geosite.dat' | ${sudoCmd} crontab -
+colorEcho ${GREEN} "Removed v2ray successfully."
 
 # remove tls-shunt-server
 colorEcho ${BLUE} "Shutting down tls-shunt-proxy service."
