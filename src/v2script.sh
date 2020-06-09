@@ -506,6 +506,7 @@ EOF
     # https://github.com/v2ray/v2ray-core/issues/1011
     ${sudoCmd} useradd -d /usr/local/etc/v2ray/ -M -s $(${sudoCmd} which nologin) v2ray
     ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
+    ${sudoCmd} mkdir -p /var/log/v2ray
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
     write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
     ${sudoCmd} timedatectl set-ntp true
