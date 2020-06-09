@@ -53,7 +53,7 @@ ${sudoCmd} ${systemPackage} install curl -y -qq
 curl -sL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 colorEcho ${BLUE} "Shutting down caddy service."
 ${sudoCmd} systemctl stop v2ray
-${sudoCmd} systemctl disable v2ray
+${sudoCmd} systemctl disable caddy
 ${sudoCmd} rm -f /etc/systemd/system/v2ray.service
 ${sudoCmd} rm -f /etc/systemd/system/v2ray.service
 ${sudoCmd} rm -f /etc/systemd/system/v2ray@.service
