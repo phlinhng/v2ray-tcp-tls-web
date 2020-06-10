@@ -714,7 +714,7 @@ get_mtg() {
 
 set_mtg() {
   local mtg_service=$(mktemp)
-    cat > ${mtg_service} <<-EOF
+  cat > ${mtg_service} <<-EOF
 [Unit]
 Description=MTG - Bullshit-free MTPROTO proxy for Telegram
 Documentation=https://github.com/9seconds/mtg
@@ -732,7 +732,7 @@ RestartPreventExitStatus=23
 [Install]
 WantedBy=multi-user.target
 EOF
-    ${sudoCmd} mv ${mtg_service} /etc/systemd/system/mtg.service
+  ${sudoCmd} mv ${mtg_service} /etc/systemd/system/mtg.service
 }
 
 install_mtproto() {
