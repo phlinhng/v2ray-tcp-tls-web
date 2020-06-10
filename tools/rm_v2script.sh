@@ -127,6 +127,18 @@ ${sudoCmd} crontab -l | grep -v 'trojan-go/geoip.dat' | ${sudoCmd} crontab -
 ${sudoCmd} crontab -l | grep -v 'trojan-go/geosite.dat' | ${sudoCmd} crontab -
 colorEcho ${GREEN} "Removed trojan-go successfully."
 
+# remove mtg
+colorEcho ${BLUE} "Shutting down mtg service."
+${sudoCmd} systemctl stop mtg
+${sudoCmd} systemctl disable mtg
+${sudoCmd} rm -f /etc/systemd/system/mtg.service
+${sudoCmd} rm -f /etc/systemd/system/mtg.service # and symlinks that might be related
+${sudoCmd} systemctl daemon-reload
+${sudoCmd} systemctl reset-failed
+colorEcho ${BLUE} "Removing trojan-go files."
+${sudoCmd} rm -rf /usr/local/bin/mtg
+colorEcho ${GREEN} "Removed trojan-go successfully."
+
 # docker
 # this will stop docker.service and remove every conatainer, image...etc created by docker but not docker itself
 # since uninstalling docker is complicated and may cause unstable to OS, if you want the OS to go back to clean state then reinstall the whole OS is suggested

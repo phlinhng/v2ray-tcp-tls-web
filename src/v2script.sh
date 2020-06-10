@@ -229,32 +229,6 @@ subscription_prompt() {
   fi
 }
 
-get_docker() {
-  if [ ! -x "$(command -v docker)" ]; then
-    curl -sL https://get.docker.com/ | ${sudoCmd} bash
-    # install docker-compose
-    #${sudoCmd} curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    #${sudoCmd} chmod +x /usr/local/bin/docker-compose
-  fi
-}
-
-set_docker() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') == "true" ]]; then
-    if [ ! "$(${sudoCmd} docker ps -q --filter ancestor=nineseconds/mtg)" ]; then
-      ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=nineseconds/mtg) 2>/dev/null) 2>/dev/null
-      # start mtproto ## reference https://raw.githubusercontent.com/9seconds/mtg/master/run.sh
-      ${sudoCmd} docker run -d --restart=always --name mtg --ulimit nofile=51200:51200 -p 127.0.0.1:3128:3128 nineseconds/mtg:latest run "$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
-    fi
-  fi
-
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.sub.api.installed') == "true" ]]; then
-    if [ ! "$(${sudoCmd} docker ps -q --filter ancestor=tindy2013/subconverter)" ]; then
-      ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=tindy2013/subconverter) 2>/dev/null) 2>/dev/null
-      ${sudoCmd} docker run -d --restart=always -p 127.0.0.1:25500:25500 -v /usr/local/etc/v2script/pref.ini:/base/pref.ini tindy2013/subconverter:latest
-    fi
-  fi
-}
-
 get_proxy() {
   if [ ! -f "/usr/local/bin/tls-shunt-proxy" ]; then
     colorEcho ${BLUE} "tls-shunt-proxy is not installed. start installation"
@@ -731,17 +705,44 @@ display_mtproto() {
   fi
 }
 
+get_mtg() {
+  local latest_version="$(curl -s "https://api.github.com/repos/9seconds/mtg/releases" | jq '.[0].tag_name' --raw-output)"
+  echo "${latest_version}"
+  ${sudoCmd} wget -nv https://github.com/9seconds/mtg/releases/download/${latest_version}/mtg-linux-amd64 -O /usr/local/bin/mtg
+  ${sudoCmd} chmod +x /usr/local/bin/mtg
+}
+
+set_mtg() {
+  local mtg_service=$(mktemp)
+    cat > ${mtg_service} <<-EOF
+[Unit]
+Description=MTG - Bullshit-free MTPROTO proxy for Telegram
+Documentation=https://github.com/9seconds/mtg
+After=network.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/mtg run $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') --bind 127.0.0.1:3128
+Restart=on-failure
+RestartSec=10
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    ${sudoCmd} mv ${mtg_service} /etc/systemd/system/mtg.service
+}
+
 install_mtproto() {
   if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') != "true" ]]; then
     get_proxy
-    get_docker
-
-    # pre-run this to pull image
-    ${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c "www.fast.com" >/dev/null
+    get_mtg
 
     # generate random header from txt files
     local FAKE_TLS_HEADER="$(curl -s https://raw.githubusercontent.com/phlinhng/my-scripts/master/text/mainland_cdn.txt | shuf -n 1)"
-    local secret="$(${sudoCmd} docker run --rm nineseconds/mtg generate-secret tls -c ${FAKE_TLS_HEADER})"
+    local secret="$(${sudoCmd} mtg generate-secret tls -c ${FAKE_TLS_HEADER})"
 
     # writing configurations & setting tls-shunt-proxy
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.installed" "true"
@@ -749,11 +750,11 @@ install_mtproto() {
     write_json "/usr/local/etc/v2script/config.json" ".mtproto.secret" "\"${secret}\""
 
     set_proxy
-    set_docker
+    set_mtg
 
     # activate service
-    ${sudoCmd} systemctl enable docker
-    ${sudoCmd} systemctl start docker
+    ${sudoCmd} systemctl enable mtg
+    ${sudoCmd} systemctl start mtg
     ${sudoCmd} systemctl enable tls-shunt-proxy
     ${sudoCmd} systemctl restart tls-shunt-proxy
     ${sudoCmd} systemctl daemon-reload
