@@ -45,7 +45,7 @@ fi
 
 # install requirements
 ${sudoCmd} ${systemPackage} update -q
-${sudoCmd} ${systemPackage} install curl wget jq lsof coreutils unzip gpg -y -qq
+${sudoCmd} ${systemPackage} install curl wget jq lsof coreutils unzip -y -qq
 
 ${sudoCmd} mkdir -p /usr/local/etc/v2script
 
