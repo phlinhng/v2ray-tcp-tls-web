@@ -23,7 +23,7 @@ colorEcho() {
 if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
   # allocate space
   # ${sudoCmd} fallocate -l 1G /swapfile
-  ${sudoCmd} dd if=/dev/zero of=/swapfile bs=1024 count=1024
+  ${sudoCmd} dd if=/dev/zero of=/swapfile bs=1024 count=1048576
 
   # set permission
   ${sudoCmd} chmod 600 /swapfile
