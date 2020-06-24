@@ -203,7 +203,7 @@ sync_nodes() {
 }
 
 generate_link() {
-  if [ ! -d "/usr/bin/v2ray" ] && [ ! -d "/usr/bin/trojan-go" ]; then
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" != "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" != "true" ]]; then
     colorEcho ${RED} "尚末安装 V2Ray 或 Trojan"
     return 1
   fi
@@ -247,7 +247,7 @@ generate_link() {
 }
 
 update_link() {
-  if [ ! -d "/usr/bin/v2ray" ] && [ ! -d "/usr/bin/trojan-go" ]; then
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" != "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" != "true" ]]; then
     colorEcho ${RED} "尚末安装 V2Ray 或 Trojan"
     return 1
   fi
@@ -339,7 +339,7 @@ install_api() {
 }
 
 display_link() {
-  if [ ! -d "/usr/bin/v2ray" ] && [ ! -d "/usr/bin/trojan-go" ]; then
+  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" != "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" != "true" ]]; then
     colorEcho ${RED} "尚末安装 V2Ray 或 Trojan"
     return 1
   fi
