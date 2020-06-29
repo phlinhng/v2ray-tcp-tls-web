@@ -593,25 +593,24 @@ get_trojan() {
     echo "${latest_version}"
     local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
 
-    ${sudoCmd} mkdir -p "/usr/bin/trojan-go"
     ${sudoCmd} mkdir -p "/etc/trojan-go"
     #${sudoCmd} mkdir -p "/etc/ssl/trojan-go"
 
     cd $(mktemp -d)
     wget -nv "${trojango_link}" -O trojan-go.zip
     unzip -q trojan-go.zip && rm -rf trojan-go.zip
-    ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
     write_json /usr/local/etc/v2script/config.json ".trojan.installed" "true"
 
     colorEcho ${BLUE} "Building trojan-go.service"
     ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
 
-    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/trojan-go/geoip.dat
-    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/trojan-go/geosite.dat
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/geoip.dat
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/geosite.dat
 
     # set crontab to auto update geoip.dat and geosite.dat
-    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/trojan-go/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
-    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/trojan-go/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
     colorEcho ${GREEN} "trojan-go is installed."
   else
@@ -623,7 +622,25 @@ get_trojan() {
     cd $(mktemp -d)
     wget -nv "${trojango_link}" -O trojan-go.zip
     unzip trojan-go.zip
-    ${sudoCmd} mv trojan-go /usr/bin/trojan-go/trojan-go
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+
+    # migrate from v0.6.0 to v0.7+
+    if [ -d "/usr/bin/trojan-go" ];then
+      ${sudoCmd} mv /usr/bin/trojan-go/geoip.dat /usr/bin/geoip.dat
+      ${sudoCmd} mv /usr/bin/trojan-go/geosite.dat /usr/bin/geosite.dat
+      ${sudoCmd} rm -rf /usr/bin/trojan-go
+
+      ${sudoCmd} crontab -l | grep -v 'trojan-go/geoip.dat' | ${sudoCmd} crontab -
+      ${sudoCmd} crontab -l | grep -v 'trojan-go/geosite.dat' | ${sudoCmd} crontab -
+
+      (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/bin/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+      (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/bin/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+
+      ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
+      ${sudoCmd} systemctl daemon-reload
+      ${sudoCmd} systemctl enable trojan-go
+      ${sudoCmd} systemctl restart trojan-go
+    fi
   fi
 }
 
