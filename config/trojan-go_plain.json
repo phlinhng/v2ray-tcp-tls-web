@@ -13,9 +13,6 @@
     "type": "plaintext"
   },
   "router": {
-    "enabled": true,
-    "block": [
-      "geoip:private"
-    ]
+    "enabled": false
   }
 }
