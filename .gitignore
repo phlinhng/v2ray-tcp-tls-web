@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/linux,macos
 # Edit at https://www.gitignore.io/?templates=linux,macos
 
@@ -46,5 +45,3 @@ Temporary Items
 .apdisk
 
 # End of https://www.gitignore.io/api/linux,macos
-
-public
