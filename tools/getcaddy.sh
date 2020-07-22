@@ -165,7 +165,7 @@ install_caddy()
 	echo "Downloading Caddy for ${caddy_os}/${caddy_arch}${caddy_arm} (${caddy_license} license)..."
 	caddy_file="caddy_${caddy_os}_${caddy_arch}${caddy_arm}_custom${caddy_dl_ext}"
 	qs="license=${caddy_license}&plugins=${caddy_plugins}&access_codes=${caddy_access_codes}&telemetry=${CADDY_TELEMETRY}"
-	caddy_url="https://caddyserver.com/download/${caddy_os}/${caddy_arch}${caddy_arm}?${qs}"
+	caddy_url="https://github.com/caddyserver/caddy/releases/download/v1.0.4/caddy_v1.0.4_linux_${caddy_arch}.tar.gz"
 	caddy_asc="https://caddyserver.com/download/${caddy_os}/${caddy_arch}${caddy_arm}/signature?${qs}"
 
 	type -p gpg >/dev/null 2>&1 && gpg=1 || gpg=0
@@ -174,47 +174,11 @@ install_caddy()
 	dl="$PREFIX/tmp/$caddy_file"
 	rm -rf -- "$dl"
 
-	if type -p curl >/dev/null 2>&1; then
-		curl -fsSL "$caddy_url" -u "$CADDY_ACCOUNT_ID:$CADDY_API_KEY" -o "$dl"
-		((gpg)) && curl -fsSL "$caddy_asc" -u "$CADDY_ACCOUNT_ID:$CADDY_API_KEY" -o "$dl.asc"
-	elif type -p wget >/dev/null 2>&1; then
-		wget --quiet --header "Authorization: Basic $(echo -ne "$CADDY_ACCOUNT_ID:$CADDY_API_KEY" | base64)" "$caddy_url" -O "$dl"
-		((gpg)) && wget --quiet --header "Authorization: Basic $(echo -ne "$CADDY_ACCOUNT_ID:$CADDY_API_KEY" | base64)" "$caddy_asc" -O "$dl.asc"
-	else
-		echo "Aborted, could not find curl or wget"
-		return 7
-	fi
 
-	# Verify download
-	if ((gpg)); then
-		keyservers=(
-			ha.pool.sks-keyservers.net
-			hkps.pool.sks-keyservers.net
-			pool.sks-keyservers.net
-			keyserver.ubuntu.com)
-		keyserver_ok=0 n_keyserver=${#keyservers[@]}
-		caddy_pgp="65760C51EDEA2017CEA2CA15155B6D79CA56EA34"
-		while ((!keyserver_ok && n_keyserver))
-		do
-			((n_keyserver--))
-			gpg --keyserver ${keyservers[$n_keyserver]} --recv-keys $caddy_pgp >/dev/null 2>&1 &&
-				keyserver_ok=1
-		done
-		if ((!keyserver_ok))
-		then
-			echo "No valid response from keyservers"
-		elif gpg -q --batch --verify "$dl.asc" "$dl" >/dev/null 2>&1; then
-			rm -- "$dl.asc"
-			echo "Download verification OK"
-		else
-			rm -- "$dl.asc"
-			echo "Aborted, download verification failed"
-			return 8
-		fi
-	else
-		echo "Notice: download verification not possible because gpg is not installed"
-	fi
-
+	curl -fsSL "$caddy_url" -u "$CADDY_ACCOUNT_ID:$CADDY_API_KEY" -o "$dl"
+	
+	
+	
 	echo "Extracting..."
 	case "$caddy_file" in
 		*.zip)    unzip -o "$dl" "$caddy_bin" -d "$PREFIX/tmp/" ;;
