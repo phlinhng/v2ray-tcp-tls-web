@@ -1,9 +1,11 @@
 listen: 0.0.0.0:443
+redirecthttps: 0.0.0.0:80
 
 vhosts:
   ##V2RAY@- name: FAKEV2DOMAIN
     ##V2RAY@tlsoffloading: true
     ##V2RAY@managedcert: true
+    ##V2RAY@keytype: p256
     ##V2RAY@alpn: h2,http/1.1
     ##V2RAY@protocols: tls12,tls13
     ##V2RAY@http:
@@ -20,6 +22,7 @@ vhosts:
   ##SUBAPI@- name: FAKEAPIDOMAIN
     ##SUBAPI@tlsoffloading: true
     ##SUBAPI@managedcert: true
+    ##SUBAPI@keytype: p256
     ##SUBAPI@alpn: http/1.1
     ##SUBAPI@protocols: tls12,tls13
     ##SUBAPI@http:
@@ -35,6 +38,7 @@ vhosts:
   ##TROJAN@- name: FAKETJDOMAIN
     ##TROJAN@tlsoffloading: true
     ##TROJAN@managedcert: true
+    ##TROJAN@keytype: p256
     ##TROJAN@alpn: h2,http/1.1
     ##TROJAN@protocols: tls12,tls13
     ##TROJAN@http:
