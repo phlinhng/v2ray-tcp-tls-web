@@ -135,7 +135,8 @@ sync_nodes() {
   fi
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.cloudflare')" == "true" ]]; then
-    local cfUrl="www.digitalocean.com"
+    #local cfUrl="www.digitalocean.com"
+    local cfUrl="amp.cloudflare.com"
     local wssPath="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path' | tr -d '/')"
     local uuid_wss="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
     local json_wss="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${V2_DOMAIN}\",\"id\":\"${uuid_wss}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${v2_remark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
@@ -389,7 +390,8 @@ set_v2ray_wss() {
     ${sudoCmd} systemctl daemon-reload
 
     colorEcho ${GREEN} "设置CDN成功!"
-    local cfUrl="www.digitalocean.com"
+    #local cfUrl="www.digitalocean.com"
+    local cfUrl="amp.cloudflare.com"
     local uuid_wss="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
     local currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
     local json_wss="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid_wss}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
@@ -523,7 +525,7 @@ install_v2ray() {
 
   # install caddy
   ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=abiosoft/caddy) 2>/dev/null) 2>/dev/null
-  get_caddy
+  #get_caddy
 
   # prevent some bug
   ${sudoCmd} rm -rf /usr/local/etc/ssl/caddy/*
@@ -678,10 +680,10 @@ install_trojan() {
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
   set_proxy
 
-  get_caddy
+  #get_caddy
 
   colorEcho ${BLUE} "Setting caddy"
-  set_caddy
+  #set_caddy
 
   colorEcho ${BLUE} "Building dummy web site"
   build_web
