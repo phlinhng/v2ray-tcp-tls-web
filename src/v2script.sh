@@ -682,7 +682,7 @@ install_trojan() {
 
   #get_caddy
 
-  colorEcho ${BLUE} "Setting caddy"
+  #colorEcho ${BLUE} "Setting caddy"
   #set_caddy
 
   colorEcho ${BLUE} "Building dummy web site"
