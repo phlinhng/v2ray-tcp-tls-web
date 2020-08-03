@@ -20,7 +20,7 @@ v2script
 
 ## For Chinese users
 1. 中文文档在[本项目 wiki 页面](https://github.com/phlinhng/v2ray-tcp-tls-web/wiki)
-2. 任何情况下都不需要点亮 Cloudflare 云朵，否则 TCP+TLS 无法发挥作用（云朵是灰色的情况下还是能接入 CDN 的，相信我） 
+2. 任何情况下都**不需要**点亮 Cloudflare 云朵，否则 TCP+TLS 无法发挥作用（云朵是灰色的情况下还是能接入 CDN 的，相信我） 
 
 ## Related work
 + [@phlinhng/v2ray-caddy-cf](https://github.com/phlinhng/v2ray-caddy-cf): automated script for v2Ray (WS+TLS+Web)
