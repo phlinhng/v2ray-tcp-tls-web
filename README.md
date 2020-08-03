@@ -18,6 +18,10 @@ v2script
 2. TCP+TLS has lower delay by saving 1-RTT from ws handshaking
 3. TCP+TLS is not compatible with cloudflare free CDN plan as WSS does
 
+## For Chinese user
+1. 中文文档在[本项目 wiki 页面](https://github.com/phlinhng/v2ray-tcp-tls-web/wiki)
+2. 任何情况下都不需要点亮 Cloudflare 云朵，否则 TCP+TLS 无法发挥作用（云朵是灰色的情况下还是能接入 CDN 的，相信我） 
+
 ## Related work
 + [@phlinhng/v2ray-caddy-cf](https://github.com/phlinhng/v2ray-caddy-cf): automated script for v2Ray (WS+TLS+Web)
 + [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor): subscription manager
