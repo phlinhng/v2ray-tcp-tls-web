@@ -103,9 +103,6 @@ colorEcho ${BLUE} "Removing caddy files."
 ${sudoCmd} rm -rf /usr/local/bin/caddy
 ${sudoCmd} rm -rf /usr/local/etc/caddy
 ${sudoCmd} rm -rf /usr/local/etc/ssl/caddy
-colorEcho ${BLUE} "Removing caddy user & group."
-${sudoCmd} deluser www-data
-${sudoCmd} delgroup --only-if-empty www-data
 colorEcho ${GREEN} "Removed caddy successfully."
 
 colorEcho ${BLUE} "Removing dummy site."
