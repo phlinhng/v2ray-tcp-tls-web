@@ -559,8 +559,8 @@ install_v2ray() {
   ${sudoCmd} systemctl restart v2ray 2>/dev/null ## restart v2ray to enable new config
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy ## restart tls-shunt-proxy to enable new config
-  ${sudoCmd} systemctl enable caddy
-  ${sudoCmd} systemctl restart caddy
+  #${sudoCmd} systemctl enable caddy
+  #${sudoCmd} systemctl restart caddy
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
@@ -694,8 +694,8 @@ install_trojan() {
   ${sudoCmd} systemctl restart trojan-go 2>/dev/null ## restart trojan-go to enable new config
   ${sudoCmd} systemctl enable tls-shunt-proxy
   ${sudoCmd} systemctl restart tls-shunt-proxy ## restart tls-shunt-proxy to enable new config
-  ${sudoCmd} systemctl enable caddy
-  ${sudoCmd} systemctl restart caddy
+  #${sudoCmd} systemctl enable caddy
+  #${sudoCmd} systemctl restart caddy
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
