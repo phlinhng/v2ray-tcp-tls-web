@@ -45,8 +45,6 @@ colorEcho() {
   echo -e "\033[${1}${@:2}\033[0m" 1>& 2
 }
 
-${sudoCmd} ${systemPackage} install curl -y -qq
-
 # remove v2ray
 # Notice the two dashes (--) which are telling bash to not process anything following it as arguments to bash.
 # https://stackoverflow.com/questions/4642915/passing-parameters-to-bash-when-executing-a-script-fetched-by-curl
