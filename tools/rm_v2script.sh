@@ -58,6 +58,7 @@ ${sudoCmd} rm -f /etc/systemd/system/v2ray@.service
 ${sudoCmd} rm -f /etc/systemd/system/v2ray@.service
 colorEcho ${BLUE} "Removing v2ray files."
 ${sudoCmd} rm -rf /etc/v2ray
+${sudoCmd} rm -rf /usr/bin/v2ray
 ${sudoCmd} rm -rf /usr/local/bin/v2ray
 ${sudoCmd} rm -rf /usr/local/bin/v2ctl
 ${sudoCmd} rm -rf /usr/local/etc/v2ray
