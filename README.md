@@ -27,7 +27,7 @@ v2script
 + [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor): subscription manager
 
 ## Credit
-+ [Project V](https://www.v2ray.com/)
++ [Project V](https://www.v2fly.org/)
 + [V2Ray 配置指南](https://toutyrater.github.io/)
 + [新 V2Ray 白话文指南](https://guide.v2fly.org/)
 + [templated.co](https://templated.co)
