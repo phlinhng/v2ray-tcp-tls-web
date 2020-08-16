@@ -459,7 +459,7 @@ Type=simple
 User=v2ray
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
 NoNewPrivileges=yes
-Environment=V2RAY_LOCATION_ASSET=/usr/local/lib/v2ray/
+Environment=V2RAY_LOCATION_ASSET=/usr/local/share/v2ray/
 
 ExecStartPre=$(which mkdir) -p /tmp/v2ray-ds
 ExecStartPre=$(which rm) -rf /tmp/v2ray-ds/*.sock
@@ -488,13 +488,13 @@ EOF
     ${sudoCmd} timedatectl set-ntp true
 
     ${sudoCmd} mkdir -p /usr/local/etc/v2ray
-    ${sudoCmd} mkdir -p /usr/local/lib/v2ray
-    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/lib/v2ray/geoip.dat
-    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/lib/v2ray/geosite.dat
+    ${sudoCmd} mkdir -p /usr/local/share/v2ray
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/share/v2ray/geoip.dat
+    ${sudoCmd} wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/share/v2ray/geosite.dat
 
     # set crontab to auto update geoip.dat and geosite.dat
-    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/lib/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
-    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/lib/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/share/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+    (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/share/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
   fi
 }
 
