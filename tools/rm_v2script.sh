@@ -63,6 +63,7 @@ ${sudoCmd} rm -rf /usr/local/bin/v2ray
 ${sudoCmd} rm -rf /usr/local/bin/v2ctl
 ${sudoCmd} rm -rf /usr/local/etc/v2ray
 ${sudoCmd} rm -rf /usr/local/lib/v2ray
+${sudoCmd} rm -rf /usr/local/share/v2ray
 ${sudoCmd} rm -rf /var/log/v2ray
 ${sudoCmd} rm -rf /tmp/v2ray-ds
 colorEcho ${BLUE} "Removing v2ray user & group."
