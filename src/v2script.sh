@@ -544,8 +544,8 @@ install_v2ray() {
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
   set_proxy
 
-  colorEcho ${BLUE} "Setting caddy"
-  set_caddy
+  #colorEcho ${BLUE} "Setting caddy"
+  #set_caddy
 
   colorEcho ${BLUE} "Building dummy web site"
   build_web
