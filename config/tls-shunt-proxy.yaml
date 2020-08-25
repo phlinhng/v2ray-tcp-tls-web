@@ -44,6 +44,6 @@ vhosts:
     ##TROJAN@http:
       ##TROJAN@handler: fileServer
       ##TROJAN@args: /var/www/html
-    ##TROJAN@default:
+    ##TROJAN@trojan:
       ##TROJAN@handler: proxyPass
       ##TROJAN@args: 127.0.0.1:3567
