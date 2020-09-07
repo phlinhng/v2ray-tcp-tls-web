@@ -74,23 +74,6 @@ ${sudoCmd} crontab -l | grep -v 'v2ray/geoip.dat' | ${sudoCmd} crontab -
 ${sudoCmd} crontab -l | grep -v 'v2ray/geosite.dat' | ${sudoCmd} crontab -
 colorEcho ${GREEN} "Removed v2ray successfully."
 
-# remove tls-shunt-server
-colorEcho ${BLUE} "Shutting down tls-shunt-proxy service."
-${sudoCmd} systemctl stop tls-shunt-proxy
-${sudoCmd} systemctl disable tls-shunt-proxy
-${sudoCmd} rm -f /etc/systemd/system/tls-shunt-proxy.service
-${sudoCmd} rm -f /etc/systemd/system/tls-shunt-proxy.service # and symlinks that might be related
-${sudoCmd} systemctl daemon-reload
-${sudoCmd} systemctl reset-failed
-colorEcho ${BLUE} "Removing tls-shunt-proxy files."
-${sudoCmd} rm -rf /usr/local/bin/tls-shunt-proxy
-${sudoCmd} rm -rf /etc/tls-shunt-proxy
-${sudoCmd} rm -rf /etc/ssl/tls-shunt-proxy
-colorEcho ${BLUE} "Removing tls-shunt-proxy user & group."
-${sudoCmd} deluser tls-shunt-proxy
-${sudoCmd} delgroup --only-if-empty tls-shunt-proxy
-colorEcho ${GREEN} "Removed tls-shunt-proxy successfully."
-
 # remove caddy
 colorEcho ${BLUE} "Shutting down caddy service."
 ${sudoCmd} systemctl stop caddy
