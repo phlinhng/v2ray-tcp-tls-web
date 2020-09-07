@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
-branch="master"
+branch="v2gun"
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
@@ -710,107 +710,16 @@ install_trojan() {
   subscription_prompt
 }
 
-rm_v2script() {
+rm_v2gun() {
   ${sudoCmd} ${systemPackage} install curl -y -qq
-  curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_v2script.sh | bash
+  curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_v2gun.sh | bash
   exit 0
-}
-
-display_mtproto() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader') == "" ]] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
-    echo "tg://proxy?server=`curl -s https://api.ipify.org`&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
-  elif  [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') == "true" ]] &&  [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') != "" ]];then
-    echo "tg://proxy?server=$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')&port=443&secret=$(read_json /usr/local/etc/v2script/config.json '.mtproto.secret')"
-  fi
-}
-
-get_mtg() {
-  local latest_version="$(curl -s "https://api.github.com/repos/9seconds/mtg/releases" | jq '.[0].tag_name' --raw-output)"
-  echo "${latest_version}"
-  ${sudoCmd} wget -nv https://github.com/9seconds/mtg/releases/download/${latest_version}/mtg-linux-amd64 -O /usr/local/bin/mtg
-  ${sudoCmd} chmod +x /usr/local/bin/mtg
-}
-
-set_mtg() {
-  local mtg_service=$(mktemp)
-  cat > ${mtg_service} <<-EOF
-[Unit]
-Description=MTG - Bullshit-free MTPROTO proxy for Telegram
-Documentation=https://github.com/9seconds/mtg
-After=network.target nss-lookup.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-User=root
-ExecStart=/usr/local/bin/mtg run $(read_json /usr/local/etc/v2script/config.json '.mtproto.secret') --bind 127.0.0.1:3128
-Restart=on-failure
-RestartSec=10
-RestartPreventExitStatus=23
-
-[Install]
-WantedBy=multi-user.target
-EOF
-  ${sudoCmd} mv ${mtg_service} /etc/systemd/system/mtg.service
-}
-
-install_mtproto() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.mtproto.installed') != "true" ]]; then
-    get_proxy
-    get_mtg
-
-    # generate random header from txt files
-    local FAKE_TLS_HEADER="$(curl -s https://raw.githubusercontent.com/phlinhng/my-scripts/master/text/mainland_cdn.txt | shuf -n 1)"
-    local secret="$(${sudoCmd} mtg generate-secret tls -c ${FAKE_TLS_HEADER})"
-
-    # writing configurations & setting tls-shunt-proxy
-    write_json "/usr/local/etc/v2script/config.json" ".mtproto.installed" "true"
-    write_json "/usr/local/etc/v2script/config.json" ".mtproto.fakeTlsHeader" "\"${FAKE_TLS_HEADER}\""
-    write_json "/usr/local/etc/v2script/config.json" ".mtproto.secret" "\"${secret}\""
-
-    set_proxy
-    set_mtg
-
-    # activate service
-    ${sudoCmd} systemctl enable mtg
-    ${sudoCmd} systemctl start mtg
-    ${sudoCmd} systemctl enable tls-shunt-proxy
-    ${sudoCmd} systemctl restart tls-shunt-proxy
-    ${sudoCmd} systemctl daemon-reload
-    colorEcho ${GREEN} "电报代理设置成功!"
-  fi
-
-  display_mtproto
 }
 
 vps_tools() {
   ${sudoCmd} ${systemPackage} install wget -y -qq
   wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh -O /tmp/vps_tools.sh && chmod +x /tmp/vps_tools.sh && ${sudoCmd} /tmp/vps_tools.sh
   exit 0
-}
-
-cert_status() {
-  printf "\n"
-
-  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]];then
-    local V2_DOMAIN=`read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader'`
-    if [ -d "/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${V2_DOMAIN}" ]; then
-      printf "%s\t%s\t${green}%s${nocolor}\n" "[V2Ray]" "${V2_DOMAIN}" "正常" | expand -t 16
-    else
-      printf "%s\t%s\t${red}%s${nocolor}\n" "[V2Ray]" "${V2_DOMAIN}" "异常" | expand -t 16
-    fi
-  fi
-
-  if [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]];then
-    local TJ_DOMAIN=`read_json /usr/local/etc/v2script/config.json '.trojan.tlsHeader'`
-    if [ -d "/etc/ssl/tls-shunt-proxy/certificates/acme-v02.api.letsencrypt.org-directory/${TJ_DOMAIN}" ]; then
-      printf "%s\t%s\t${green}%s${nocolor}\n" "[Trojan]" "${TJ_DOMAIN}" "正常" | expand -t 16
-    else
-      printf "%s\t%s\t${red}%s${nocolor}\n" "[Trojan]" "${TJ_DOMAIN}" "异常" | expand -t 16
-    fi
-  fi
-
-  printf "\n"
 }
 
 check_status() {
@@ -862,21 +771,15 @@ check_status() {
 show_menu() {
   echo ""
   echo "----------安装代理----------"
-  echo "0) 安装 V2Ray TCP+TLS+WEB"
-  echo "1) 安装 Trojan-go"
+  echo "0) 安装 VLESS (TLS) + VMess (WSS) + Trojan-Go"
+  echo "1) 安装 VLESS (TLS) + VMess (WSS)"
   echo "----------显示配置----------"
   echo "2) 显示链接"
-  echo "3) 管理订阅"
-  echo "----------各种工具----------"
-  echo "4) 设置 CDN"
-  echo "5) 设置电报代理"
-  echo "6) VPS 工具"
-  echo "7) 检查证书状态"
   echo "----------组件管理----------"
-  echo "8) 更新 v2ray-core"
-  echo "9) 更新 tls-shunt-proxy"
-  echo "10) 更新 trojan-go"
-  echo "11) 卸载脚本"
+  echo "3) 更新 v2ray-core"
+  echo "4) 更新 trojan-go"
+  echo "----------卸载脚本----------"
+  echo "11) 卸载脚本与全部组件"
   echo ""
 }
 
