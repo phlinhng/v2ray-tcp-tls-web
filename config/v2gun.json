@@ -1,0 +1,12 @@
+{
+  "sni": "",
+  "cloudflare": "",
+  "v2ray": {
+    "installed": false,
+    "cloudflare": false
+  },
+  "trojan": {
+    "installed": false
+  },
+  "version": ""
+}
