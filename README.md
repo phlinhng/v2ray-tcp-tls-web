@@ -41,3 +41,6 @@ v2script
 + [@tindy2013/subconverter](https://github.com/tindy2013/subconverter)
 + [@9seconds/mtg](https://github.com/9seconds/mtg)
 + [@p4gefau1t/trojan-go](https://github.com/p4gefau1t/trojan-go)
+
+## Stargazers over time
+[![Stargazers over time](https://starchart.cc/phlinhng/v2ray-tcp-tls-web.svg)](https://starchart.cc/phlinhng/v2ray-tcp-tls-web)
