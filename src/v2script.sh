@@ -129,7 +129,7 @@ sync_nodes() {
 
   if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
     local uuid_tcp="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-    local json_tcp="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"1\",\"host\":\"\",\"id\":\"${uuid_tcp}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${v2_remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local json_tcp="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid_tcp}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${v2_remark}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
     local uri_tcp="$(printf %s "${json_tcp}" | base64 --wrap=0)"
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri_tcp}\"")"
   fi
@@ -469,10 +469,6 @@ install_v2ray() {
 
   # install tls-shunt-proxy
   get_proxy
-
-  # install caddy
-  ${sudoCmd} docker rm $(${sudoCmd} docker stop $(${sudoCmd} docker ps -q --filter ancestor=abiosoft/caddy) 2>/dev/null) 2>/dev/null
-  #get_caddy
 
   # prevent some bug
   ${sudoCmd} rm -rf /usr/local/etc/ssl/caddy/*
