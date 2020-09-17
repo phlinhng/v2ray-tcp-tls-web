@@ -276,27 +276,6 @@ set_proxy() {
   ${sudoCmd} /bin/cp -f /tmp/config_new.yaml /etc/tls-shunt-proxy/config.yaml
 }
 
-get_caddy() {
-  if [ ! -f "/usr/local/bin/caddy" ]; then
-    #${sudoCmd} ${systemPackage} install libcap2-bin -y -qq
-
-    curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/getcaddy.sh | ${sudoCmd} bash -s personal
-    # Give the caddy binary the ability to bind to privileged ports (e.g. 80, 443) as a non-root user
-    #${sudoCmd} setcap 'cap_net_bind_service=+ep' /usr/local/bin/caddy
-
-    # create user for caddy
-    ${sudoCmd} useradd -d /usr/local/etc/caddy -M -s $(${sudoCmd} which nologin) -r -u 33 www-data
-    ${sudoCmd} mkdir -p /usr/local/etc/caddy && ${sudoCmd} chown -R root:root /usr/local/etc/caddy
-    ${sudoCmd} mkdir -p /usr/local/etc/ssl/caddy && ${sudoCmd} chown -R root:www-data /usr/local/etc/ssl/caddy
-    ${sudoCmd} chmod 0770 /usr/local/etc/ssl/caddy
-
-    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/caddy.service -O /tmp/caddy.service
-    ${sudoCmd} mv /tmp/caddy.service /etc/systemd/system/caddy.service
-    ${sudoCmd} chown root:root /etc/systemd/system/caddy.service
-    ${sudoCmd} chmod 644 /etc/systemd/system/caddy.service
-  fi
-}
-
 build_web() {
   if [ ! -f "/var/www/html/index.html" ]; then
     # choose and copy a random  template for dummy web pages
