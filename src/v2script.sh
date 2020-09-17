@@ -297,38 +297,6 @@ get_caddy() {
   fi
 }
 
-set_caddy() {
-  local caddyserver_file=$(mktemp)
-
-  if [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]] && [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    cat >> ${caddyserver_file} <<-EOF
-$(jq --raw-output '.v2ray.tlsHeader' /usr/local/etc/v2script/config.json):80 {
-    redir https://$(jq --raw-output '.v2ray.tlsHeader' /usr/local/etc/v2script/config.json){uri}
-}
-EOF
-    echo "" >> ${caddyserver_file}
-    cat >> ${caddyserver_file} <<-EOF
-$(jq --raw-output '.trojan.tlsHeader' /usr/local/etc/v2script/config.json):80 {
-    redir https://$(jq --raw-output '.trojan.tlsHeader' /usr/local/etc/v2script/config.json){uri}
-}
-EOF
-  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.v2ray.installed')" == "true" ]]; then
-    cat >> ${caddyserver_file} <<-EOF
-$(jq --raw-output '.v2ray.tlsHeader' /usr/local/etc/v2script/config.json):80 {
-    redir https://$(jq --raw-output '.v2ray.tlsHeader' /usr/local/etc/v2script/config.json){uri}
-}
-EOF
-  elif [[ "$(read_json /usr/local/etc/v2script/config.json '.trojan.installed')" == "true" ]]; then
-    cat >> ${caddyserver_file} <<-EOF
-$(jq --raw-output '.trojan.tlsHeader' /usr/local/etc/v2script/config.json):80 {
-    redir https://$(jq --raw-output '.trojan.tlsHeader' /usr/local/etc/v2script/config.json){uri}
-}
-EOF
-  fi
-
-  ${sudoCmd} /bin/cp -f ${caddyserver_file} /usr/local/etc/caddy/Caddyfile && ${sudoCmd} chmod 644 /usr/local/etc/caddy/Caddyfile
-}
-
 build_web() {
   if [ ! -f "/var/www/html/index.html" ]; then
     # choose and copy a random  template for dummy web pages
@@ -679,11 +647,6 @@ install_trojan() {
 
   colorEcho ${BLUE} "Setting tls-shunt-proxy"
   set_proxy
-
-  #get_caddy
-
-  #colorEcho ${BLUE} "Setting caddy"
-  #set_caddy
 
   colorEcho ${BLUE} "Building dummy web site"
   build_web
