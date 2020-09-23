@@ -139,7 +139,7 @@ preinstall() {
     ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y
     ${sudoCmd} ${systemPackage} update
     ${sudoCmd} ${systemPackage} install coreutil curl git jq nginx wget unzip -y -q
-  elif [[ release == "centos"]] || [[ systemPackage == "yum" ]]; then
+  elif [[ release == "centos" ]] || [[ systemPackage == "yum" ]]; then
     # turning off selinux
     ${sudoCmd} setenforce 0
     ${sudoCmd} echo "SELINUX=disable" > /etc/selinux/config
