@@ -133,23 +133,21 @@ show_links() {
 }
 
 preinstall() {
-  if [[ release == "debian" ]] || [[ release == "ubuntu" ]] || [[ systemPackage == "apt-get" ]]; then
-    ${sudoCmd} ${systemPackage} update
-    ${sudoCmd} ${systemPackage} install software-properties-common -y -q
-    ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y
-    ${sudoCmd} ${systemPackage} update
-    ${sudoCmd} ${systemPackage} install coreutil curl git jq nginx wget unzip -y -q
-  elif [[ release == "centos" ]] || [[ systemPackage == "yum" ]]; then
     # turning off selinux
     ${sudoCmd} setenforce 0
     ${sudoCmd} echo "SELINUX=disable" > /etc/selinux/config
+
     # turning off firewall
     ${sudoCmd} systemctl stop firewalld 2>/dev/null
     ${sudoCmd} systemctl disable firewalld 2>/dev/null
+
     # get dependencies
     ${sudoCmd} ${systemPackage} update -y
-    ${sudoCmd} ${systemPackage} install epel-release -y
-    ${sudoCmd} ${systemPackage} install coreutil curl git jq nginx wget unzip -y -q
+    ${sudoCmd} ${systemPackage} install software-properties-common -y -q # debian/ubuntu
+    ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y # debian/ubuntu
+    ${sudoCmd} ${systemPackage} install epel-release -y # centos
+    ${sudoCmd} ${systemPackage} update -y
+    ${sudoCmd} ${systemPackage} install coreutil curl git jq nginx wget unzip -y
   fi
 }
 
