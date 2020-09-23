@@ -512,7 +512,6 @@ show_menu() {
 menu() {
   colorEcho ${YELLOW} "V2Ray & Trojan automated script v${VERSION}"
   colorEcho ${YELLOW} "author: phlinhng"
-  echo ""
 
   #check_status
 
