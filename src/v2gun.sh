@@ -4,7 +4,7 @@ export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
 branch="v2gun"
-VERSION="2.0 alpha"
+VERSION="2.0 beta"
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
@@ -99,9 +99,10 @@ build_web() {
 
 checkIP() {
   local realIP="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/ip_api`)"
-  local resolvedIP="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
+  local resolvedIP4="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
+  local resolvedIP6="$(ping $1 -c 1 | head -n 1 | grep  -oE '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' | head -n 1)"
 
-  if [[ "${realIP}" == "${resolvedIP}" ]]; then
+  if [[ "${realIP}" == "${resolvedIP4}" ]] || [[ "${realIP}" == "${resolvedIP6}" ]]; then
     return 0
   else
     return 1
@@ -120,7 +121,6 @@ show_links() {
   printf "%s:443 %s\n\n" "sni" "${uuid_vless}"
 
   echo "VMess (新版)"
-  vmess://ws+tls:7db04e8f-7cfc-46e0-9e18-d329c22ec353-64@myServer.com:12345/?path=%2FmyServerAddressPath%2F%E4%B8%AD%E6%96%87%E8%B7%AF%E5%BE%84%2F&host=www.myServer.com&tlsAllowInsecure=true&tlsServerName=%E4%BC%AA%E8%A3%85%E5%9F%9F%E5%90%8D.com#%E4%B8%AA%E6%80%A7%E5%8C%96%E9%93%BE%E6%8E%A5%E5%A4%87%E6%B3%A8
   local uri_vmess="ws+tls:${uuid_vmeess}@{cf_node}:443/?path=${path_vmees}&host={sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
   printf "%s\n\n" "vmess://${uri_vmess}"
 
