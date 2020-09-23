@@ -237,7 +237,8 @@ get_proxy() {
     colorEcho ${GREEN} "tls-shunt-proxy is installed."
   else
     local API_URL="https://api.github.com/repos/liberal-boy/tls-shunt-proxy/releases/latest"
-    local DOWNLOAD_URL="$(curl -H "Accept: application/json" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0" -s "${API_URL}" --connect-timeout 10| grep 'browser_download_url' | cut -d\" -f4)"
+    #local DOWNLOAD_URL="$(curl -H "Accept: application/json" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0" -s "${API_URL}" --connect-timeout 10| grep 'browser_download_url' | cut -d\" -f4)"
+    local DOWNLOAD_URL="https://github.com/liberal-boy/tls-shunt-proxy/releases/download/0.6.1/tls-shunt-proxy-linux-amd64.zip"
     ${sudoCmd} curl -L -H "Cache-Control: no-cache" -o "/tmp/tls-shunt-proxy.zip" "${DOWNLOAD_URL}"
     ${sudoCmd} unzip -o -d /usr/local/bin/ "/tmp/tls-shunt-proxy.zip"
     ${sudoCmd} chmod +x /usr/local/bin/tls-shunt-proxy
@@ -378,13 +379,7 @@ set_v2ray_wss_prompt() {
   fi
 }
 
-get_v2ray() {
-  curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash
-}
-
-build_v2ray() {
-  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') != "true" ]]; then
-    get_v2ray
+build_v2ray_service() {
     colorEcho ${BLUE} "Building v2ray.service for domainsocket"
     local ds_service=$(mktemp)
     cat > ${ds_service} <<-EOF
@@ -425,6 +420,24 @@ RestartPreventExitStatus=23
 [Install]
 WantedBy=multi-user.target
 EOF
+}
+
+get_v2ray() {
+  if [ ! -f "/usr/local/bin/v2ray" ]; then
+    curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash
+  else
+    curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash
+    ${sudoCmd} $(which rm) -rf /tmp/v2ray-ds # prevent v2ray booting issues after reinstalling
+    build_v2ray_service
+    ${sudoCmd} systemctl daemon-reload
+    ${sudoCmd} restart v2ray
+  fi
+}
+
+build_v2ray() {
+  if [[ $(read_json /usr/local/etc/v2script/config.json '.v2ray.installed') != "true" ]]; then
+    get_v2ray
+    build_v2ray_service
     # add new user and overwrite v2ray.service
     # https://github.com/v2ray/v2ray-core/issues/1011
     ${sudoCmd} useradd -d /usr/local/etc/v2ray/ -M -s $(${sudoCmd} which nologin) v2ray
@@ -534,7 +547,8 @@ get_trojan() {
     colorEcho ${BLUE} "trojan-go is not installed. start installation"
 
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    #local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    latest_version="v0.8.2"
     echo "${latest_version}"
     local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
 
