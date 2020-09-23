@@ -135,6 +135,44 @@ get_cert() {
   --reloadcmd "chmod 644 /etc/ssl/v2ray/fullchain.pem; chmod 644 /etc/ssl/v2ray/key.pem; systemctl daemon-reload; systemctl restart v2ray"
 }
 
+get_trojan() {
+  if [ ! -d "/usr/bin/trojan-go" ]; then
+    colorEcho ${BLUE} "trojan-go is not installed. start installation"
+
+    colorEcho ${BLUE} "Getting the latest version of trojan-go"
+    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    echo "${latest_version}"
+    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
+
+    ${sudoCmd} mkdir -p "/etc/trojan-go"
+
+    cd $(mktemp -d)
+    wget -nv "${trojango_link}" -O trojan-go.zip
+    unzip -q trojan-go.zip && rm -rf trojan-go.zip
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+    ${sudoCmd} mv geoip.dat -O /usr/bin/geoip.dat
+    ${sudoCmd} mv geosite.dat -O /usr/bin/geosite.dat
+
+    colorEcho ${BLUE} "Building trojan-go.service"
+    ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
+
+    ${sudoCmd} systemctl daemon-reload
+    ${sudoCmd} systemctl enable trojan-go
+
+    colorEcho ${GREEN} "trojan-go is installed."
+  else
+    colorEcho ${BLUE} "Getting the latest version of trojan-go"
+    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    echo "${latest_version}"
+    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
+
+    cd $(mktemp -d)
+    wget -nv "${trojango_link}" -O trojan-go.zip
+    unzip trojan-go.zip
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+  fi
+}
+
 get_v2ray() {
   curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash
 }
@@ -160,10 +198,12 @@ EOF
   ${sudoCmd} systemctl enable v2ray
 }
 
-set_v2ray_with_trojan() {
+set_v2ray() {
   # $1: uuid for vless+tcp
   # $2: uuid for vmess+ws
   # $3: path for vmess+ws
+  # $4: sni
+  for BASE in 00_log 01_api 02_dns 03_routing 04_policy 05_inbounds 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
   ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
 {
   "inbounds": [
@@ -204,7 +244,8 @@ set_v2ray_with_trojan() {
       "sniffing": {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
-      }
+      },
+      "tag": "$4"
     },
     {
       "port": 3566,
@@ -233,42 +274,27 @@ EOF
   ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/06_outbounds.json -O /usr/local/etc/v2ray/06_outbounds.json
 }
 
-get_trojan() {
-  if [ ! -d "/usr/bin/trojan-go" ]; then
-    colorEcho ${BLUE} "trojan-go is not installed. start installation"
-
-    colorEcho ${BLUE} "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
-    echo "${latest_version}"
-    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
-
-    ${sudoCmd} mkdir -p "/etc/trojan-go"
-
-    cd $(mktemp -d)
-    wget -nv "${trojango_link}" -O trojan-go.zip
-    unzip -q trojan-go.zip && rm -rf trojan-go.zip
-    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
-    ${sudoCmd} mv geoip.dat -O /usr/bin/geoip.dat
-    ${sudoCmd} mv geosite.dat -O /usr/bin/geosite.dat
-
-    colorEcho ${BLUE} "Building trojan-go.service"
-    ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
-
-    ${sudoCmd} systemctl daemon-reload
-    ${sudoCmd} systemctl enable trojan-go
-
-    colorEcho ${GREEN} "trojan-go is installed."
-  else
-    colorEcho ${BLUE} "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
-    echo "${latest_version}"
-    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
-
-    cd $(mktemp -d)
-    wget -nv "${trojango_link}" -O trojan-go.zip
-    unzip trojan-go.zip
-    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
-  fi
+set_trojan() {
+  ${sudoCmd} cat > "/etc/trojan-go/config.json" <<-EOF
+{
+  "run_type": "server",
+  "local_addr": "127.0.0.1",
+  "local_port": 8080,
+  "remote_addr": "127.0.0.1",
+  "remote_port": 80,
+  "log_level": 3,
+  "password": [
+    "$1"
+  ],
+  "transport_plugin": {
+    "enabled": true,
+    "type": "plaintext"
+  },
+  "router": {
+    "enabled": false
+  }
+}
+EOF
 }
 
 install_v2ray_and_trojan() {
@@ -286,7 +312,6 @@ install_v2ray_and_trojan() {
       esac
     fi
   done
-  write_json /usr/local/etc/v2gun.json ".sni" "\"${V2_DOMAIN}\""
 
   ${sudoCmd} ${systemPackage} update
   ${sudoCmd} ${systemPackage} install curl wget coreutils unzip -y -q
@@ -301,9 +326,29 @@ install_v2ray_and_trojan() {
 
   get_trojan
 
-  set_v2ray_with_trojan
+  local uuid_vless="$(cat '/proc/sys/kernel/random/uuid')"
+  local uuid_vmess="$(cat '/proc/sys/kernel/random/uuid')"
+  local path_vmess="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+  local passwd_trojan="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+
+  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}"
+  set_trojan "${passwd_trojan}"
 
   ${sudoCmd} mkdir -p /etc/ssl/v2ray
+
+  # temporary config for issuing certs
+  ${sudoCmd} cat > /etc/nginx/sites-enabled/vless_fallback.conf <<-EOF
+server {
+    listen 80;
+    server_name ${V2_DOMAIN};
+    root /var/www/html;
+    index index.php index.html index.htm;
+}
+EOF
+
+  get_cert "${V2_DOMAIN}"
+
+  set_nginx
 
   local uuid_vless="$(cat '/proc/sys/kernel/random/uuid')"
   local uuid_vmess="$(cat '/proc/sys/kernel/random/uuid')"
@@ -330,7 +375,9 @@ install_v2ray_and_trojan() {
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
-  colorEcho ${GREEN} "安装 TCP+TLS+WEB 成功!"
+  colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
+
+  show_link
 }
 
 rm_v2gun() {
@@ -349,16 +396,15 @@ show_menu() {
   echo ""
   echo "----------安装代理----------"
   echo "0) 安装 VLESS (TLS) + VMess (WSS) + Trojan-Go"
-  #echo "1) 安装 VLESS (TLS) + VMess (WSS)"
   echo "----------显示配置----------"
-  echo "2) 显示链接"
+  echo "1) 显示链接"
   echo "----------组件管理----------"
-  echo "3) 更新 v2ray-core"
-  echo "4) 更新 trojan-go"
+  echo "2) 更新 v2ray-core"
+  echo "3) 更新 trojan-go"
   echo "----------实用工具----------"
-  echo "5) VPS 工具箱 (含 BBR 脚本)"
+  echo "4) VPS 工具箱 (含 BBR 脚本)"
   echo "----------卸载脚本----------"
-  echo "11) 卸载脚本与全部组件"
+  echo "5) 卸载脚本与全部组件"
   echo ""
 }
 
@@ -367,7 +413,7 @@ menu() {
   colorEcho ${YELLOW} "author: phlinhng"
   echo ""
 
-  check_status
+  #check_status
 
   COLUMNS=woof
 
@@ -376,12 +422,11 @@ menu() {
     read -rp "选择操作 [输入任意值退出]: " opt
     case "${opt}" in
       "0") install_v2ray && continue_prompt ;;
-      #"1") install_trojan && continue_prompt ;;
-      "2") display_vmess && continue_prompt ;;
-      "3") get_v2ray && continue_prompt ;;
-      "4") get_trojan && continue_prompt ;;
-      "5") vps_tools ;;
-      "11") rm_v2script ;;
+      "1") display_vmess && continue_prompt ;;
+      "2") get_v2ray && continue_prompt ;;
+      "3") get_trojan && continue_prompt ;;
+      "4") vps_tools ;;
+      "5") rm_v2script ;;
       *) break ;;
     esac
   done
