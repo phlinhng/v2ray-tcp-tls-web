@@ -27,6 +27,9 @@ bash ~/v2gun.sh
 + [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor): subscription manager
 + [v2script](https://github.com/phlinhng/v2ray-tcp-tls-web/tree/master): v1.x version
 
+## Telegram
+https://t.me/technologyshare
+
 ## Credit
 + [Project V](https://www.v2fly.org/)
 + [V2Ray 配置指南](https://toutyrater.github.io/)
