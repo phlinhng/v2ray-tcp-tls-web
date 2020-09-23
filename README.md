@@ -14,6 +14,7 @@ bash ~/v2gun.sh
 1. VLESS / VMess / Trojan-Go all in one
 2. Higher offloading efficieny with v2ray-core as frontend
 3. Support Debian9+, Ubuntu 16+ and CentOS 7+ operation systems
+4. Support both IPv4 and IPv6
 
 ## Architecture
 + VLESS over TCP with TLS powered by v2ray-core
