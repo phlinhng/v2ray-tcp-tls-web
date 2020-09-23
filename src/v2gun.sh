@@ -480,7 +480,7 @@ menu() {
       "3") get_v2ray && continue_prompt ;;
       "4") get_trojan && continue_prompt ;;
       "5") vps_tools ;;
-      "6") rm_v2script ;;
+      "6") rm_v2gun ;;
       *) break ;;
     esac
   done
