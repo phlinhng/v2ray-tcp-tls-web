@@ -110,6 +110,19 @@ checkIP() {
   fi
 }
 
+show_links() {
+  local sni="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].settings.tag')"
+  local cf_node="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].settings.tag')"
+  local uuid_vless="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
+  local uuid_vmess="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
+  echo "VLESS"
+  echo "VMess (新版)"
+  echo "VMess (旧版)"
+  local json_vmess="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid_vmess}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local uri_vmess_2dust="$(printf %s "${json_tcp}" | base64 --wrap=0)"
+  echo "Trojan"
+}
+
 preinstall() {
   if [[ systemPackage == "apt-get" ]]; then
     ${sudoCmd} ${systemPackage} update
@@ -213,6 +226,7 @@ set_v2ray() {
   # $2: uuid for vmess+ws
   # $3: path for vmess+ws
   # $4: sni
+  # $5: url of cf node
   for BASE in 00_log 01_api 02_dns 03_routing 04_policy 05_inbounds 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
   ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
 {
@@ -264,7 +278,8 @@ set_v2ray() {
       "settings": {
         "clients": [
           {
-            "id": "$2"
+            "id": "$2",
+            "alterId": 2
           }
         ]
       },
@@ -275,7 +290,8 @@ set_v2ray() {
           "acceptProxyProtocol": true,
           "path": "$3"
         }
-      }
+      },
+      "tag": "$5"
     }
   ]
 }
@@ -364,7 +380,7 @@ install_v2ray_and_trojan() {
   local path_vmess="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
   local passwd_trojan="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
 
-  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}"
+  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "icook.tw"
   set_trojan "${passwd_trojan}"
 
   ${sudoCmd} mkdir -p /etc/ssl/v2ray
@@ -407,17 +423,15 @@ EOF
 
   colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
 
-  show_link
+  show_links
 }
 
 rm_v2gun() {
-  ${sudoCmd} ${systemPackage} install curl -y -qq
   curl -sL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_v2gun.sh | bash
   exit 0
 }
 
 vps_tools() {
-  ${sudoCmd} ${systemPackage} install wget -y -qq
   wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh -O /tmp/vps_tools.sh && chmod +x /tmp/vps_tools.sh && ${sudoCmd} /tmp/vps_tools.sh
   exit 0
 }
@@ -425,16 +439,16 @@ vps_tools() {
 show_menu() {
   echo ""
   echo "----------安装代理----------"
-  echo "0) 安装 VLESS (TLS) + VMess (WSS) + Trojan-Go"
+  echo "1) 安装 VLESS (TLS) + VMess (WSS) + Trojan-Go"
   echo "----------显示配置----------"
-  echo "1) 显示链接"
+  echo "2) 显示链接"
   echo "----------组件管理----------"
-  echo "2) 更新 v2ray-core"
-  echo "3) 更新 trojan-go"
+  echo "3) 更新 v2ray-core"
+  echo "4) 更新 trojan-go"
   echo "----------实用工具----------"
-  echo "4) VPS 工具箱 (含 BBR 脚本)"
+  echo "5) VPS 工具箱 (含 BBR 脚本)"
   echo "----------卸载脚本----------"
-  echo "5) 卸载脚本与全部组件"
+  echo "6) 卸载脚本与全部组件"
   echo ""
 }
 
@@ -451,12 +465,12 @@ menu() {
     show_menu
     read -rp "选择操作 [输入任意值退出]: " opt
     case "${opt}" in
-      "0") install_v2ray && continue_prompt ;;
-      "1") display_vmess && continue_prompt ;;
-      "2") get_v2ray && continue_prompt ;;
-      "3") get_trojan && continue_prompt ;;
-      "4") vps_tools ;;
-      "5") rm_v2script ;;
+      "1") install_v2ray && continue_prompt ;;
+      "2") show_links && continue_prompt ;;
+      "3") get_v2ray && continue_prompt ;;
+      "4") get_trojan && continue_prompt ;;
+      "5") vps_tools ;;
+      "6") rm_v2script ;;
       *) break ;;
     esac
   done
