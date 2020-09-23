@@ -104,7 +104,7 @@ colorEcho ${GREEN} "Removed trojan-go successfully."
 
 colorEcho ${BLUE} "Removing acme.sh"
 ${sudoCmd} bash ~/.acme.sh/acme.sh --uninstall
-${sudoCmd} $(which rm) -f ~/.acme.sh
+${sudoCmd} $(which rm) -rf ~/.acme.sh
 colorEcho ${GREEN} "Removed acme.sh successfully."
 
 ${sudoCmd} ${systemPackage} autoremove -y --purge
