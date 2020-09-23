@@ -66,9 +66,6 @@ ${sudoCmd} $(which rm) -rf /usr/local/lib/v2ray
 ${sudoCmd} $(which rm) -rf /usr/local/share/v2ray
 ${sudoCmd} $(which rm) -rf /var/log/v2ray
 ${sudoCmd} $(which rm) -rf /tmp/v2ray-ds
-colorEcho ${BLUE} "Removing v2ray user & group."
-${sudoCmd} deluser v2ray
-${sudoCmd} delgroup --only-if-empty v2ray
 colorEcho ${BLUE} "Removing v2ray crontab"
 ${sudoCmd} crontab -l | grep -v 'v2ray/geoip.dat' | ${sudoCmd} crontab -
 ${sudoCmd} crontab -l | grep -v 'v2ray/geosite.dat' | ${sudoCmd} crontab -
