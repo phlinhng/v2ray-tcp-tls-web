@@ -12,7 +12,7 @@ bash ~/v2gun.sh
 
 ## Features
 1. VLESS / VMess / Trojan-Go all in one
-2. Higher offloading efficeny with v2ray-core as frontend
+2. Higher offloading efficieny with v2ray-core as frontend
 3. Support Debian9+, Ubuntu 16+ and CentOS 7+ operation systems
 
 ## Architecture
