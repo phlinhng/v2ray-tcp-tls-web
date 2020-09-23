@@ -371,7 +371,7 @@ fix_cert() {
     fi
   done
 
-  ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag').key
+  ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag').key
 
   ${sudoCmd} $(which rm) -f /etc/nginx/sites-available/default
 
@@ -478,7 +478,7 @@ EOF
     colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
     show_links
   else
-    colorEcho ${GREEN} "证书签发失败, 请运行修复证书"
+    colorEcho ${RED} "证书签发失败, 请运行修复证书"
   fi
 }
 
