@@ -108,18 +108,18 @@ checkIP() {
 }
 
 show_links() {
-  local sni="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].settings.tag')"
-  local cf_node="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].settings.tag')"
-  local uuid_vless="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-  local uuid_vmess="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
-  local path_vmess="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path')"
+  local sni="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag')"
+  local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].settings.tag')"
+  local uuid_vless="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.clients[0].id')"
+  local uuid_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].settings.clients[0].id')"
+  local path_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].streamSettings.wsSettings.path')"
   local passwd_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
 
   echo "VLESS"
   printf "%s:443 %s\n\n" "sni" "${uuid_vless}"
 
   echo "VMess (新版)"
-  local uri_vmess="ws+tls:${uuid_vmeess}@{cf_node}:443/?path=${path_vmees}&host={sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
+  local uri_vmess="ws+tls:${uuid_vmeess}@${cf_node}:443/?path=${path_vmees}&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
   printf "%s\n\n" "vmess://${uri_vmess}"
 
   echo "VMess (旧版)"
@@ -249,7 +249,7 @@ set_v2ray() {
         "decryption": "none",
         "fallbacks": [
           {
-            "dest": 8080
+            "dest": 3567
           },
           {
             "path": "$3",
@@ -311,7 +311,7 @@ set_trojan() {
 {
   "run_type": "server",
   "local_addr": "127.0.0.1",
-  "local_port": 8080,
+  "local_port": 3567,
   "remote_addr": "127.0.0.1",
   "remote_port": 80,
   "log_level": 3,
@@ -344,7 +344,7 @@ set_nginx() {
   ${sudoCmd} rm /etc/nginx/sites-enabled/v2gun.conf
   ${sudoCmd} cat > /etc/nginx/sites-available/v2gun.conf <<-EOF
 server {
-listen 127.0.0.1:80;
+    listen 127.0.0.1:80;
     server_name $1;
     root /var/www/html;
     index index.php index.html index.htm;
@@ -428,8 +428,8 @@ EOF
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
+  if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]
   colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
-
   show_links
 }
 
