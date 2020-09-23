@@ -64,7 +64,7 @@ read_json() {
 write_json() {
   # jq [key = value] [path-to-file]
   jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
-} ## write_json [path-to-file] [key = value]
+} ## write_json [path-to-file] [key] [value]
 
 urlEncode() {
   printf %s "$1" | jq -s -R -r @uri
@@ -355,6 +355,52 @@ EOF
   ${sudoCmd} cd ~
 }
 
+fix_cert() {
+  while true; do
+    read -rp "解析到本 VPS 的域名: " V2_DOMAIN
+    if checkIP "${V2_DOMAIN}"; then
+      colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始修复证书"
+      break
+    else
+      colorEcho ${RED} "域名 ${V2_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
+      read -rp "若您确定域名解析正确, 可以继续进行修复作业. 强制继续? (yes/no/quit) " forceConfirm
+      case "${forceConfirm}" in
+        [yY]|[yY][eE][sS] ) break ;;
+        [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
+      esac
+    fi
+  done
+
+  ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag').key
+
+  ${sudoCmd} $(which rm) -f /etc/nginx/sites-available/default
+
+  # temporary config for issuing certs
+  ${sudoCmd} cat > /etc/nginx/sites-enabled/v2gun.conf <<-EOF
+server {
+    listen 80;
+    server_name ${V2_DOMAIN};
+    root /var/www/html;
+    index index.php index.html index.htm;
+}
+EOF
+
+  get_cert "${V2_DOMAIN}"
+
+  colorEcho ${BLUE} "Setting nginx"
+  set_redirect
+  set_nginx "${V2_DOMAIN}"
+
+  write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].settings.tag" "${V2_DOMAIN}"
+
+  if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
+    colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
+    show_links
+  else
+    colorEcho ${GREEN} "证书签发失败, 请运行修复证书"
+  fi
+}
+
 install_v2ray() {
   while true; do
     read -rp "解析到本 VPS 的域名: " V2_DOMAIN
@@ -431,6 +477,8 @@ EOF
   if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
     colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
     show_links
+  else
+    colorEcho ${GREEN} "证书签发失败, 请运行修复证书"
   fi
 }
 
@@ -448,15 +496,16 @@ show_menu() {
   echo ""
   echo "----------安装代理----------"
   echo "1) 安装 VLESS (TLS) + VMess (WSS) + Trojan-Go"
+  echo "2) 修复证书 / 更换域名"
   echo "----------显示配置----------"
-  echo "2) 显示链接"
+  echo "3) 显示链接"
   echo "----------组件管理----------"
-  echo "3) 更新 v2ray-core"
-  echo "4) 更新 trojan-go"
+  echo "4) 更新 v2ray-core"
+  echo "5) 更新 trojan-go"
   echo "----------实用工具----------"
-  echo "5) VPS 工具箱 (含 BBR 脚本)"
+  echo "6) VPS 工具箱 (含 BBR 脚本)"
   echo "----------卸载脚本----------"
-  echo "6) 卸载脚本与全部组件"
+  echo "7) 卸载脚本与全部组件"
   echo ""
 }
 
@@ -474,11 +523,12 @@ menu() {
     read -rp "选择操作 [输入任意值退出]: " opt
     case "${opt}" in
       "1") install_v2ray && continue_prompt ;;
-      "2") show_links && continue_prompt ;;
-      "3") get_v2ray && continue_prompt ;;
-      "4") get_trojan && continue_prompt ;;
-      "5") vps_tools ;;
-      "6") rm_v2gun ;;
+      "2") fix_cert && continue_prompt ;;
+      "3") show_links && continue_prompt ;;
+      "4") get_v2ray && continue_prompt ;;
+      "5") get_trojan && continue_prompt ;;
+      "6") vps_tools ;;
+      "7") rm_v2gun ;;
       *) break ;;
     esac
   done
