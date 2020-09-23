@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
-branch="v2gun"
+branch="vless"
 VERSION="2.0 beta"
 
 # /usr/local/bin/v2script ##main
