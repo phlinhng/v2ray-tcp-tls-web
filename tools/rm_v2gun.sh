@@ -71,7 +71,7 @@ ${sudoCmd} systemctl disable nginx
 ${sudoCmd} $(which rm) -f /etc/systemd/system/nginx.service
 ${sudoCmd} $(which rm) -f /etc/systemd/system/nginx.service # and symlinks that might be related
 colorEcho ${BLUE} "Removing nginx"
-${sudoCmd} ${systemPackage} remove nginx -y
+${sudoCmd} ${systemPackage} remove nginx-extras -y
 colorEcho ${GREEN} "Removed nginx successfully."
 
 colorEcho ${BLUE} "Removing dummy site."
