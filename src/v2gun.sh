@@ -4,7 +4,7 @@ export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
 branch="v2gun"
-VERSION="2.0"
+VERSION="2.0 alpha"
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
@@ -36,8 +36,6 @@ nocolor="\033[0m"
 if [[ -f /etc/redhat-release ]]; then
   release="centos"
   systemPackage="yum"
-  #colorEcho ${RED} "unsupported OS"
-  #exit 0
 elif cat /etc/issue | grep -Eqi "debian"; then
   release="debian"
   systemPackage="apt-get"
@@ -115,12 +113,25 @@ show_links() {
   local cf_node="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].settings.tag')"
   local uuid_vless="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
   local uuid_vmess="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
+  local path_vmess="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].streamSettings.wsSettings.path')"
+  local passwd_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
+
   echo "VLESS"
+  printf "%s:443 %s\n\n" "sni" "${uuid_vless}"
+
   echo "VMess (新版)"
+  vmess://ws+tls:7db04e8f-7cfc-46e0-9e18-d329c22ec353-64@myServer.com:12345/?path=%2FmyServerAddressPath%2F%E4%B8%AD%E6%96%87%E8%B7%AF%E5%BE%84%2F&host=www.myServer.com&tlsAllowInsecure=true&tlsServerName=%E4%BC%AA%E8%A3%85%E5%9F%9F%E5%90%8D.com#%E4%B8%AA%E6%80%A7%E5%8C%96%E9%93%BE%E6%8E%A5%E5%A4%87%E6%B3%A8
+  local uri_vmess="ws+tls:${uuid_vmeess}@{cf_node}:443/?path=${path_vmees}&host={sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
+  printf "%s\n\n" "vmess://${uri_vmess}"
+
   echo "VMess (旧版)"
   local json_vmess="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid_vmess}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
   local uri_vmess_2dust="$(printf %s "${json_tcp}" | base64 --wrap=0)"
+  printf "%s\n\n" "vmess://${uri_vmess_2dust}"
+
   echo "Trojan"
+  local uri_trojan="${passwd_trojan}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
+  printf "%s\n" "trojan://${uri_trojan}"
 }
 
 preinstall() {
