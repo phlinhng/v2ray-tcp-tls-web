@@ -7,5 +7,5 @@ graph LR
     F -->|no| G[NGINX] -->|HTTP| H[Fake website]
     C -->|no| I{is VLESS?}
     I -->|yes| B -->|VLESS| E
-    I -->|no| G
+    I -->|no| F
     A -->|www.cloudflare.com| K[Cloudflare]-->|www.example.com| B
