@@ -1,0 +1,11 @@
+graph LR
+    A[Client] -->|www.example.com| B(v2ray-core)
+    B --> C{with path?}
+    C -->|yes, vmess path| B -->|VMess| E[Internet]
+    C -->|yes but wrong path| D[Trojan-Go] --> F{is trojan?}
+    F -->|yes| D[Trojan-Go] --> |Trojan| E
+    F -->|no| G[NGINX] -->|HTTP| H[Fake website]
+    C -->|no| I{is VLESS?}
+    I -->|yes| B -->|VLESS| E
+    I -->|no| G
+    A -->|www.cloudflare.com| K[Cloudflare]-->|www.example.com| B

@@ -98,7 +98,7 @@ build_web() {
 }
 
 checkIP() {
-  local realIP="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/custom/ip_api`)"
+  local realIP="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/v2gun/custom/ip_api`)"
   local resolvedIP="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
 
   if [[ "${realIP}" == "${resolvedIP}" ]]; then
@@ -389,9 +389,10 @@ install_v2ray_and_trojan() {
   local uuid_vless="$(cat '/proc/sys/kernel/random/uuid')"
   local uuid_vmess="$(cat '/proc/sys/kernel/random/uuid')"
   local path_vmess="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+  local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/custom/ip_api)"
   local passwd_trojan="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
 
-  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "icook.tw"
+  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "$(cf_node)"
   set_trojan "${passwd_trojan}"
 
   ${sudoCmd} mkdir -p /etc/ssl/v2ray

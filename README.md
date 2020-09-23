@@ -1,5 +1,5 @@
-# V2RAY TCP+TLS+WEB / WSS+CDN and Trojan-go
-automated script for V2Ray (TCP+TLS+Web), V2Ray (WSS+CDN), and Trojan-go
+# VLESS TCP+TLS / VMess WSS+CDN / Trojan-go
+automated script for VLESS TCP+TLS, VMess WSS+CDN, and Trojan-go
 
 ## Usage
 ```sh
@@ -9,10 +9,6 @@ The above command will download the script, save it to `/usr/local/bin/v2script`
 ```
 v2script
 ```
-
-## Screenshot
-<img src="https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/image/v2script_menu.jpeg" alt="alt text" width="640">
-
 ## TCP+TLS vs WS+TLS
 1. TCP+TLS has faster connection speed than WS+TLS benifit from that TCP is naturally faster than websocket
 2. TCP+TLS has lower delay by saving 1-RTT from ws handshaking
