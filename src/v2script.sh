@@ -420,6 +420,8 @@ RestartPreventExitStatus=23
 [Install]
 WantedBy=multi-user.target
 EOF
+
+  ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
 }
 
 get_v2ray() {
@@ -441,7 +443,6 @@ build_v2ray() {
     # add new user and overwrite v2ray.service
     # https://github.com/v2ray/v2ray-core/issues/1011
     ${sudoCmd} useradd -d /usr/local/etc/v2ray/ -M -s $(${sudoCmd} which nologin) v2ray
-    ${sudoCmd} mv ${ds_service} /etc/systemd/system/v2ray.service
     ${sudoCmd} mkdir -p /var/log/v2ray
     ${sudoCmd} chown -R v2ray:v2ray /var/log/v2ray
     write_json /usr/local/etc/v2script/config.json ".v2ray.installed" "true"
