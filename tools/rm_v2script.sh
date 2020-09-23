@@ -151,6 +151,6 @@ ${sudoCmd} rm -f /usr/local/bin/v2script
 ${sudoCmd} rm -f /usr/local/bin/v2sub
 colorEcho ${GREEN} "Removed v2script successfully."
 
-${sudoCmd} ${systemPackage} autoremove -y
+${sudoCmd} ${systemPackage} autoremove -y --purge
 
 colorEcho ${BLUE} "卸载完成"
