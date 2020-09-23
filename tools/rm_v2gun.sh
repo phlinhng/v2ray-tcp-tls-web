@@ -70,8 +70,6 @@ ${sudoCmd} systemctl stop nginx
 ${sudoCmd} systemctl disable nginx
 ${sudoCmd} $(which rm) -f /etc/systemd/system/nginx.service
 ${sudoCmd} $(which rm) -f /etc/systemd/system/nginx.service # and symlinks that might be related
-${sudoCmd} systemctl daemon-reload
-${sudoCmd} systemctl reset-failed
 colorEcho ${BLUE} "Removing nginx"
 ${sudoCmd} ${systemPackage} remove nginx -y
 colorEcho ${GREEN} "Removed nginx successfully."
@@ -85,8 +83,6 @@ ${sudoCmd} systemctl stop trojan-go
 ${sudoCmd} systemctl disable trojan-go
 ${sudoCmd} $(which rm) -f /etc/systemd/system/trojan-go.service
 ${sudoCmd} $(which rm) -f /etc/systemd/system/trojan-go.service # and symlinks that might be related
-${sudoCmd} systemctl daemon-reload
-${sudoCmd} systemctl reset-failed
 colorEcho ${BLUE} "Removing trojan-go files."
 ${sudoCmd} $(which rm) -rf /usr/bin/trojan-go
 ${sudoCmd} $(which rm) -rf /etc/trojan-go
