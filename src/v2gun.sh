@@ -133,7 +133,7 @@ show_links() {
 }
 
 preinstall() {
-  if [[ release == "debian"]] || [ release="ubuntu" ] || [[ systemPackage == "apt-get" ]]; then
+  if [[ release == "debian"]] || [ release == "ubuntu" ] || [[ systemPackage == "apt-get" ]]; then
     ${sudoCmd} ${systemPackage} update
     ${sudoCmd} ${systemPackage} install software-properties-common -y -q
     ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y
@@ -442,7 +442,7 @@ rm_v2gun() {
 }
 
 vps_tools() {
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/vps_tools.sh -O /tmp/vps_tools.sh && chmod +x /tmp/vps_tools.sh && ${sudoCmd} /tmp/vps_tools.sh
+  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/tools/vps_tools.sh -O /tmp/vps_tools.sh && chmod +x /tmp/vps_tools.sh && ${sudoCmd} /tmp/vps_tools.sh
   exit 0
 }
 
