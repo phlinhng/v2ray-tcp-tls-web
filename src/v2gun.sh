@@ -360,7 +360,7 @@ EOF
   ${sudoCmd} cd ~
 }
 
-install_v2ray_and_trojan() {
+install_v2ray() {
   while true; do
     read -rp "解析到本 VPS 的域名: " V2_DOMAIN
     if checkIP "${V2_DOMAIN}"; then
