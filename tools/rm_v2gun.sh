@@ -46,9 +46,6 @@ colorEcho() {
 }
 
 # remove v2ray
-# Notice the two dashes (--) which are telling bash to not process anything following it as arguments to bash.
-# https://stackoverflow.com/questions/4642915/passing-parameters-to-bash-when-executing-a-script-fetched-by-curl
-curl -sL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 colorEcho ${BLUE} "Shutting down v2ray service."
 ${sudoCmd} systemctl stop v2ray
 ${sudoCmd} systemctl disable v2ray
@@ -57,12 +54,9 @@ ${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray.service
 ${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray@.service
 ${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray@.service
 colorEcho ${BLUE} "Removing v2ray files."
-${sudoCmd} $(which rm) -rf /etc/v2ray
-${sudoCmd} $(which rm) -rf /usr/bin/v2ray
 ${sudoCmd} $(which rm) -rf /usr/local/bin/v2ray
 ${sudoCmd} $(which rm) -rf /usr/local/bin/v2ctl
 ${sudoCmd} $(which rm) -rf /usr/local/etc/v2ray
-${sudoCmd} $(which rm) -rf /usr/local/lib/v2ray
 ${sudoCmd} $(which rm) -rf /usr/local/share/v2ray
 ${sudoCmd} $(which rm) -rf /var/log/v2ray
 colorEcho ${BLUE} "Removing v2ray crontab"
