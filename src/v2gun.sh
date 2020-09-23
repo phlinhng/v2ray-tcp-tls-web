@@ -134,7 +134,7 @@ show_links() {
 
 preinstall() {
     # turning off selinux
-    ${sudoCmd} setenforce 0
+    ${sudoCmd} setenforce 0 2>/dev/null
     ${sudoCmd} echo "SELINUX=disable" > /etc/selinux/config
 
     # turning off firewall
