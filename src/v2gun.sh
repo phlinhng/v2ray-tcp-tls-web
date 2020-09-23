@@ -56,8 +56,6 @@ elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
   systemPackage="yum"
 fi
 
-VERSION="$(${sudoCmd} jq --raw-output '.version' /usr/local/etc/v2script/config.json 2>/dev/null | tr -d '\n')"
-
 read_json() {
   # jq [key] [path-to-file]
   ${sudoCmd} jq --raw-output $2 $1 2>/dev/null | tr -d '\n'
