@@ -75,18 +75,16 @@ ${sudoCmd} crontab -l | grep -v 'v2ray/geosite.dat' | ${sudoCmd} crontab -
 colorEcho ${GREEN} "Removed v2ray successfully."
 
 # remove caddy
-colorEcho ${BLUE} "Shutting down caddy service."
-${sudoCmd} systemctl stop caddy
-${sudoCmd} systemctl disable caddy
-${sudoCmd} rm -f /etc/systemd/system/caddy.service
-${sudoCmd} rm -f /etc/systemd/system/caddy.service # and symlinks that might be related
+colorEcho ${BLUE} "Shutting down nginx service."
+${sudoCmd} systemctl stop nginx
+${sudoCmd} systemctl disable nginx
+${sudoCmd} rm -f /etc/systemd/system/nginx.service
+${sudoCmd} rm -f /etc/systemd/system/nginx.service # and symlinks that might be related
 ${sudoCmd} systemctl daemon-reload
 ${sudoCmd} systemctl reset-failed
-colorEcho ${BLUE} "Removing caddy files."
-${sudoCmd} rm -rf /usr/local/bin/caddy
-${sudoCmd} rm -rf /usr/local/etc/caddy
-${sudoCmd} rm -rf /usr/local/etc/ssl/caddy
-colorEcho ${GREEN} "Removed caddy successfully."
+colorEcho ${BLUE} "Removing nginx"
+${sudoCmd} ${systemPackage} remove nginx -y
+colorEcho ${GREEN} "Removed nginx successfully."
 
 colorEcho ${BLUE} "Removing dummy site."
 ${sudoCmd} rm -rf /var/www/html
@@ -107,33 +105,6 @@ ${sudoCmd} crontab -l | grep -v 'trojan-go/geoip.dat' | ${sudoCmd} crontab -
 ${sudoCmd} crontab -l | grep -v 'trojan-go/geosite.dat' | ${sudoCmd} crontab -
 colorEcho ${GREEN} "Removed trojan-go successfully."
 
-# remove mtg
-colorEcho ${BLUE} "Shutting down mtg service."
-${sudoCmd} systemctl stop mtg
-${sudoCmd} systemctl disable mtg
-${sudoCmd} rm -f /etc/systemd/system/mtg.service
-${sudoCmd} rm -f /etc/systemd/system/mtg.service # and symlinks that might be related
-${sudoCmd} systemctl daemon-reload
-${sudoCmd} systemctl reset-failed
-colorEcho ${BLUE} "Removing trojan-go files."
-${sudoCmd} rm -rf /usr/local/bin/mtg
-colorEcho ${GREEN} "Removed trojan-go successfully."
-
-# docker
-# this will stop docker.service and remove every conatainer, image...etc created by docker but not docker itself
-# since uninstalling docker is complicated and may cause unstable to OS, if you want the OS to go back to clean state then reinstall the whole OS is suggested
-colorEcho ${BLUE} "Removing docker containers, images, networks, and images"
-${sudoCmd} docker stop $(${sudoCmd} docker ps -a -q) 2>/dev/null
-${sudoCmd} docker system prune --force
-colorEcho ${GREEN} "Removed docker successfully."
-
-# remove script configuration files
-colorEcho ${BLUE} "Removing v2script excutable and configuration files"
-${sudoCmd} rm -rf /usr/local/etc/v2script
-${sudoCmd} rm -f /usr/local/bin/v2script
-${sudoCmd} rm -f /usr/local/bin/v2sub
-colorEcho ${GREEN} "Removed v2script successfully."
-
-${sudoCmd} ${systemPackage} autoremove -y
+${sudoCmd} ${systemPackage} autoremove -y --purge
 
 colorEcho ${BLUE} "卸载完成"

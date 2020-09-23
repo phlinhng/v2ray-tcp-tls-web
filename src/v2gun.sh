@@ -110,11 +110,24 @@ checkIP() {
   fi
 }
 
-get_nginx() {
+preinstall() {
   if [[ systemPackage == "apt-get" ]]; then
+    ${sudoCmd} ${systemPackage} update
     ${sudoCmd} ${systemPackage} install software-properties-common -y -q
     ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y
-    ${sudoCmd} ${systemPackage} install nginx-extras -y -q -f
+    ${sudoCmd} ${systemPackage} update
+    ${sudoCmd} ${systemPackage} install coreutil curl git nginx wget unzip -y -q
+  elif [[ systemPackage == "yum" ]]; then
+    # turning off selinux
+    ${sudoCmd} setenforce 0
+    ${sudoCmd} echo "SELINUX=disable" > /etc/selinux/config
+    # turning off firewall
+    ${sudoCmd} systemctl stop firewalld 2>/dev/null
+    ${sudoCmd} systemctl disable firewalld 2>/dev/null
+    # get dependencies
+    ${sudoCmd} ${systemPackage} update -y
+    ${sudoCmd} ${systemPackage} install epel-release -y
+    ${sudoCmd} ${systemPackage} install coreutil curl git nginx wget unzip -y -q
   fi
 }
 
@@ -320,7 +333,6 @@ EOF
   ${sudoCmd} cd ~
 }
 
-
 install_v2ray_and_trojan() {
   while true; do
     read -rp "解析到本 VPS 的域名: " V2_DOMAIN
@@ -337,13 +349,10 @@ install_v2ray_and_trojan() {
     fi
   done
 
-  ${sudoCmd} ${systemPackage} update
-  ${sudoCmd} ${systemPackage} install curl wget coreutils unzip -y -q
+  preinstall
 
   # set time syncronise service
   ${sudoCmd} timedatectl set-ntp true
-
-  get_nginx
 
   get_v2ray
   build_v2ray
