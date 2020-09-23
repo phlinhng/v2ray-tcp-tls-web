@@ -4,6 +4,7 @@ export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
 branch="v2gun"
+VERSION="2.0"
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
@@ -46,8 +47,6 @@ elif cat /etc/issue | grep -Eqi "ubuntu"; then
 elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
   release="centos"
   systemPackage="yum"
-  #colorEcho ${RED} "unsupported OS"
-  #exit 0
 elif cat /proc/version | grep -Eqi "debian"; then
   release="debian"
   systemPackage="apt-get"
@@ -57,8 +56,6 @@ elif cat /proc/version | grep -Eqi "ubuntu"; then
 elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
   release="centos"
   systemPackage="yum"
-  #colorEcho ${RED} "unsupported OS"
-  #exit 0
 fi
 
 VERSION="$(${sudoCmd} jq --raw-output '.version' /usr/local/etc/v2script/config.json 2>/dev/null | tr -d '\n')"
@@ -297,6 +294,33 @@ set_trojan() {
 EOF
 }
 
+set_redirect() {
+  ${sudoCmd} cat > /etc/nginx/sites-available/default <<-EOF
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+}
+
+set_nginx() {
+  ${sudoCmd} rm /etc/nginx/sites-enabled/v2gun.conf
+  ${sudoCmd} cat > /etc/nginx/sites-available/v2gun.conf <<-EOF
+server {
+listen 127.0.0.1:80;
+    server_name $1;
+    root /var/www/html;
+    index index.php index.html index.htm;
+}
+EOF
+  ${sudoCmd} cd /etc/nginx/sites-enabled
+  ${sudoCmd} ln -s /etc/nginx/sites-available/v2gun.conf .
+  ${sudoCmd} cd ~
+}
+
+
 install_v2ray_and_trojan() {
   while true; do
     read -rp "解析到本 VPS 的域名: " V2_DOMAIN
@@ -337,7 +361,7 @@ install_v2ray_and_trojan() {
   ${sudoCmd} mkdir -p /etc/ssl/v2ray
 
   # temporary config for issuing certs
-  ${sudoCmd} cat > /etc/nginx/sites-enabled/vless_fallback.conf <<-EOF
+  ${sudoCmd} cat > /etc/nginx/sites-enabled/v2gun.conf <<-EOF
 server {
     listen 80;
     server_name ${V2_DOMAIN};
@@ -348,15 +372,12 @@ EOF
 
   get_cert "${V2_DOMAIN}"
 
-  set_nginx
-
-  local uuid_vless="$(cat '/proc/sys/kernel/random/uuid')"
-  local uuid_vmess="$(cat '/proc/sys/kernel/random/uuid')"
-  local path_vmess_wss="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  set_v2ray_with_trojan "${uuid_vless}" "${uuid_vmess}" "$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-
   colorEcho ${BLUE} "Building dummy web site"
   build_web
+
+  colorEcho ${BLUE} "Setting nginx"
+  set_redirect
+  set_nginx "${V2_DOMAIN}"
 
   # activate services
   colorEcho ${BLUE} "Activating services"
