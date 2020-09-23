@@ -52,20 +52,20 @@ curl -sL https://install.direct/go.sh | ${sudoCmd} bash -s -- --remove
 colorEcho ${BLUE} "Shutting down v2ray service."
 ${sudoCmd} systemctl stop v2ray
 ${sudoCmd} systemctl disable v2ray
-${sudoCmd} rm -f /etc/systemd/system/v2ray.service
-${sudoCmd} rm -f /etc/systemd/system/v2ray.service
-${sudoCmd} rm -f /etc/systemd/system/v2ray@.service
-${sudoCmd} rm -f /etc/systemd/system/v2ray@.service
+${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray.service
+${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray.service
+${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray@.service
+${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray@.service
 colorEcho ${BLUE} "Removing v2ray files."
-${sudoCmd} rm -rf /etc/v2ray
-${sudoCmd} rm -rf /usr/bin/v2ray
-${sudoCmd} rm -rf /usr/local/bin/v2ray
-${sudoCmd} rm -rf /usr/local/bin/v2ctl
-${sudoCmd} rm -rf /usr/local/etc/v2ray
-${sudoCmd} rm -rf /usr/local/lib/v2ray
-${sudoCmd} rm -rf /usr/local/share/v2ray
-${sudoCmd} rm -rf /var/log/v2ray
-${sudoCmd} rm -rf /tmp/v2ray-ds
+${sudoCmd} $(which rm) -rf /etc/v2ray
+${sudoCmd} $(which rm) -rf /usr/bin/v2ray
+${sudoCmd} $(which rm) -rf /usr/local/bin/v2ray
+${sudoCmd} $(which rm) -rf /usr/local/bin/v2ctl
+${sudoCmd} $(which rm) -rf /usr/local/etc/v2ray
+${sudoCmd} $(which rm) -rf /usr/local/lib/v2ray
+${sudoCmd} $(which rm) -rf /usr/local/share/v2ray
+${sudoCmd} $(which rm) -rf /var/log/v2ray
+${sudoCmd} $(which rm) -rf /tmp/v2ray-ds
 colorEcho ${BLUE} "Removing v2ray user & group."
 ${sudoCmd} deluser v2ray
 ${sudoCmd} delgroup --only-if-empty v2ray
@@ -78,8 +78,8 @@ colorEcho ${GREEN} "Removed v2ray successfully."
 colorEcho ${BLUE} "Shutting down nginx service."
 ${sudoCmd} systemctl stop nginx
 ${sudoCmd} systemctl disable nginx
-${sudoCmd} rm -f /etc/systemd/system/nginx.service
-${sudoCmd} rm -f /etc/systemd/system/nginx.service # and symlinks that might be related
+${sudoCmd} $(which rm) -f /etc/systemd/system/nginx.service
+${sudoCmd} $(which rm) -f /etc/systemd/system/nginx.service # and symlinks that might be related
 ${sudoCmd} systemctl daemon-reload
 ${sudoCmd} systemctl reset-failed
 colorEcho ${BLUE} "Removing nginx"
@@ -87,20 +87,25 @@ ${sudoCmd} ${systemPackage} remove nginx -y
 colorEcho ${GREEN} "Removed nginx successfully."
 
 colorEcho ${BLUE} "Removing dummy site."
-${sudoCmd} rm -rf /var/www/html
+${sudoCmd} $(which rm) -rf /var/www/html
 
 # remove trojan-go
 colorEcho ${BLUE} "Shutting down trojan-go service."
 ${sudoCmd} systemctl stop trojan-go
 ${sudoCmd} systemctl disable trojan-go
-${sudoCmd} rm -f /etc/systemd/system/trojan-go.service
-${sudoCmd} rm -f /etc/systemd/system/trojan-go.service # and symlinks that might be related
+${sudoCmd} $(which rm) -f /etc/systemd/system/trojan-go.service
+${sudoCmd} $(which rm) -f /etc/systemd/system/trojan-go.service # and symlinks that might be related
 ${sudoCmd} systemctl daemon-reload
 ${sudoCmd} systemctl reset-failed
 colorEcho ${BLUE} "Removing trojan-go files."
-${sudoCmd} rm -rf /usr/bin/trojan-go
-${sudoCmd} rm -rf /etc/trojan-go
+${sudoCmd} $(which rm) -rf /usr/bin/trojan-go
+${sudoCmd} $(which rm) -rf /etc/trojan-go
 colorEcho ${GREEN} "Removed trojan-go successfully."
+
+colorEcho ${BLUE} "Removing acme.sh"
+${sudoCmd} bash ~/.acme.sh/acme.sh --uninstall
+${sudoCmd} $(which rm) -f ~/.acme.sh
+colorEcho ${GREEN} "Removed acme.sh successfully."
 
 ${sudoCmd} ${systemPackage} autoremove -y --purge
 
