@@ -430,7 +430,7 @@ get_v2ray() {
     ${sudoCmd} $(which rm) -rf /tmp/v2ray-ds # prevent v2ray booting issues after reinstalling
     build_v2ray_service
     ${sudoCmd} systemctl daemon-reload
-    ${sudoCmd} restart v2ray
+    ${sudoCmd} systemctl restart v2ray
   fi
 }
 
