@@ -148,7 +148,6 @@ preinstall() {
     ${sudoCmd} ${systemPackage} install epel-release -y # centos
     ${sudoCmd} ${systemPackage} update -y
     ${sudoCmd} ${systemPackage} install coreutil curl git jq nginx wget unzip -y
-  fi
 }
 
 get_cert() {
