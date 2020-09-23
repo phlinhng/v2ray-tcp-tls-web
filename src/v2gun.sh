@@ -428,9 +428,10 @@ EOF
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
-  if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]
-  colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
-  show_links
+  if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
+    colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
+    show_links
+  fi
 }
 
 vps_tools() {
