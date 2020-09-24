@@ -458,11 +458,12 @@ install_v2ray() {
   # set time syncronise service
   ${sudoCmd} timedatectl set-ntp true
 
-  export JSONS_PATH="/usr/local/etc/v2ray" # for multiple configuration files
   ${sudoCmd} $(which mkdir) -p "/usr/local/etc/v2ray"
   for BASE in 00_log 01_api 02_dns 03_routing 04_policy 05_inbounds 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
+  export JSONS_PATH="/usr/local/etc/v2ray" # for multiple configuration files
 
   get_v2ray
+  ${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray.service.d/10-donot_touch_single_conf.conf
 
   get_trojan
 
