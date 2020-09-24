@@ -208,16 +208,6 @@ get_v2ray() {
   curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash
 }
 
-build_v2ray() {
-  ${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray.service.d/10-donot_touch_single_conf.conf
-  ${sudoCmd} cat > "/etc/systemd/system/v2ray.service.d/10-multiple_conf.conf" <<-EOF
-[Service]
-ExecStart=/usr/local/bin/v2ray -confdir /usr/local/etc/v2ray
-EOF
-  ${sudoCmd} systemctl daemon-reload
-  ${sudoCmd} systemctl enable v2ray
-}
-
 set_v2ray() {
   # $1: uuid for vless+tcp
   # $2: uuid for vmess+ws
@@ -415,8 +405,9 @@ install_v2ray() {
   # set time syncronise service
   ${sudoCmd} timedatectl set-ntp true
 
+  export JSON_PATH="/usr/local/etc/v2ray"
+
   get_v2ray
-  build_v2ray
 
   get_trojan
 
