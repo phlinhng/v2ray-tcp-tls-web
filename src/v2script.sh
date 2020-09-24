@@ -342,11 +342,11 @@ set_v2ray_wss() {
     local cfUrl="amp.cloudflare.com"
     local uuid_wss="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[1].settings.clients[0].id')"
     local currentRemark="$(read_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' | sed 's/^vmess:\/\///g' | base64 -d | jq --raw-output '.ps' | tr -d '\n')"
-    local json_wss="{\"add\":\"${cfUrl}\",\"aid\":\"0\",\"host\":\"${sni}\",\"id\":\"${uuid_wss}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local json_wss="{\"add\":\"${cfUrl}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid_wss}\",\"net\":\"ws\",\"path\":\"/${wssPath}\",\"port\":\"443\",\"ps\":\"${currentRemark} (CDN)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
     local uri_wss="$(printf %s "${json_wss}" | base64 --wrap=0)"
 
     echo "${cfUrl}:443"
-    echo "${uuid_wss} (aid: 0)"
+    echo "${uuid_wss} (aid: 1)"
     echo "Header: ${sni}, Path: /${wssPath}" && echo ""
     echo "vmess://${uri_wss}" | tr -d '\n' && printf "\n"
     write_json /usr/local/etc/v2script/config.json '.sub.nodesList.wss' "$(printf %s "\"vmess://${uri_wss}\"" | tr -d '\n')"
@@ -525,7 +525,7 @@ install_v2ray() {
 
   local V2_DOMAIN="$(read_json /usr/local/etc/v2script/config.json '.v2ray.tlsHeader')"
   local uuid_tcp="$(read_json /usr/local/etc/v2ray/config.json '.inbounds[0].settings.clients[0].id')"
-  local json_tcp="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"1\",\"host\":\"\",\"id\":\"${uuid_tcp}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local json_tcp="{\"add\":\"${V2_DOMAIN}\",\"aid\":\"0\",\"host\":\"\",\"id\":\"${uuid_tcp}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${V2_DOMAIN}\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
   local uri_tcp="$(printf %s "${json_tcp}" | base64 --wrap=0)"
   write_json /usr/local/etc/v2script/config.json '.sub.nodesList.tcp' "$(printf %s "\"vmess://${uri_tcp}\"" | tr -d '\n')"
 
