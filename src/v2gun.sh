@@ -411,7 +411,6 @@ server {
 }
 EOF
 
-    get_acmesh
     get_cert "${V2_DOMAIN}"
 
     colorEcho ${BLUE} "Setting nginx"
@@ -479,6 +478,7 @@ server {
 }
 EOF
 
+  get_acmesh
   get_cert "${V2_DOMAIN}"
 
   colorEcho ${BLUE} "Building dummy web site"
