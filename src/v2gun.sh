@@ -80,10 +80,10 @@ identify_the_operating_system_and_architecture() {
       PACKAGE_MANAGEMENT_UPDATE='yum update'
       PACKAGE_MANAGEMENT_INSTALL='yum install'
       PACKAGE_MANAGEMENT_REMOVE='yum remove'
-      if [[ "$(command -v dnf)" ]]; then
-        PACKAGE_MANAGEMENT_INSTALL='dnf install'
-        PACKAGE_MANAGEMENT_REMOVE='dnf remove'
-      fi
+    elif [[ "$(command -v dnf)" ]]; then
+      PACKAGE_MANAGEMENT_UPDATE='dnf update'
+      PACKAGE_MANAGEMENT_INSTALL='dnf install'
+      PACKAGE_MANAGEMENT_REMOVE='dnf remove'
     elif [[ "$(command -v zypper)" ]]; then
       PACKAGE_MANAGEMENT_INSTALL='zypper install'
       PACKAGE_MANAGEMENT_REMOVE='zypper remove'
