@@ -31,30 +31,74 @@ red="\033[0;${RED}"
 green="\033[0;${GREEN}"
 nocolor="\033[0m"
 
-#copied & modified from atrandys trojan scripts
-#copy from 秋水逸冰 ss scripts
-if [[ -f /etc/redhat-release ]]; then
-  release="centos"
-  systemPackage="yum"
-elif cat /etc/issue | grep -Eqi "debian"; then
-  release="debian"
-  systemPackage="apt-get"
-elif cat /etc/issue | grep -Eqi "ubuntu"; then
-  release="ubuntu"
-  systemPackage="apt-get"
-elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
-  release="centos"
-  systemPackage="yum"
-elif cat /proc/version | grep -Eqi "debian"; then
-  release="debian"
-  systemPackage="apt-get"
-elif cat /proc/version | grep -Eqi "ubuntu"; then
-  release="ubuntu"
-  systemPackage="apt-get"
-elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
-  release="centos"
-  systemPackage="yum"
-fi
+#copied & modified from v2fly fhs script
+identify_the_operating_system_and_architecture() {
+  if [[ "$(uname)" == 'Linux' ]]; then
+    case "$(uname -m)" in
+      'i386' | 'i686')
+        MACHINE='386'
+        ;;
+      'amd64' | 'x86_64')
+        MACHINE='amd64'
+        ;;
+      'armv5tel')
+        MACHINE='armv5'
+        ;;
+      'armv6l')
+        MACHINE='armv6'
+        ;;
+      'armv7' | 'armv7l')
+        MACHINE='armv7a'
+        ;;
+      'armv8' | 'aarch64')
+        MACHINE='armv8'
+        ;;
+      'mips64')
+        MACHINE='mips64'
+        ;;
+      'mips64le')
+        MACHINE='mips64le'
+        ;;
+      *)
+        echo "error: The architecture is not supported."
+        exit 1
+        ;;
+    esac
+    if [[ ! -f '/etc/os-release' ]]; then
+      echo "error: Don't use outdated Linux distributions."
+      exit 1
+    fi
+    if [[ -z "$(ls -l /sbin/init | grep systemd)" ]]; then
+      echo "error: Only Linux distributions using systemd are supported."
+      exit 1
+    fi
+    if [[ "$(command -v apt)" ]]; then
+      PACKAGE_MANAGEMENT_UPDATE='apt update'
+      PACKAGE_MANAGEMENT_INSTALL='apt install'
+      PACKAGE_MANAGEMENT_REMOVE='apt remove'
+    elif [[ "$(command -v yum)" ]]; then
+      PACKAGE_MANAGEMENT_UPDATE='yum update'
+      PACKAGE_MANAGEMENT_INSTALL='yum install'
+      PACKAGE_MANAGEMENT_REMOVE='yum remove'
+      if [[ "$(command -v dnf)" ]]; then
+        PACKAGE_MANAGEMENT_INSTALL='dnf install'
+        PACKAGE_MANAGEMENT_REMOVE='dnf remove'
+      fi
+    elif [[ "$(command -v zypper)" ]]; then
+      PACKAGE_MANAGEMENT_INSTALL='zypper install'
+      PACKAGE_MANAGEMENT_REMOVE='zypper remove'
+    elif [[ "$(command -v pacman)" ]]; then
+      PACKAGE_MANAGEMENT_INSTALL='pacman -S'
+      PACKAGE_MANAGEMENT_REMOVE='pacman -R'
+    else
+      echo "error: The script does not support the package manager in this operating system."
+      exit 1
+    fi
+  else
+    echo "error: This operating system is not supported."
+    exit 1
+  fi
+}
 
 read_json() {
   # jq [key] [path-to-file]
@@ -144,12 +188,12 @@ preinstall() {
     ${sudoCmd} systemctl disable firewalld 2>/dev/null
 
     # get dependencies
-    ${sudoCmd} ${systemPackage} update -y
-    ${sudoCmd} ${systemPackage} install software-properties-common -y -q # debian/ubuntu
+    ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
+    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} software-properties-common -y -q # debian/ubuntu
     ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y # debian/ubuntu
-    ${sudoCmd} ${systemPackage} install epel-release -y # centos
-    ${sudoCmd} ${systemPackage} update -y
-    ${sudoCmd} ${systemPackage} install coreutils curl git jq nginx wget unzip -y
+    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y # centos
+    ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
+    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git jq nginx wget unzip -y
 }
 
 get_acmesh() {
@@ -175,7 +219,7 @@ get_trojan() {
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
     local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
     echo "${latest_version}"
-    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-amd64.zip"
+    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${MACHINE}.zip"
 
     ${sudoCmd} mkdir -p "/etc/trojan-go"
 
@@ -521,4 +565,5 @@ menu() {
 
 }
 
+identify_the_operating_system_and_architecture
 menu
