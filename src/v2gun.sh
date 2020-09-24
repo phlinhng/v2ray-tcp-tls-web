@@ -186,12 +186,13 @@ preinstall() {
     # turning off firewall
     ${sudoCmd} systemctl stop firewalld 2>/dev/null
     ${sudoCmd} systemctl disable firewalld 2>/dev/null
+    ${sudoCmd} ufw disable 2>/dev/null
 
     # get dependencies
     ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
-    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} software-properties-common -y -q # debian/ubuntu
-    ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y # debian/ubuntu
-    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y # centos
+    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} software-properties-common -y -q 2>/dev/null # debian/ubuntu
+    ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y 2>/dev/null # debian/ubuntu
+    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y 2>/dev/null # centos
     ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
     ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git jq nginx wget unzip -y
 }
