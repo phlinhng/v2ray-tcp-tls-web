@@ -374,7 +374,7 @@ EOF
     set_redirect
     set_nginx "${V2_DOMAIN}"
 
-    write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].settings.tag" "\"${V2_DOMAIN}\""
+    write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
 
     if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
       colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
