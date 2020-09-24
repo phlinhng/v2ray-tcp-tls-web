@@ -108,13 +108,14 @@ checkIP() {
 }
 
 show_links() {
-  local sni="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag')"
-  local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].settings.tag')"
+  local sni="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].tag')"
+  local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
   local uuid_vless="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.clients[0].id')"
   local uuid_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].settings.clients[0].id')"
   local path_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].streamSettings.wsSettings.path')"
   local passwd_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
 
+  colorEcho ${YELLOW} "===================="
   echo "VLESS"
   printf "%s:443 %s\n\n" "sni" "${uuid_vless}"
 
@@ -124,12 +125,13 @@ show_links() {
 
   echo "VMess (旧版)"
   local json_vmess="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid_vmess}\",\"net\":\"\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri_vmess_2dust="$(printf %s "${json_tcp}" | base64 --wrap=0)"
+  local uri_vmess_2dust="$(printf %s "${json_vmess}" | base64 --wrap=0)"
   printf "%s\n\n" "vmess://${uri_vmess_2dust}"
 
   echo "Trojan"
   local uri_trojan="${passwd_trojan}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
   printf "%s\n" "trojan://${uri_trojan}"
+  colorEcho ${YELLOW} "===================="
 }
 
 preinstall() {
@@ -432,7 +434,7 @@ install_v2ray() {
   local uuid_vless="$(cat '/proc/sys/kernel/random/uuid')"
   local uuid_vmess="$(cat '/proc/sys/kernel/random/uuid')"
   local path_vmess="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/custom/cf_node)"
+  local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
   local passwd_trojan="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
 
   set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "${cf_node}"
