@@ -368,7 +368,6 @@ EOF
 }
 
 set_nginx() {
-  ${sudoCmd} rm /etc/nginx/sites-enabled/v2gun.conf
   ${sudoCmd} cat > /etc/nginx/sites-available/v2gun.conf <<-EOF
 server {
     listen 127.0.0.1:80;
