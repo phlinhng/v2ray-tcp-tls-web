@@ -161,7 +161,7 @@ get_cert() {
   colorEcho ${BLUE} "Installing certificate"
   ${sudoCmd} /root/.acme.sh/acme.sh --install-cert --ecc -d "$1" \
   --key-file /etc/ssl/v2ray/key.pem --fullchain-file /etc/ssl/v2ray/fullchain.pem \
-  --reloadcmd "chmod 644 /etc/ssl/v2ray/fullchain.pem; chmod 644 /etc/ssl/v2ray/key.pem; systemctl daemon-reload; systemctl restart v2ray"
+  --reloadcmd "chmod 644 /etc/ssl/v2ray/fullchain.pem; chmod 644 /etc/ssl/v2ray/key.pem; systemctl restart v2ray"
 }
 
 get_trojan() {
@@ -356,27 +356,28 @@ EOF
 }
 
 fix_cert() {
-  while true; do
-    read -rp "解析到本 VPS 的域名: " V2_DOMAIN
-    if checkIP "${V2_DOMAIN}"; then
-      colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始修复证书"
-      break
-    else
-      colorEcho ${RED} "域名 ${V2_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
-      read -rp "若您确定域名解析正确, 可以继续进行修复作业. 强制继续? (yes/no/quit) " forceConfirm
-      case "${forceConfirm}" in
-        [yY]|[yY][eE][sS] ) break ;;
-        [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
-      esac
-    fi
-  done
+  if [ -f "/usr/local/bin/v2ray" ]; then
+    while true; do
+      read -rp "解析到本 VPS 的域名: " V2_DOMAIN
+      if checkIP "${V2_DOMAIN}"; then
+        colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始修复证书"
+        break
+      else
+        colorEcho ${RED} "域名 ${V2_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
+        read -rp "若您确定域名解析正确, 可以继续进行修复作业. 强制继续? (yes/no/quit) " forceConfirm
+        case "${forceConfirm}" in
+          [yY]|[yY][eE][sS] ) break ;;
+          [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
+        esac
+      fi
+    done
 
-  ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag').key
+    ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag').key
 
-  ${sudoCmd} $(which rm) -f /etc/nginx/sites-available/default
+    ${sudoCmd} $(which rm) -f /etc/nginx/sites-available/default
 
-  # temporary config for issuing certs
-  ${sudoCmd} cat > /etc/nginx/sites-enabled/v2gun.conf <<-EOF
+    # temporary config for issuing certs
+    ${sudoCmd} cat > /etc/nginx/sites-enabled/v2gun.conf <<-EOF
 server {
     listen 80;
     server_name ${V2_DOMAIN};
@@ -385,19 +386,22 @@ server {
 }
 EOF
 
-  get_cert "${V2_DOMAIN}"
+    get_cert "${V2_DOMAIN}"
 
-  colorEcho ${BLUE} "Setting nginx"
-  set_redirect
-  set_nginx "${V2_DOMAIN}"
+    colorEcho ${BLUE} "Setting nginx"
+    set_redirect
+    set_nginx "${V2_DOMAIN}"
 
-  write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].settings.tag" "${V2_DOMAIN}"
+    write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].settings.tag" "${V2_DOMAIN}"
 
-  if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-    colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
-    show_links
+    if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
+      colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
+      show_links
+    else
+      colorEcho ${RED} "证书签发失败, 請运行修复证书"
+    fi
   else
-    colorEcho ${GREEN} "证书签发失败, 请运行修复证书"
+    colorEcho ${YELLOW} "请先安装 V2Ray"
   fi
 }
 
