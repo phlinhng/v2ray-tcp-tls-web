@@ -46,16 +46,8 @@ colorEcho() {
 }
 
 # remove v2ray
-colorEcho ${BLUE} "Shutting down v2ray service."
-${sudoCmd} systemctl stop v2ray
-${sudoCmd} systemctl disable v2ray
-${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray.service
-${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray.service
-${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray@.service
-${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray@.service
+curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash -s -- --remove
 colorEcho ${BLUE} "Removing v2ray files."
-${sudoCmd} $(which rm) -rf /usr/local/bin/v2ray
-${sudoCmd} $(which rm) -rf /usr/local/bin/v2ctl
 ${sudoCmd} $(which rm) -rf /usr/local/etc/v2ray
 ${sudoCmd} $(which rm) -rf /usr/local/share/v2ray
 ${sudoCmd} $(which rm) -rf /var/log/v2ray
