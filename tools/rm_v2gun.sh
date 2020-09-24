@@ -56,7 +56,18 @@ ${sudoCmd} crontab -l | grep -v 'v2ray/geoip.dat' | ${sudoCmd} crontab -
 ${sudoCmd} crontab -l | grep -v 'v2ray/geosite.dat' | ${sudoCmd} crontab -
 colorEcho ${GREEN} "Removed v2ray successfully."
 
-# remove caddy
+# remove trojan-go
+colorEcho ${BLUE} "Shutting down trojan-go service."
+${sudoCmd} systemctl stop trojan-go
+${sudoCmd} systemctl disable trojan-go
+${sudoCmd} $(which rm) -f /etc/systemd/system/trojan-go.service
+${sudoCmd} $(which rm) -f /etc/systemd/system/trojan-go.service # and symlinks that might be related
+colorEcho ${BLUE} "Removing trojan-go files."
+${sudoCmd} $(which rm) -rf /usr/bin/trojan-go
+${sudoCmd} $(which rm) -rf /etc/trojan-go
+colorEcho ${GREEN} "Removed trojan-go successfully."
+
+# remove nginx
 colorEcho ${BLUE} "Shutting down nginx service."
 ${sudoCmd} systemctl stop nginx
 ${sudoCmd} systemctl disable nginx
@@ -69,17 +80,7 @@ colorEcho ${GREEN} "Removed nginx successfully."
 colorEcho ${BLUE} "Removing dummy site."
 ${sudoCmd} $(which rm) -rf /var/www/html
 
-# remove trojan-go
-colorEcho ${BLUE} "Shutting down trojan-go service."
-${sudoCmd} systemctl stop trojan-go
-${sudoCmd} systemctl disable trojan-go
-${sudoCmd} $(which rm) -f /etc/systemd/system/trojan-go.service
-${sudoCmd} $(which rm) -f /etc/systemd/system/trojan-go.service # and symlinks that might be related
-colorEcho ${BLUE} "Removing trojan-go files."
-${sudoCmd} $(which rm) -rf /usr/bin/trojan-go
-${sudoCmd} $(which rm) -rf /etc/trojan-go
-colorEcho ${GREEN} "Removed trojan-go successfully."
-
+# remove acme.sh
 colorEcho ${BLUE} "Removing acme.sh"
 ${sudoCmd} bash ~/.acme.sh/acme.sh --uninstall
 ${sudoCmd} $(which rm) -rf ~/.acme.sh
