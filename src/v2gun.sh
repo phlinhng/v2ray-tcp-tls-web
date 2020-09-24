@@ -261,7 +261,6 @@ set_v2ray() {
   # $3: path for vmess+ws
   # $4: sni
   # $5: url of cf node
-  for BASE in 00_log 01_api 02_dns 03_routing 04_policy 05_inbounds 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
   ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
 {
   "inbounds": [
@@ -446,7 +445,9 @@ install_v2ray() {
   # set time syncronise service
   ${sudoCmd} timedatectl set-ntp true
 
-  export JSONS_PATH='/usr/local/etc/v2ray' # for multiple configuration files
+  export JSONS_PATH="/usr/local/etc/v2ray" # for multiple configuration files
+  ${sudoCmd} $(which mkdir) -p "/usr/local/etc/v2ray"
+  for BASE in 00_log 01_api 02_dns 03_routing 04_policy 05_inbounds 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
 
   get_v2ray
 
