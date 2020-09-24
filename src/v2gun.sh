@@ -124,7 +124,7 @@ show_links() {
   printf "%s\n\n" "vmess://${uri_vmess}"
 
   echo "VMess (旧版)"
-  local json_vmess="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid_vmess}\",\"net\":\"ws\",\"path\":\"\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+  local json_vmess="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid_vmess}\",\"net\":\"ws\",\"path\":\"${path_vmess}\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
   local uri_vmess_2dust="$(printf %s "${json_vmess}" | base64 --wrap=0)"
   printf "%s\n\n" "vmess://${uri_vmess_2dust}"
 
