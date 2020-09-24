@@ -4,7 +4,7 @@ export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
 branch="vless"
-VERSION="2.0 beta"
+VERSION="2.0"
 
 # /usr/local/bin/v2script ##main
 # /usr/local/bin/v2sub ##subscription manager
@@ -149,7 +149,7 @@ preinstall() {
     ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y # debian/ubuntu
     ${sudoCmd} ${systemPackage} install epel-release -y # centos
     ${sudoCmd} ${systemPackage} update -y
-    ${sudoCmd} ${systemPackage} install coreutils curl git jq nginx-extras wget unzip -y
+    ${sudoCmd} ${systemPackage} install coreutils curl git jq nginx wget unzip -y
 }
 
 get_cert() {
@@ -484,6 +484,10 @@ EOF
   else
     colorEcho ${RED} "证书签发失败, 请运行修复证书"
   fi
+}
+
+change_cf_node() {
+
 }
 
 vps_tools() {
