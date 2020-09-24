@@ -63,7 +63,7 @@ read_json() {
 
 write_json() {
   # jq [key = value] [path-to-file]
-  jq -r "$2 = $3" $1 > tmp.$$.json && ${sudoCmd} mv tmp.$$.json $1 && sleep 1
+  jq -r "$2 = $3" $1 > /tmp/tmp.$$.json && ${sudoCmd} mv /tmp/tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key] [value]
 
 urlEncode() {
