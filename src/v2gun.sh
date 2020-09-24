@@ -152,10 +152,12 @@ preinstall() {
     ${sudoCmd} ${systemPackage} install coreutils curl git jq nginx wget unzip -y
 }
 
-get_cert() {
+get_acmesh() {
   colorEcho ${BLUE} "Installing acme.sh"
   curl -fsSL https://get.acme.sh | ${sudoCmd} bash
+}
 
+get_cert() {
   colorEcho ${BLUE} "Issuing certificate"
   ${sudoCmd} /root/.acme.sh/acme.sh --issue --nginx -d "$1" --keylength ec-256
 
@@ -365,6 +367,7 @@ server {
 }
 EOF
 
+    get_acmesh
     get_cert "${V2_DOMAIN}"
 
     colorEcho ${BLUE} "Setting nginx"
