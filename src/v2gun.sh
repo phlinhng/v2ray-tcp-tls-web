@@ -367,21 +367,6 @@ server {
 EOF
 }
 
-set_nginx_precert() {
-  ${sudoCmd} cat > /etc/nginx/sites-available/v2gun.conf <<-EOF
-server {
-    listen 80;
-    server_name $1;
-    root /var/www/html;
-    index index.php index.html index.htm;
-}
-EOF
-  ${sudoCmd} cd /etc/nginx/sites-enabled
-  ${sudoCmd} ln -s /etc/nginx/sites-available/v2gun.conf .
-  ${sudoCmd} cd ~
-  ${sudoCmd} systemctl restart nginx
-}
-
 set_nginx() {
   ${sudoCmd} cat > /etc/nginx/sites-available/v2gun.conf <<-EOF
 server {
@@ -391,7 +376,9 @@ server {
     index index.php index.html index.htm;
 }
 EOF
-  ${sudoCmd} systemctl restart nginx
+  ${sudoCmd} cd /etc/nginx/sites-enabled
+  ${sudoCmd} ln -s /etc/nginx/sites-available/v2gun.conf .
+  ${sudoCmd} cd ~
 }
 
 fix_cert() {
@@ -418,11 +405,11 @@ fix_cert() {
     ${sudoCmd} chmod 644 /etc/ssl/v2ray/key.pem
     ${sudoCmd} chmod 644 /etc/ssl/v2ray/fullchain.pem
 
-    set_nginx_precert "${V2_DOMAIN}"
-    get_cert "${V2_DOMAIN}"
-
     colorEcho ${BLUE} "Re-setting nginx"
     set_nginx "${V2_DOMAIN}"
+    ${sudoCmd} systemctl restart nginx
+
+    get_cert "${V2_DOMAIN}"
 
     write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
 
@@ -483,9 +470,12 @@ install_v2ray() {
   ${sudoCmd} chmod 644 /etc/ssl/v2ray/key.pem
   ${sudoCmd} chmod 644 /etc/ssl/v2ray/fullchain.pem
 
-  colorEcho ${BLUE} "Building dummy web site & Setting nginx"
+  colorEcho ${BLUE} "Building dummy web site"
   build_web
+
+  colorEcho ${BLUE} "Setting nginx"
   set_redirect
+  set_nginx "${V2_DOMAIN}"
 
   # activate services
   colorEcho ${BLUE} "Activating services"
@@ -493,6 +483,7 @@ install_v2ray() {
   ${sudoCmd} systemctl reset-failed
 
   ${sudoCmd} systemctl enable nginx
+  ${sudoCmd} systemctl restart nginx 2>/dev/null ## restart nginx to enable new config
 
   ${sudoCmd} systemctl enable trojan-go
   ${sudoCmd} systemctl restart trojan-go ## restart trojan-go to enable new config
@@ -501,9 +492,7 @@ install_v2ray() {
   ${sudoCmd} systemctl restart v2ray 2>/dev/null ## restart v2ray to enable new config
 
   get_acmesh
-  set_nginx_precert "${V2_DOMAIN}"
   get_cert "${V2_DOMAIN}"
-  set_nginx "${V2_DOMAIN}"
 
   if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
     colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
