@@ -209,22 +209,11 @@ get_v2ray() {
 }
 
 build_v2ray() {
-  ${sudoCmd} cat > "/etc/systemd/system/v2ray.service" <<-EOF
-[Unit]
-Description=V2Ray Service
-After=network.target nss-lookup.target
+  ${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray.service.d/10-donot_touch_single_conf.conf
+  ${sudoCmd} cat > "/etc/systemd/system/v2ray.service.d/10-multiple_conf.conf" <<-EOF
 [Service]
-User=nobody
-CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-NoNewPrivileges=true
-Environment=V2RAY_LOCATION_ASSET=/usr/local/share/v2ray/
 ExecStart=/usr/local/bin/v2ray -confdir /usr/local/etc/v2ray
-Restart=on-failure
-[Install]
-WantedBy=multi-user.target
 EOF
-
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl enable v2ray
 }
