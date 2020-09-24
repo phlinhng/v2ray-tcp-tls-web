@@ -405,7 +405,7 @@ install_v2ray() {
   # set time syncronise service
   ${sudoCmd} timedatectl set-ntp true
 
-  export JSON_PATH="/usr/local/etc/v2ray"
+  export JSONS_PATH='/usr/local/etc/v2ray' # for multiple configuration files
 
   get_v2ray
 
