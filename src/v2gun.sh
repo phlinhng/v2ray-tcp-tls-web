@@ -495,7 +495,6 @@ install_v2ray() {
   ${sudoCmd} systemctl reset-failed
 
   ${sudoCmd} systemctl enable nginx
-  ${sudoCmd} systemctl restart nginx 2>/dev/null
 
   ${sudoCmd} systemctl enable trojan-go
   ${sudoCmd} systemctl restart trojan-go ## restart trojan-go to enable new config
@@ -505,6 +504,7 @@ install_v2ray() {
 
   get_acmesh
   set_nginx_precert "${V2_DOMAIN}"
+  ${sudoCmd} systemctl restart nginx
   get_cert "${V2_DOMAIN}"
   set_nginx_precert "${V2_DOMAIN}"
   ${sudoCmd} systemctl restart nginx
