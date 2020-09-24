@@ -403,7 +403,7 @@ fix_cert() {
     ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag').key
 
     # temporary cert
-    ${sudoCmd} openssl req -new -newkey rsa:2048 -days 1 -nodes -x509 -keyout /etc/ssl/v2ray/key.pem -out /etc/ssl/v2ray/fullchain.pem
+    ${sudoCmd} openssl req -new -newkey rsa:2048 -days 1 -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=${V2_DOMAIN}" -keyout /etc/ssl/v2ray/key.pem -out /etc/ssl/v2ray/fullchain.pem
     ${sudoCmd} chmod 644 /etc/ssl/v2ray/key.pem
     ${sudoCmd} chmod 644 /etc/ssl/v2ray/fullchain.pem
 
@@ -464,7 +464,7 @@ install_v2ray() {
   ${sudoCmd} mkdir -p /etc/ssl/v2ray
 
   # temporary cert
-  ${sudoCmd} openssl req -new -newkey rsa:2048 -days 1 -nodes -x509 -keyout /etc/ssl/v2ray/key.pem -out /etc/ssl/v2ray/fullchain.pem
+  ${sudoCmd} openssl req -new -newkey rsa:2048 -days 1 -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=${V2_DOMAIN}" -keyout /etc/ssl/v2ray/key.pem -out /etc/ssl/v2ray/fullchain.pem
   ${sudoCmd} chmod 644 /etc/ssl/v2ray/key.pem
   ${sudoCmd} chmod 644 /etc/ssl/v2ray/fullchain.pem
 
