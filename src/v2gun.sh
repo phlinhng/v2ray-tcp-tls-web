@@ -486,10 +486,6 @@ EOF
   fi
 }
 
-change_cf_node() {
-
-}
-
 vps_tools() {
   wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/tools/vps_tools.sh -O /tmp/vps_tools.sh && bash /tmp/vps_tools.sh
   exit 0
