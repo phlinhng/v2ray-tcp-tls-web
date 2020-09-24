@@ -374,8 +374,6 @@ fix_cert() {
 
     ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag').key
 
-    ${sudoCmd} $(which rm) -f /etc/nginx/sites-available/default
-
     # temporary config for issuing certs
     ${sudoCmd} cat > /etc/nginx/sites-enabled/v2gun.conf <<-EOF
 server {
