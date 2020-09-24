@@ -115,7 +115,7 @@ show_links() {
   local path_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].streamSettings.wsSettings.path')"
   local passwd_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
 
-  colorEcho ${YELLOW} "===================="
+  colorEcho ${YELLOW} "=============================="
   echo "VLESS"
   printf "%s:443 %s\n\n" "${sni}" "${uuid_vless}"
 
@@ -131,7 +131,7 @@ show_links() {
   echo "Trojan"
   local uri_trojan="${passwd_trojan}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
   printf "%s\n" "trojan://${uri_trojan}"
-  colorEcho ${YELLOW} "===================="
+  colorEcho ${YELLOW} "=============================="
 }
 
 preinstall() {
