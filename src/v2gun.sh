@@ -470,24 +470,24 @@ install_v2ray() {
 
   colorEcho ${BLUE} "Building dummy web site"
   build_web
+
+  colorEcho ${BLUE} "Setting nginx"
   set_redirect
+  set_nginx "${V2_DOMAIN}"
 
   # activate services
   colorEcho ${BLUE} "Activating services"
   ${sudoCmd} systemctl daemon-reload
   ${sudoCmd} systemctl reset-failed
 
+  ${sudoCmd} systemctl enable nginx
+  ${sudoCmd} systemctl restart nginx 2>/dev/null
+
   ${sudoCmd} systemctl enable trojan-go
   ${sudoCmd} systemctl restart trojan-go ## restart tls-shunt-proxy to enable new config
 
   ${sudoCmd} systemctl enable v2ray
   ${sudoCmd} systemctl restart v2ray 2>/dev/null ## restart v2ray to enable new config
-
-  ${sudoCmd} systemctl enable nginx
-  ${sudoCmd} systemctl restart nginx 2>/dev/null
-
-  colorEcho ${BLUE} "Setting nginx"
-  set_nginx "${V2_DOMAIN}"
 
   get_acmesh
   get_cert "${V2_DOMAIN}"
