@@ -1,5 +1,5 @@
-# V2RAY TCP+TLS+WEB / WSS+CDN and Trojan-go
-automated script for V2Ray (TCP+TLS+Web), V2Ray (WSS+CDN), and Trojan-go
+# V2Ray TCP+TLS+WEB / WSS+CDN and Trojan-Go
+automated script for V2Ray (TCP+TLS+Web), V2Ray (WSS+CDN), and Trojan-Go
 
 ## Usage
 ```sh
