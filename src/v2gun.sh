@@ -400,15 +400,19 @@ fix_cert() {
 
     ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag').key
 
+    colorEcho ${BLUE} "Re-setting nginx"
+    set_nginx "${V2_DOMAIN}"
+    ${sudoCmd} systemctl restart nginx 2>/dev/null
+
+    colorEcho ${BLUE} "Re-setting v2ray"
     # temporary cert
     ${sudoCmd} openssl req -new -newkey rsa:2048 -days 1 -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=${V2_DOMAIN}" -keyout /etc/ssl/v2ray/key.pem -out /etc/ssl/v2ray/fullchain.pem
     ${sudoCmd} chmod 644 /etc/ssl/v2ray/key.pem
     ${sudoCmd} chmod 644 /etc/ssl/v2ray/fullchain.pem
 
-    colorEcho ${BLUE} "Re-setting nginx"
-    set_nginx "${V2_DOMAIN}"
-    ${sudoCmd} systemctl restart nginx
+    ${sudoCmd} systemctl restart nginx 2>/dev/null
 
+    colorEcho ${BLUE} "Re-issuing certificates for ${V2_DOMAIN}"
     get_cert "${V2_DOMAIN}"
 
     write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
