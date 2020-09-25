@@ -1,5 +1,5 @@
-# VLESS TCP+TLS / VMess WSS+CDN / Trojan-go
-automated script for VLESS TCP+TLS, VMess WSS+CDN, and Trojan-go
+# VLESS TCP+TLS / VMess WSS+CDN / Trojan-Go
+automated script for VLESS TCP+TLS, VMess WSS+CDN, and Trojan-Go
 
 ## Usage
 ```sh
