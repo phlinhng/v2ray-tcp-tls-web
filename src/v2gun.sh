@@ -367,7 +367,7 @@ server {
 }
 EOF
   elif [ -d "/etc/nginx/conf.d" ];then # centos
-${sudoCmd} cat > /etc/nginx/conf.d/default <<-EOF
+    ${sudoCmd} cat > /etc/nginx/conf.d/default <<-EOF
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
