@@ -6,10 +6,6 @@ export LANGUAGE=en_US.UTF-8
 branch="vless"
 VERSION="2.0.2"
 
-# /usr/local/bin/v2script ##main
-# /usr/local/bin/v2sub ##subscription manager
-# /usr/local/etc/v2script/config.json ##config
-
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
 else
