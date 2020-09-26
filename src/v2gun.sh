@@ -507,13 +507,16 @@ install_v2ray() {
 }
 
 vps_tools() {
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} wget -y
   wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/master/tools/vps_tools.sh -O /tmp/vps_tools.sh && bash /tmp/vps_tools.sh
   exit 0
 }
 
 rm_v2gun() {
-  wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_v2gun.sh -O /tmp/rm_v2gun.sh && bash /tmp/rm_v2gun.sh
-  exit 0
+  if [ -f "/usr/local/bin/v2ray" ]; then
+    wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_v2gun.sh -O /tmp/rm_v2gun.sh && bash /tmp/rm_v2gun.sh
+    exit 0
+  fi
 }
 
 show_menu() {
