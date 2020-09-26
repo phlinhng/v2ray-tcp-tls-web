@@ -320,6 +320,10 @@ set_v2ray() {
           "path": "$3"
         }
       },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [ "http", "tls" ]
+      },
       "tag": "$5"
     }
   ]
