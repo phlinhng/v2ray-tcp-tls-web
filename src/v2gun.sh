@@ -266,7 +266,8 @@ set_v2ray() {
       "settings": {
         "clients": [
           {
-            "id": "$1"
+            "id": "$1",
+            "flow": "xtls-rprx-origin"
           }
         ],
         "decryption": "none",
@@ -283,8 +284,8 @@ set_v2ray() {
       },
       "streamSettings": {
         "network": "tcp",
-        "security": "tls",
-        "tlsSettings": {
+        "security": "xtls",
+        "xtlsSettings": {
           "alpn": [ "http/1.1" ],
           "certificates": [
             {
