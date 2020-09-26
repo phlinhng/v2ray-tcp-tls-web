@@ -17,7 +17,7 @@ bash ~/v2gun.sh
 4. Support both IPv4 and IPv6
 
 ## Architecture
-+ VLESS over TCP with TLS powered by v2ray-core
++ VLESS over TCP with [XTLS](https://github.com/XTLS/Go) powered by v2ray-core
 + VMess over WSS on Cloudflare powered by v2ray-core on Cloudflare
 + Trojan-GFW (protocol) powered by trojan-go (implementaion)
 + HTTP Website backend powered by nginx
