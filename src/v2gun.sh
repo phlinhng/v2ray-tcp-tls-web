@@ -154,8 +154,10 @@ show_links() {
   local uuid_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].settings.clients[0].id')"
   local path_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].streamSettings.wsSettings.path')"
   local passwd_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
+  local path_trojan="$(read_json /etc/trojan-go/config.json '.websocket.path')"
 
   colorEcho ${YELLOW} "=============================="
+
   echo "VLESS"
   printf "%s:443 %s\n\n" "${sni}" "${uuid_vless}"
 
@@ -171,6 +173,11 @@ show_links() {
   echo "Trojan"
   local uri_trojan="${passwd_trojan}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
   printf "%s\n" "trojan://${uri_trojan}"
+
+  echo "Trojan-Go"
+  local uri_trojango="${passwd_trojan}@${cf_node}:443?peer=${sni}&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path_trojan}"`#`urlEncode "${sni} (Trojan-Go)"`"
+  printf "%s\n" "trojan-go://${uri_trojango}"
+
   colorEcho ${YELLOW} "=============================="
 }
 
@@ -257,6 +264,7 @@ set_v2ray() {
   # $3: path for vmess+ws
   # $4: sni
   # $5: url of cf node
+  # $6: path for trojan-go+ws
   ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
 {
   "inbounds": [
@@ -278,6 +286,11 @@ set_v2ray() {
           {
             "path": "$3",
             "dest": 3566,
+            "xver": 1
+          },
+          {
+            "path": "$6",
+            "dest": 3567,
             "xver": 1
           }
         ]
@@ -335,6 +348,9 @@ EOF
 }
 
 set_trojan() {
+  # $1: password
+  # $2: ws path
+  # $3: sni
   ${sudoCmd} cat > "/etc/trojan-go/config.json" <<-EOF
 {
   "run_type": "server",
@@ -349,6 +365,11 @@ set_trojan() {
   "transport_plugin": {
     "enabled": true,
     "type": "plaintext"
+  },
+  "websocket": {
+    "enabled": true,
+    "path": "$2",
+    "host": "$3"
   },
   "router": {
     "enabled": false
@@ -468,6 +489,9 @@ fix_cert() {
     get_cert "${V2_DOMAIN}"
 
     write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
+    write_json /etc/trojan-go/config.json ".websocket.host" "\"${V2_DOMAIN}\""
+
+    ${sudoCmd} systemctl restart trojan-go
 
     if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
       colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
@@ -515,9 +539,10 @@ install_v2ray() {
   local path_vmess="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
   local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
   local passwd_trojan="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+  local path_trojan="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
 
-  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "${cf_node}"
-  set_trojan "${passwd_trojan}"
+  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "${cf_node}" "${path_trojan}"
+  set_trojan "${passwd_trojan}" "${path_trojan}" "${V2_DOMAIN}"
 
   ${sudoCmd} mkdir -p /etc/ssl/v2ray
 
