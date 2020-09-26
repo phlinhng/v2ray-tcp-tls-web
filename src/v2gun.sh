@@ -160,7 +160,7 @@ show_links() {
   printf "%s:443 %s\n\n" "${sni}" "${uuid_vless}"
 
   echo "VMess (新版)"
-  local uri_vmess="ws+tls:${uuid_vmess}@${cf_node}:443/?path=${path_vmess}&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
+  local uri_vmess="ws+tls:${uuid_vmess}@${cf_node}:443/?path=`urlEncode "${path_vmess}"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
   printf "%s\n\n" "vmess://${uri_vmess}"
 
   echo "VMess (旧版)"
