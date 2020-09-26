@@ -357,7 +357,8 @@ EOF
 }
 
 set_redirect() {
-  ${sudoCmd} cat > /etc/nginx/sites-available/default <<-EOF
+  if [ -d "/etc/nginx/sites-available" ]; then # debian/ubuntu
+    ${sudoCmd} cat > /etc/nginx/sites-available/default <<-EOF
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
@@ -365,10 +366,21 @@ server {
     return 301 https://\$host\$request_uri;
 }
 EOF
+  elif [ -d "/etc/nginx/conf.d" ];then # centos
+${sudoCmd} cat > /etc/nginx/conf.d/default <<-EOF
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+  fi
 }
 
 set_nginx() {
-  ${sudoCmd} cat > /etc/nginx/sites-available/v2gun.conf <<-EOF
+  if [ -d "/etc/nginx/sites-available" ]; then # debian/ubuntu
+    ${sudoCmd} cat > /etc/nginx/sites-available/v2gun.conf <<-EOF
 server {
     listen 127.0.0.1:80;
     server_name $1;
@@ -376,9 +388,19 @@ server {
     index index.php index.html index.htm;
 }
 EOF
-  ${sudoCmd} cd /etc/nginx/sites-enabled
-  ${sudoCmd} ln -s /etc/nginx/sites-available/v2gun.conf .
-  ${sudoCmd} cd ~
+    ${sudoCmd} cd /etc/nginx/sites-enabled
+    ${sudoCmd} ln -s /etc/nginx/sites-available/v2gun.conf .
+    ${sudoCmd} cd ~
+  elif [ -d "/etc/nginx/conf.d" ];then # centos
+    ${sudoCmd} cat > /etc/nginx/conf.d/v2gun.conf <<-EOF
+server {
+    listen 127.0.0.1:80;
+    server_name $1;
+    root /var/www/html;
+    index index.php index.html index.htm;
+}
+EOF
+  fi
 }
 
 fix_cert() {
