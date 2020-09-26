@@ -172,7 +172,7 @@ show_links() {
 
   echo "Trojan"
   local uri_trojan="${passwd_trojan}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
-  printf "%s\n" "trojan://${uri_trojan}"
+  printf "%s\n\n" "trojan://${uri_trojan}"
 
   echo "Trojan-Go"
   local uri_trojango="${passwd_trojan}@${cf_node}:443?peer=${sni}&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path_trojan}"`#`urlEncode "${sni} (Trojan-Go)"`"
