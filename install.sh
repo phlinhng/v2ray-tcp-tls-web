@@ -4,6 +4,7 @@ export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
 branch="master"
+VERSION="1.4.0"
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
@@ -61,4 +62,4 @@ ${sudoCmd} chmod +x /usr/local/bin/v2script
 ${sudoCmd} wget -q -N https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/src/v2sub.sh -O /usr/local/bin/v2sub
 ${sudoCmd} chmod +x /usr/local/bin/v2sub
 
-jq -r ".version = \"1.4.0\"" /usr/local/etc/v2script/config.json > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2script/config.json
+jq -r ".version = \"${VERSION}\"" /usr/local/etc/v2script/config.json > tmp.$$.json && ${sudoCmd} mv tmp.$$.json /usr/local/etc/v2script/config.json
