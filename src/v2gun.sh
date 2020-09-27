@@ -782,7 +782,7 @@ install_v2ray() {
   get_cert "${V2_DOMAIN}"
 
   if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-    colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
+    colorEcho ${GREEN} "安装 VLESS + VMess + Trojan-Go 成功!"
     show_links
   else
     colorEcho ${RED} "证书签发失败, 请运行修复证书"
