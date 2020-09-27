@@ -178,7 +178,7 @@ show_links() {
   printf "%s\n\n" "trojan://${uri_trojan}"
 
   echo "Trojan-Go"
-  local uri_trojango="${passwd_trojan}@${cf_node}:443?peer=${sni}&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path_trojan}"`#`urlEncode "${sni} (Trojan-Go)"`"
+  local uri_trojango="${passwd_trojan}@${cf_node}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path_trojan}"`#`urlEncode "${sni} (Trojan-Go)"`"
   printf "%s\n" "trojan-go://${uri_trojango}"
 
   #colorEcho ${YELLOW} "===============配 置 文 件==============="
@@ -756,7 +756,7 @@ install_v2ray() {
   colorEcho ${BLUE} "Building dummy web site"
   build_web
 
-  colorEcho ${BLUE} "Generating client configs"
+  #colorEcho ${BLUE} "Generating client configs"
   #gen_config_v2ray
   #gen_config_trojan
 
