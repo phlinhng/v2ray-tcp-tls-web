@@ -156,7 +156,7 @@ show_links() {
   local passwd_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
   local path_trojan="$(read_json /etc/trojan-go/config.json '.websocket.path')"
 
-  colorEcho ${YELLOW} "=============================="
+  colorEcho ${YELLOW} "===============分 享 链 接==============="
 
   echo "VLESS"
   printf "%s:443 %s\n\n" "${sni}" "${uuid_vless}"
@@ -178,7 +178,172 @@ show_links() {
   local uri_trojango="${passwd_trojan}@${cf_node}:443?peer=${sni}&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path_trojan}"`#`urlEncode "${sni} (Trojan-Go)"`"
   printf "%s\n" "trojan-go://${uri_trojango}"
 
-  colorEcho ${YELLOW} "=============================="
+  colorEcho ${YELLOW} "===============配 置 文 件==============="
+  echo "VLESS"
+  printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vless} | sed -e 's/-//g' | head -c 13"`/client.json"
+
+  echo "VMess"
+  printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vmess} | sed -e 's/-//g' | head -c 13"`/client.json"
+
+  echo "Trojan"
+  printf "%s\n\n" "https://${sni}/`printf %s ${passwd_trojan} | head -c 9`/client.json"
+
+  echo "Trojan-Go"
+  printf "%s\n\n" "https://${sni}/`printf %s "${passwd_trojan}${path_trojan}" | head -c 13`/client.json"
+  colorEcho ${YELLOW} "========================================"
+}
+
+gen_config_v2ray() {
+  local sni="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].tag')"
+  local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
+  local uuid_vless="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.clients[0].id')"
+  local uuid_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].settings.clients[0].id')"
+  local config_path_vless="$(printf %s ${uuid_vless} | sed -e 's/-//g' | head -c 13)"
+  local config_path_vmess="$(printf %s ${uuid_vmess} | sed -e 's/-//g' | head -c 13)"
+
+  if [ ! -d "/var/www/html/${config_path_vless}" ]; then
+    ${sudoCmd} $(which mkdir) -p "/var/www/html/config_path_vless"
+  fi
+
+  if [ ! -d "/var/www/html/${config_path_vmess}" ]; then
+    ${sudoCmd} $(which mkdir) -p "/var/www/html/config_path_vmess"
+  fi
+
+  ${sudoCmd} cat > "/var/www/html/${config_path_vless}/config.json" <<-EOF
+{
+  "inbounds": [
+    {
+      "port": 1080,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "settings": {
+          "udp": true
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "${sni}",
+            "port": 443,
+            "users": [
+                {
+                  "id": "${uuid_vless}",
+                  "flow": "xtls-rprx-origin",
+                  "encryption": "none"
+                }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "blocked"
+    }
+  ],
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+            "geoip:private"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": [
+            "geoip:cn"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": [
+            "geosite:cn"
+        ],
+        "outboundTag": "direct"
+      }
+    ]
+  }
+}
+EOF
+
+  ${sudoCmd} cat > "/var/www/html/${config_path_vmess}/config.json" <<-EOF
+{
+  "inbounds": [
+    {
+      "port": 1080,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "settings": {
+          "udp": true
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "${sni}",
+            "port": 443,
+            "users": [
+                {
+                  "id": "${uuid_vmess}"
+                }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "blocked"
+    }
+  ],
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+            "geoip:private"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": [
+            "geoip:cn"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": [
+            "geosite:cn"
+        ],
+        "outboundTag": "direct"
+      }
+    ]
+  }
+}
+EOF
 }
 
 preinstall() {
@@ -552,6 +717,10 @@ install_v2ray() {
 
   colorEcho ${BLUE} "Building dummy web site"
   build_web
+
+  colorEcho ${BLUE} "Generating client configs"
+  gen_config_v2ray
+  gen_config_trojan
 
   colorEcho ${BLUE} "Setting nginx"
   set_redirect
