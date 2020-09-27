@@ -1,9 +1,10 @@
 graph LR
     A[Device] -->|www.example.com| B(v2ray-core)
     B --> I{is VLESS?}
-    I -->|yes| B -->|VLESS| E
+    I -->|yes| B -->|VLESS over TCP| E
     I -->|no| C{with path?}
-    C -->|yes, vmess path| B -->|VMess| E[Internet]
+    C -->|yes, vmess path| B -->|VMess over WSS| E[Internet]
+    C -->|yes, vless path| B -->|VLESS over WSS| E[Internet]
     C -->|yes, trojan path| D[Trojan-Go] --> F{is trojan?}
     C -->|wrong path / no path| D[Trojan-Go]
     F -->|yes| D --> |Trojan| E
