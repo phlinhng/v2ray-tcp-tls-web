@@ -19,7 +19,7 @@ bash ~/v2gun.sh
 ## Architecture
 + VLESS over TCP with [XTLS](https://github.com/XTLS/Go) powered by v2ray-core
 + VMess over WSS on Cloudflare powered by v2ray-core and Cloudflare
-+ Trojan-GFW (protocol) powered by trojan-go (implementaion)
++ Trojan (protocol) and muxing powered by trojan-go (implementaion)
 + Trojan over WSS on Cloudflare powered by v2ray-core, trojan-go and Cloudflare
 + HTTP Website backend powered by nginx
 + Flow chart <br>
