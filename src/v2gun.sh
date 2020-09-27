@@ -497,7 +497,8 @@ set_v2ray() {
           {
             "id": "$7"
           }
-        ]
+        ],
+        "decryption": "none"
       },
       "streamSettings": {
         "network": "ws",
