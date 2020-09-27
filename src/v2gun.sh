@@ -399,8 +399,8 @@ get_trojan() {
     wget -nv "${trojango_link}" -O trojan-go.zip
     unzip -q trojan-go.zip && rm -rf trojan-go.zip
     ${sudoCmd} mv trojan-go /usr/bin/trojan-go
-    ${sudoCmd} mv geoip.dat -O /usr/bin/geoip.dat
-    ${sudoCmd} mv geosite.dat -O /usr/bin/geosite.dat
+    ${sudoCmd} mv geoip.dat /usr/bin/geoip.dat
+    ${sudoCmd} mv geosite.dat /usr/bin/geosite.dat
 
     colorEcho ${BLUE} "Building trojan-go.service"
     ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
