@@ -29,13 +29,14 @@ bash ~/v2gun.sh
 | Protocol | Transport | Direct | CDN | Qv2ray | Shadowrocket | Clash | v2rayN(G) |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | VLESS | XTLS | ✅ | ❌ | ✅ | ✅ (TLS) | ❌ | ✅ |
+| VLESS | WSS | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | VMess | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Trojan | TLS | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
 | Trojan | TLS + Mux | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
 | Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Trojan | WSS + Mux | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 
-6 protocols combinations with 9 connection methods in total.
+7 protocols combinations with 11 connection methods in total.
 
 ## Related work
 + [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor): subscription manager

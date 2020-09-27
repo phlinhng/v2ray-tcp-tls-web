@@ -178,18 +178,18 @@ show_links() {
   local uri_trojango="${passwd_trojan}@${cf_node}:443?peer=${sni}&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path_trojan}"`#`urlEncode "${sni} (Trojan-Go)"`"
   printf "%s\n" "trojan-go://${uri_trojango}"
 
-  colorEcho ${YELLOW} "===============配 置 文 件==============="
-  echo "VLESS"
-  printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vless} | sed -e 's/-//g' | head -c 13"`/client.json"
+  #colorEcho ${YELLOW} "===============配 置 文 件==============="
+  #echo "VLESS"
+  #printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vless} | sed -e 's/-//g' | head -c 13"`/client.json"
 
-  echo "VMess"
-  printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vmess} | sed -e 's/-//g' | head -c 13"`/client.json"
+  #echo "VMess"
+  #printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vmess} | sed -e 's/-//g' | head -c 13"`/client.json"
 
-  echo "Trojan"
-  printf "%s\n\n" "https://${sni}/`printf %s ${passwd_trojan} | head -c 9`/client.json"
+  #echo "Trojan"
+  #printf "%s\n\n" "https://${sni}/`printf %s ${passwd_trojan} | head -c 9`/client.json"
 
-  echo "Trojan-Go"
-  printf "%s\n\n" "https://${sni}/`printf %s "${passwd_trojan}${path_trojan}" | head -c 13`/client.json"
+  #echo "Trojan-Go"
+  #printf "%s\n\n" "https://${sni}/`printf %s "${passwd_trojan}${path_trojan}" | head -c 13`/client.json"
   colorEcho ${YELLOW} "========================================"
 }
 
@@ -430,6 +430,8 @@ set_v2ray() {
   # $4: sni
   # $5: url of cf node
   # $6: path for trojan-go+ws
+  # $7: uuid for vless+ws
+  # $8: path for vless+ws
   ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
 {
   "inbounds": [
@@ -447,6 +449,11 @@ set_v2ray() {
         "fallbacks": [
           {
             "dest": 3567
+          },
+          {
+            "path": "$8",
+            "dest": 3565,
+            "xver": 1
           },
           {
             "path": "$3",
@@ -479,6 +486,31 @@ set_v2ray() {
       "tag": "$4"
     },
     {
+      "port": 3565,
+      "listen": "127.0.0.1",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "$7",
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "$8"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [ "http", "tls" ]
+      },
+      "tag": "$5"
+    },
+    {
       "port": 3566,
       "listen": "127.0.0.1",
       "protocol": "vmess",
@@ -501,8 +533,7 @@ set_v2ray() {
       "sniffing": {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
-      },
-      "tag": "$5"
+      }
     }
   ]
 }
@@ -699,13 +730,15 @@ install_v2ray() {
   get_trojan
 
   local uuid_vless="$(cat '/proc/sys/kernel/random/uuid')"
+  local uuid_vless_ws="$(cat '/proc/sys/kernel/random/uuid')"
+  local path_vless_ws="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
   local uuid_vmess="$(cat '/proc/sys/kernel/random/uuid')"
   local path_vmess="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
   local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
   local passwd_trojan="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
   local path_trojan="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
 
-  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "${cf_node}" "${path_trojan}"
+  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "${cf_node}" "${path_trojan}" "${uuid_vless_ws}" "${path_vless_ws}"
   set_trojan "${passwd_trojan}" "${path_trojan}" "${V2_DOMAIN}"
 
   ${sudoCmd} mkdir -p /etc/ssl/v2ray
@@ -719,8 +752,8 @@ install_v2ray() {
   build_web
 
   colorEcho ${BLUE} "Generating client configs"
-  gen_config_v2ray
-  gen_config_trojan
+  #gen_config_v2ray
+  #gen_config_trojan
 
   colorEcho ${BLUE} "Setting nginx"
   set_redirect
@@ -767,7 +800,7 @@ rm_v2gun() {
 show_menu() {
   echo ""
   echo "----------安装代理----------"
-  echo "1) 安装 VLESS (TLS) + VMess (WSS) + Trojan-Go"
+  echo "1) 安装 VLESS + VMess + Trojan-Go"
   echo "2) 修复证书 / 更换域名"
   echo "----------显示配置----------"
   echo "3) 显示链接"
