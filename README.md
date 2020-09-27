@@ -28,15 +28,20 @@ bash ~/v2gun.sh
 ## Supported Protocols
 | Protocol | Transport | Direct | CDN | Qv2ray | Shadowrocket | Clash | v2rayN(G) |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| VLESS | XTLS | ✅ | ❌ | ✅ | ✅ (TLS) | ❌ | ✅ |
+| VLESS | XTLS | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ |
+| VLESS | XTLS + Mux | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ |
+| VLESS | TLS | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
+| VLESS | TLS + Mux | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
 | VLESS | WSS | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| VLESS | WSS  + Mux | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | VMess | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| VMess | WSS + Mux | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Trojan | TLS | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
 | Trojan | TLS + Mux | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
 | Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Trojan | WSS + Mux | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 
-7 protocols combinations with 11 connection methods in total.
+12 protocols combinations with 14 connection methods in total.
 
 ## Related work
 + [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor): subscription manager
