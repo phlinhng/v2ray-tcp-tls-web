@@ -694,7 +694,7 @@ fix_cert() {
     ${sudoCmd} systemctl restart trojan-go
 
     if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-      colorEcho ${GREEN} "安装 VLESS (TLS) + VMess (WSS) + Trojan-Go 成功!"
+      colorEcho ${GREEN} "证书修复成功!"
       show_links
     else
       colorEcho ${RED} "证书签发失败, 請运行修复证书"
