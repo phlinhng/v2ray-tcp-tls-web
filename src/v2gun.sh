@@ -683,7 +683,7 @@ fix_cert() {
     ${sudoCmd} chmod 644 /etc/ssl/v2ray/key.pem
     ${sudoCmd} chmod 644 /etc/ssl/v2ray/fullchain.pem
 
-    ${sudoCmd} systemctl restart nginx 2>/dev/null
+    ${sudoCmd} systemctl restart v2ray 2>/dev/null
 
     colorEcho ${BLUE} "Re-issuing certificates for ${V2_DOMAIN}"
     get_cert "${V2_DOMAIN}"
