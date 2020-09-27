@@ -32,7 +32,7 @@ bash ~/v2gun.sh
 | VMess | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Trojan | TLS | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
 | Trojan | TLS + Mux | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Trojan | WSS | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Trojan | WSS + Mux | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 
 6 protocols combinations with 9 connection method in total.
