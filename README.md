@@ -31,7 +31,7 @@ bash ~/v2gun.sh
 | VLESS | XTLS | ✅ | ❌ | ✅ | ✅ (TLS) | ❌ | ✅ |
 | VMess | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Trojan | TLS | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Trojan | TLS + Mux | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Trojan | TLS + Mux | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
 | Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Trojan | WSS + Mux | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 
