@@ -151,15 +151,18 @@ show_links() {
   local sni="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].tag')"
   local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
   local uuid_vless="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.clients[0].id')"
-  local uuid_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].settings.clients[0].id')"
-  local path_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].streamSettings.wsSettings.path')"
+  local uuid_vless_ws="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].settings.clients[0].id')"
+  local path_vless_ws="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].streamSettings.wsSettings.path')"
+  local uuid_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[2].settings.clients[0].id')"
+  local path_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[2].streamSettings.wsSettings.path')"
   local passwd_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
   local path_trojan="$(read_json /etc/trojan-go/config.json '.websocket.path')"
 
   colorEcho ${YELLOW} "===============分 享 链 接==============="
 
   echo "VLESS"
-  printf "%s:443 %s\n\n" "${sni}" "${uuid_vless}"
+  printf "(TCP) %s:443 %s\n" "${sni}" "${uuid_vless}"
+  printf "(WSS) %s:443 %s %s\n\n" "${sni}" "${uuid_vless_ws}" "${path_vless_ws}"
 
   echo "VMess (新版)"
   local uri_vmess="ws+tls:${uuid_vmess}@${cf_node}:443/?path=`urlEncode "${path_vmess}"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
