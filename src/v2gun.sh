@@ -419,6 +419,7 @@ get_trojan() {
     wget -nv "${trojango_link}" -O trojan-go.zip
     unzip trojan-go.zip
     ${sudoCmd} $(which mv) trojan-go /usr/bin/trojan-go
+    ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
   fi
 }
 
