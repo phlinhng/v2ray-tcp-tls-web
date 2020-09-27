@@ -495,7 +495,7 @@ set_v2ray() {
       "settings": {
         "clients": [
           {
-            "id": "$7",
+            "id": "$7"
           }
         ]
       },
