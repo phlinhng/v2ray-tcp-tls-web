@@ -3,8 +3,8 @@ export LC_ALL=C
 export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
-branch="vless"
-VERSION="2.0.5"
+branch="v2gun-dev"
+VERSION="2.0.5-dev"
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
@@ -350,22 +350,50 @@ EOF
 }
 
 preinstall() {
-    # turning off selinux
-    ${sudoCmd} setenforce 0 2>/dev/null
-    ${sudoCmd} echo "SELINUX=disable" > /etc/selinux/config
+  # turning off selinux
+  ${sudoCmd} setenforce 0 2>/dev/null
+  ${sudoCmd} echo "SELINUX=disable" > /etc/selinux/config
 
-    # turning off firewall
-    ${sudoCmd} systemctl stop firewalld 2>/dev/null
-    ${sudoCmd} systemctl disable firewalld 2>/dev/null
-    ${sudoCmd} ufw disable 2>/dev/null
+  # turning off firewall
+  ${sudoCmd} systemctl stop firewalld 2>/dev/null
+  ${sudoCmd} systemctl disable firewalld 2>/dev/null
+  ${sudoCmd} ufw disable 2>/dev/null
 
-    # get dependencies
+  # get dependencies
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} software-properties-common -y -q 2>/dev/null # debian/ubuntu
+  ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y 2>/dev/null # debian/ubuntu
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y 2>/dev/null # centos
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git wget unzip -y
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} jq -y
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx -y
+
+  # install jq mannualy if the package management didn't
+  if [[ ! "$(commnad -v jq)" ]]; then
+    echo "Fetching jq failed, trying manual installation"
+    ${sudoCmd} curl -L https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -o /usr/bin/jq
+    ${sudoCmd} $(which chmod) +x /usr/bin/jq
+  fi
+
+  if [[ ! "$(commnad -v nginx)" ]]; then
+    echo "Fetching nginx failed, trying another ppa"
+    ${sudoCmd} add-apt-repository ppa:nginx/stable -y 2>/dev/null # debian/ubuntu
     ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
-    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} software-properties-common -y -q 2>/dev/null # debian/ubuntu
-    ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y 2>/dev/null # debian/ubuntu
-    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y 2>/dev/null # centos
-    ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
-    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git jq nginx wget unzip -y
+    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx -y
+  fi
+
+  if [[ ! "$(commnad -v nginx)" ]]; then
+    echo "Fetching nginx failed, trying building from source"
+    cd $(mktemp -d)
+    wget https://nginx.org/download/nginx-1.10.1.tar.gz
+    tar -xvf nginx-1.10.1.tar.gz
+    cd nginx-1.10.1.tar
+    ${sudoCmd} ./configure
+    ${sudoCmd} make
+    ${sudoCmd} make install
+    cd ~
+  fi
 }
 
 get_acmesh() {

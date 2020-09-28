@@ -75,6 +75,9 @@ ${sudoCmd} $(which rm) -f /etc/systemd/system/nginx.service
 ${sudoCmd} $(which rm) -f /etc/systemd/system/nginx.service # and symlinks that might be related
 colorEcho ${BLUE} "Removing nginx"
 ${sudoCmd} ${systemPackage} remove nginx -y
+if [ -d "/usr/local/nginx" ]; then
+  ${sudoCmd} $(which rm) -rf /usr/local/nginx
+fi
 colorEcho ${GREEN} "Removed nginx successfully."
 
 colorEcho ${BLUE} "Removing dummy site."
