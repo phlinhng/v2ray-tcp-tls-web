@@ -157,6 +157,8 @@ show_links() {
   local path_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[2].streamSettings.wsSettings.path')"
   local passwd_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
   local path_trojan="$(read_json /etc/trojan-go/config.json '.websocket.path')"
+  local passwd_ss="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[3].settings.password')"
+  local path_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[3].streamSettings.wsSettings.path')"
 
   colorEcho ${YELLOW} "===============分 享 链 接==============="
 
@@ -179,7 +181,13 @@ show_links() {
 
   echo "Trojan-Go"
   local uri_trojango="${passwd_trojan}@${cf_node}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path_trojan}"`#`urlEncode "${sni} (Trojan-Go)"`"
-  printf "%s\n" "trojan-go://${uri_trojango}"
+  printf "%s\n\n" "trojan-go://${uri_trojango}"
+
+  echo "Shadowsocks"
+  local user_ss="$(printf %s "aes-128-gcm:${passwd_ss}" | base64 --wrap=0)"
+  local user_ss="$(printf %s "aes-128-gcm:${passwd_ss}" | base64 --wrap=0)"
+  local uri_ss="${user_ss}@${sni}:443/?plugin=`urlEncode "v2ray-plugin;tls;host=${sni};path=${path_ss}"`#`urlEncode "${sni} (SS)"`"
+  printf "%s\n" "ss://${uri_ss}"
 
   #colorEcho ${YELLOW} "===============配 置 文 件==============="
   #echo "VLESS"
@@ -464,6 +472,8 @@ set_v2ray() {
   # $6: path for trojan-go+ws
   # $7: uuid for vless+ws
   # $8: path for vless+ws
+  # $9: path for ss+v2ray-plugin
+  # $10: password for ss+v2ray-plugin
   ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
 {
   "inbounds": [
@@ -495,6 +505,10 @@ set_v2ray() {
           {
             "path": "$6",
             "dest": 3567
+          },
+          {
+            "path": "$9",
+            "dest": 3568
           }
         ]
       },
@@ -561,6 +575,26 @@ set_v2ray() {
         "wsSettings": {
           "acceptProxyProtocol": true,
           "path": "$3"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [ "http", "tls" ]
+      }
+    },
+    {
+      "port": 3568,
+      "listen": "127.0.0.1",
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "aes-128-gcm",
+        "password": "$10"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "path": "$9"
         }
       },
       "sniffing": {
