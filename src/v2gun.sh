@@ -762,6 +762,10 @@ install_v2ray() {
 
   get_trojan
 
+  # set crontab to auto update geoip.dat and geosite.dat
+  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/share/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/share/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
+
   local uuid_vless="$(cat '/proc/sys/kernel/random/uuid')"
   local uuid_vless_ws="$(cat '/proc/sys/kernel/random/uuid')"
   local path_vless_ws="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
