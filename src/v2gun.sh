@@ -815,12 +815,12 @@ install_v2ray() {
   set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "${cf_node}" "${path_trojan}" "${uuid_vless_ws}" "${path_vless_ws}" "${passwd_ss}" "${path_ss}"
   set_trojan "${passwd_trojan}" "${path_trojan}" "${V2_DOMAIN}"
 
-  ${sudoCmd} mkdir -p /etc/ssl/v2ray
+  ${sudoCmd} $(which mkdir) -p /etc/ssl/v2ray
 
   # temporary cert
   ${sudoCmd} openssl req -new -newkey rsa:2048 -days 1 -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=${V2_DOMAIN}" -keyout /etc/ssl/v2ray/key.pem -out /etc/ssl/v2ray/fullchain.pem
-  ${sudoCmd} chmod 644 /etc/ssl/v2ray/key.pem
-  ${sudoCmd} chmod 644 /etc/ssl/v2ray/fullchain.pem
+  ${sudoCmd} $(which chmod) 644 /etc/ssl/v2ray/key.pem
+  ${sudoCmd} $(which chmod) 644 /etc/ssl/v2ray/fullchain.pem
 
   colorEcho ${BLUE} "Building dummy web site"
   build_web
