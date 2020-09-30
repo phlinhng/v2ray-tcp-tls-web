@@ -57,9 +57,10 @@ https://t.me/technologyshare
 + [@ylx2016/Linux-NetSpeed](https://github.com/ylx2016/Linux-NetSpeed)
 + [@LemonBench/LemonBench](https://github.com/LemonBench/LemonBench)
 + [@tindy2013/subconverter](https://github.com/tindy2013/subconverter)
-+ [@9seconds/mtg](https://github.com/9seconds/mtg)
 + [@p4gefau1t/trojan-go](https://github.com/p4gefau1t/trojan-go)
 + [@rprx/v2ray-vless](https://github.com/rprx/v2ray-vless)
++ [@acmesh-official/acme.sh](https://github.com/acmesh-official/acme.sh)
++ [@nginx/nginx](https://github.com/nginx/nginx)
 
 ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/phlinhng/v2ray-tcp-tls-web.svg)](https://starchart.cc/phlinhng/v2ray-tcp-tls-web)
