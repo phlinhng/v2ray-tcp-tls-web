@@ -159,7 +159,7 @@ show_links() {
   local passwd_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
   local path_trojan="$(read_json /etc/trojan-go/config.json '.websocket.path')"
   local passwd_ss="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[3].settings.password')"
-  local path_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[3].streamSettings.wsSettings.path')"
+  local path_ss="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[3].streamSettings.wsSettings.path')"
 
   colorEcho ${YELLOW} "===============分 享 链 接==============="
 
@@ -473,8 +473,8 @@ set_v2ray() {
   # $6: path for trojan-go+ws
   # $7: uuid for vless+ws
   # $8: path for vless+ws
-  # $9: path for ss+v2ray-plugin
-  # $10: password for ss+v2ray-plugin
+  # $9: password for ss+v2ray-plugin
+  # $10: path for ss+v2ray-plugin
   ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
 {
   "inbounds": [
@@ -508,7 +508,7 @@ set_v2ray() {
             "dest": 3567
           },
           {
-            "path": "$9",
+            "path": "$10",
             "dest": 3568
           }
         ]
@@ -589,13 +589,13 @@ set_v2ray() {
       "protocol": "shadowsocks",
       "settings": {
         "method": "aes-128-gcm",
-        "password": "$10"
+        "password": "$9"
       },
       "streamSettings": {
         "network": "ws",
         "security": "none",
         "wsSettings": {
-          "path": "$9"
+          "path": "$10"
         }
       },
       "sniffing": {
@@ -809,8 +809,10 @@ install_v2ray() {
   local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
   local passwd_trojan="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
   local path_trojan="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+  local passwd_ss="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+  local path_ss="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
 
-  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "${cf_node}" "${path_trojan}" "${uuid_vless_ws}" "${path_vless_ws}"
+  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "${cf_node}" "${path_trojan}" "${uuid_vless_ws}" "${path_vless_ws}" "${passwd_ss}" "${path_ss}"
   set_trojan "${passwd_trojan}" "${path_trojan}" "${V2_DOMAIN}"
 
   ${sudoCmd} mkdir -p /etc/ssl/v2ray
