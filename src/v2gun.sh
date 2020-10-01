@@ -371,7 +371,6 @@ preinstall() {
   # get dependencies
   ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} software-properties-common -y -q 2>/dev/null # debian/ubuntu
-  ${sudoCmd} add-apt-repository ppa:ondrej/nginx-mainline -y 2>/dev/null # debian/ubuntu
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y 2>/dev/null # centos
   ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git wget unzip -y
@@ -386,18 +385,11 @@ preinstall() {
   fi
 
   if [[ ! "$(commnad -v nginx)" ]]; then
-    echo "Fetching nginx failed, trying another ppa"
-    ${sudoCmd} add-apt-repository ppa:nginx/stable -y 2>/dev/null # debian/ubuntu
-    ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
-    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx -y
-  fi
-
-  if [[ ! "$(commnad -v nginx)" ]]; then
     echo "Fetching nginx failed, trying building from source"
     cd $(mktemp -d)
-    wget https://nginx.org/download/nginx-1.10.1.tar.gz
-    tar -xvf nginx-1.10.1.tar.gz
-    cd nginx-1.10.1.tar
+    wget https://nginx.org/download/nginx-1.18.0.tar.gz
+    tar -xvf nginx-1.18.0.tar.gz
+    cd nginx-1.18.0.tar
     ${sudoCmd} ./configure
     ${sudoCmd} make
     ${sudoCmd} make install
