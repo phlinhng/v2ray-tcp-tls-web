@@ -32,28 +32,32 @@ identify_the_operating_system_and_architecture() {
   if [[ "$(uname)" == 'Linux' ]]; then
     case "$(uname -m)" in
       'i386' | 'i686')
-        MACHINE='386'
+        MACHINE_V2="32"
+        MACHINE_TJ="386"
         ;;
       'amd64' | 'x86_64')
-        MACHINE='amd64'
+        MACHINE_V2="64"
+        MACHINE_TJ="amd64"
         ;;
       'armv5tel')
-        MACHINE='armv5'
+        MACHINE_V2="arm32-v5"
+        MACHINE_TJ="armv5"
         ;;
       'armv6l')
-        MACHINE='armv6'
+        MACHINE_V2="arm32-v6"
+        MACHINE_TJ="armv6"
         ;;
       'armv7' | 'armv7l')
-        MACHINE='armv7a'
+        MACHINE_TJ="armv7a"
         ;;
       'armv8' | 'aarch64')
-        MACHINE='armv8'
+        MACHINE_TJ="armv8"
         ;;
       'mips64')
-        MACHINE='mips64'
+        MACHINE_TJ="mips64"
         ;;
       'mips64le')
-        MACHINE='mips64le'
+        MACHINE_TJ="mips64le"
         ;;
       *)
         echo "error: The architecture is not supported."
@@ -418,7 +422,7 @@ get_trojan() {
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
     local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
     echo "${latest_version}"
-    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${MACHINE}.zip"
+    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${MACHINE_TJ}.zip"
 
     ${sudoCmd} mkdir -p "/etc/trojan-go"
 
