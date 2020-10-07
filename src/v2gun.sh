@@ -820,7 +820,7 @@ install_v2ray() {
   local path="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c $((10+$RANDOM%10)))"
   local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
 
-  set_v2ray "${uuid_vless}" "${path}" "${V2_DOMAIN}" "${cf_node}"
+  set_v2ray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}"
 
   ${sudoCmd} $(which mkdir) -p /etc/ssl/v2ray
 
