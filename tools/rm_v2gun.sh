@@ -86,7 +86,7 @@ ${sudoCmd} $(which rm) -rf /var/www/html
 # remove acme.sh
 colorEcho ${BLUE} "Removing acme.sh"
 ${sudoCmd} bash /root/.acme.sh/acme.sh --uninstall
-${sudoCmd} $(which rm) -rf /root/.acme.sh
+uninstall /root/.acme.sh
 colorEcho ${GREEN} "Removed acme.sh successfully."
 
 ${sudoCmd} ${systemPackage} autoremove -y --purge 2>/dev/null
