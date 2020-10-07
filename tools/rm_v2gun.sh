@@ -45,38 +45,38 @@ colorEcho() {
   echo -e "\033[${1}${@:2}\033[0m" 1>& 2
 }
 
+uninstall() {
+  ${sudoCmd} $(which rm) -rf $1
+  printf "Removed: %s\n" $1
+}
+
 # remove v2ray
-curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash -s -- --remove
+colorEcho ${BLUE} "Stopping v2ray service."
+${sudoCmd} systemctl stop v2ray
+${sudoCmd} systemctl stop disable
+uninstall "/etc/systemd/system/v2ray.service"
+colorEcho ${BLUE} "Removing v2ray binaries."
+uninstall "/usr/local/bin/v2ray"
+uninstall "/usr/local/bin/v2ctl"
 colorEcho ${BLUE} "Removing v2ray files."
-${sudoCmd} $(which rm) -rf /usr/local/etc/v2ray
-${sudoCmd} $(which rm) -rf /usr/local/share/v2ray
-${sudoCmd} $(which rm) -rf /var/log/v2ray
-colorEcho ${BLUE} "Removing v2ray crontab"
+uninstall "/usr/local/etc/v2ray"
+uninstall"/usr/local/share/v2ray"
+uninstall "/var/log/v2ray"
+colorEcho ${BLUE} "Removing v2ray crontab."
 ${sudoCmd} crontab -l | grep -v 'v2ray/geoip.dat' | ${sudoCmd} crontab -
 ${sudoCmd} crontab -l | grep -v 'v2ray/geosite.dat' | ${sudoCmd} crontab -
 colorEcho ${GREEN} "Removed v2ray successfully."
-
-# remove trojan-go
-colorEcho ${BLUE} "Shutting down trojan-go service."
-${sudoCmd} systemctl stop trojan-go
-${sudoCmd} systemctl disable trojan-go
-${sudoCmd} $(which rm) -f /etc/systemd/system/trojan-go.service
-${sudoCmd} $(which rm) -f /etc/systemd/system/trojan-go.service # and symlinks that might be related
-colorEcho ${BLUE} "Removing trojan-go files."
-${sudoCmd} $(which rm) -rf /usr/bin/trojan-go
-${sudoCmd} $(which rm) -rf /etc/trojan-go
-colorEcho ${GREEN} "Removed trojan-go successfully."
 
 # remove nginx
 colorEcho ${BLUE} "Shutting down nginx service."
 ${sudoCmd} systemctl stop nginx
 ${sudoCmd} systemctl disable nginx
-${sudoCmd} $(which rm) -f /etc/systemd/system/nginx.service
-${sudoCmd} $(which rm) -f /etc/systemd/system/nginx.service # and symlinks that might be related
+uninstall /etc/systemd/system/nginx.service
 colorEcho ${BLUE} "Removing nginx"
 ${sudoCmd} ${systemPackage} remove nginx -y
+${sudoCmd} ${systemPackage} remove nginx-full -y
 if [ -d "/usr/local/nginx" ]; then
-  ${sudoCmd} $(which rm) -rf /usr/local/nginx
+  uninstall /usr/local/nginx
 fi
 colorEcho ${GREEN} "Removed nginx successfully."
 

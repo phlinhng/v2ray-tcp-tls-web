@@ -390,15 +390,21 @@ preinstall() {
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y 2>/dev/null # centos
   ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git wget unzip -y
-  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} jq -y
-  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx -y
 
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} jq -y
   # install jq mannualy if the package management didn't
   if [[ ! "$(commnad -v jq)" ]]; then
     echo "Fetching jq failed, trying manual installation"
     ${sudoCmd} curl -L https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -o /usr/bin/jq
     ${sudoCmd} $(which chmod) +x /usr/bin/jq
   fi
+
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx -y # ubuntu / centos
+  # debian
+  if [[ ! "$(commnad -v nginx)" ]]; then
+    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx-full -y
+  fi
+
 
   if [[ ! "$(commnad -v nginx)" ]]; then
     echo "Fetching nginx failed, trying building from source"
