@@ -427,42 +427,77 @@ get_cert() {
   --reloadcmd "chmod 644 /etc/ssl/v2ray/fullchain.pem; chmod 644 /etc/ssl/v2ray/key.pem; systemctl restart v2ray"
 }
 
-get_trojan() {
-  if [ ! -d "/usr/bin/trojan-go" ]; then
-    colorEcho ${BLUE} "trojan-go is not installed. start installation"
+set_v2ray_systemd() {
+  ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
+[Unit]
+Description=V2Ray Service
+Documentation=https://www.v2fly.org/
+After=network.target nss-lookup.target
 
-    colorEcho ${BLUE} "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+[Service]
+User=nobody
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+Environment=V2RAY_LOCATION_ASSET=/usr/local/share/v2ray/
+ExecStart=/usr/local/bin/v2ray -confdir /usr/local/etc/v2ray
+Restart=on-failure
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
+get_v2ray() {
+  if [ ! -f "/usr/local/bin/v2ray" ]; then
+    colorEcho ${BLUE} "V2Ray is not installed. start installation"
+
+    colorEcho ${BLUE} "Getting the latest version of v2ray-core"
+    local latest_version="$(curl -s "https://api.github.com/repos/v2fly/v2ray-core/release/latest" | jq '.tag_name' --raw-output)"
     echo "${latest_version}"
-    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${MACHINE_TJ}.zip"
+    local v2ray_link="https://github.com/v2fly/v2ray-core/releases/download/${latest_version}/v2ray-linux-${MACHINE}.zip"
 
-    ${sudoCmd} mkdir -p "/etc/trojan-go"
+    ${sudoCmd} $(which mkdir) -p "/usr/local/etc/v2ray"
+    printf "Cretated: %s\n" "/usr/local/etc/v2ray"
+    for BASE in 00_log 01_api 02_dns 03_routing 04_policy 05_inbounds 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
+    ${sudoCmd} $(which mkdir) -p "/usr/local/share/v2ray"
+    printf "Cretated: %s\n" "/usr/local/share/v2ray"
 
     cd $(mktemp -d)
-    wget -nv "${trojango_link}" -O trojan-go.zip
-    unzip -q trojan-go.zip && rm -rf trojan-go.zip
-    ${sudoCmd} $(which mv) trojan-go /usr/bin/trojan-go
-    ${sudoCmd} $(which mv) geoip.dat /usr/bin/geoip.dat
-    ${sudoCmd} $(which mv) geosite.dat /usr/bin/geosite.dat
+    wget -nv "${v2ray_link}" -O v2ray-core.zip
+    unzip -q v2ray-core.zip && $(which rm) -rf v2ray-core.zip
+    ${sudoCmd} $(which mv) v2ray /usr/local/bin/v2ray && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ray
+    printf "Installed: %s\n" "/usr/local/bin/v2ray"
+    ${sudoCmd} $(which mv) v2ctl /usr/local/bin/v2ctl && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ctl
+    printf "Installed: %s\n" "/usr/local/bin/v2ctl"
+    ${sudoCmd} $(which mv) geoip.dat /usr/local/share/v2ray/geoip.dat
+    printf "Installed: %s\n" "/usr/local/share/v2ray/geoip.dat"
+    ${sudoCmd} $(which mv) geosite.dat /usr/local/share/v2ray/geosite.dat
+    printf "Installed: %s\n" "/usr/local/share/v2ray/geosite.dat"
 
-    colorEcho ${BLUE} "Building trojan-go.service"
-    ${sudoCmd} $(which mv) example/trojan-go.service /etc/systemd/system/trojan-go.service
+    colorEcho ${BLUE} "Building v2ray.service"
+    set_v2ray_systemd
 
     ${sudoCmd} systemctl daemon-reload
-    ${sudoCmd} systemctl enable trojan-go
 
-    colorEcho ${GREEN} "trojan-go is installed."
+    colorEcho ${GREEN} "V2Ray ${latest_version} is installed."
   else
-    colorEcho ${BLUE} "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    colorEcho ${BLUE} "Getting the latest version of v2ray-core"
+    local latest_version="$(curl -s "https://api.github.com/repos/v2fly/v2ray-core/release/latest" | jq '.tag_name' --raw-output)"
     echo "${latest_version}"
-    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${MACHINE}.zip"
+    local v2ray_link="https://github.com/v2fly/v2ray-core/releases/download/${latest_version}/v2ray-linux-${MACHINE}.zip"
 
     cd $(mktemp -d)
-    wget -nv "${trojango_link}" -O trojan-go.zip
-    unzip trojan-go.zip
-    ${sudoCmd} $(which mv) trojan-go /usr/bin/trojan-go
-    ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
+    wget -nv "${v2ray_link}" -O v2ray-core.zip
+    unzip -q v2ray-core.zip && $(which rm) -rf v2ray-core.zip
+    ${sudoCmd} $(which mv) v2ray /usr/local/bin/v2ray && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ray
+    printf "Installed: %s\n" "/usr/local/bin/v2ray"
+    ${sudoCmd} $(which mv) v2ctl /usr/local/bin/v2ctl && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ctl
+    printf "Installed: %s\n" "/usr/local/bin/v2ctl"
+
+    ${sudoCmd} systemctl daemon-reload
+    colorEcho ${GREEN} "V2Ray ${latest_version} has been updated."
   fi
 }
 
@@ -805,12 +840,7 @@ install_v2ray() {
   # set time syncronise service
   ${sudoCmd} timedatectl set-ntp true
 
-  ${sudoCmd} $(which mkdir) -p "/usr/local/etc/v2ray"
-  for BASE in 00_log 01_api 02_dns 03_routing 04_policy 05_inbounds 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
-  export JSONS_PATH="/usr/local/etc/v2ray" # for multiple configuration files
-
   get_v2ray
-  ${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray.service.d/10-donot_touch_single_conf.conf
 
   # set crontab to auto update geoip.dat and geosite.dat
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/share/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
@@ -884,11 +914,10 @@ show_menu() {
   echo "3) 显示链接"
   echo "----------组件管理----------"
   echo "4) 更新 v2ray-core"
-  echo "5) 更新 trojan-go"
   echo "----------实用工具----------"
-  echo "6) VPS 工具箱 (含 BBR 脚本)"
+  echo "5) VPS 工具箱 (含 BBR 脚本)"
   echo "----------卸载脚本----------"
-  echo "7) 卸载脚本与全部组件"
+  echo "6) 卸载脚本与全部组件"
   echo ""
 }
 
@@ -908,9 +937,8 @@ menu() {
       "2") fix_cert && continue_prompt ;;
       "3") show_links && continue_prompt ;;
       "4") get_v2ray && continue_prompt ;;
-      "5") get_trojan && continue_prompt ;;
-      "6") vps_tools ;;
-      "7") rm_v2gun ;;
+      "5") vps_tools ;;
+      "6") rm_v2gun ;;
       *) break ;;
     esac
   done
