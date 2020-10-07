@@ -816,19 +816,11 @@ install_v2ray() {
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/share/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/share/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
-  local uuid_vless="$(cat '/proc/sys/kernel/random/uuid')"
-  local uuid_vless_ws="$(cat '/proc/sys/kernel/random/uuid')"
-  local path_vless_ws="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  local uuid_vmess="$(cat '/proc/sys/kernel/random/uuid')"
-  local path_vmess="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+  local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+  local path="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c $((10+$RANDOM%10)))"
   local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
-  local passwd_trojan="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  local path_trojan="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  local passwd_ss="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  local path_ss="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
 
-  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "${cf_node}" "${path_trojan}" "${uuid_vless_ws}" "${path_vless_ws}" "${passwd_ss}" "${path_ss}"
-  set_trojan "${passwd_trojan}" "${path_trojan}" "${V2_DOMAIN}"
+  set_v2ray "${uuid_vless}" "${path}" "${V2_DOMAIN}" "${cf_node}"
 
   ${sudoCmd} $(which mkdir) -p /etc/ssl/v2ray
 
@@ -856,9 +848,6 @@ install_v2ray() {
   ${sudoCmd} systemctl enable nginx
   ${sudoCmd} systemctl restart nginx 2>/dev/null ## restart nginx to enable new config
 
-  ${sudoCmd} systemctl enable trojan-go
-  ${sudoCmd} systemctl restart trojan-go ## restart trojan-go to enable new config
-
   ${sudoCmd} systemctl enable v2ray
   ${sudoCmd} systemctl restart v2ray 2>/dev/null ## restart v2ray to enable new config
 
@@ -866,7 +855,7 @@ install_v2ray() {
   get_cert "${V2_DOMAIN}"
 
   if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-    colorEcho ${GREEN} "安装 VLESS + VMess + Trojan-Go 成功!"
+    colorEcho ${GREEN} "安装 VLESS + VMess + Trojan 成功!"
     show_links
   else
     colorEcho ${RED} "证书签发失败, 请运行修复证书"
