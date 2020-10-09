@@ -165,62 +165,64 @@ checkIP() {
 }
 
 show_links() {
-  local uuid="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.clients[0].id')"
-  local path="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[2].streamSettings.wsSettings.path')"
-  local sni="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].tag')"
-  local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
-  # path ss+ws: /[base], path vless+ws: /[base]ws, path vmess+ws: /[base]wss, path trojan+ws: /[base]tj
+  if [ -f "/usr/local/bin/v2ray" ]; then
+    local uuid="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.clients[0].id')"
+    local path="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[2].streamSettings.wsSettings.path')"
+    local sni="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].tag')"
+    local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
+    # path ss+ws: /[base], path vless+ws: /[base]ws, path vmess+ws: /[base]wss, path trojan+ws: /[base]tj
 
-  colorEcho ${YELLOW} "===============分 享 链 接==============="
+    colorEcho ${YELLOW} "===============分 享 链 接==============="
 
-  echo "VLESS"
-  printf "(TCP) %s:443 %s\n" "${sni}" "${uuid}"
-  printf "(WSS) %s:443 %s %s\n" "${sni}" "${uuid}" "${path}ws"
-  echo ""
+    echo "VLESS"
+    printf "(TCP) %s:443 %s\n" "${sni}" "${uuid}"
+    printf "(WSS) %s:443 %s %s\n" "${sni}" "${uuid}" "${path}ws"
+    echo ""
 
-  echo "VMess (新版分享格式)"
-  local uri_vmess_cf="ws+tls:${uuid}@${cf_node}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
-  local uri_vmess_cf="ws+tls:${uuid}@${sni}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
-  printf "%s\n%s\n" "vmess://${uri_vmess_cf}" "vmess://${uri_vmess}"
-  echo ""
+    echo "VMess (新版分享格式)"
+    local uri_vmess_cf="ws+tls:${uuid}@${cf_node}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
+    local uri_vmess_cf="ws+tls:${uuid}@${sni}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
+    printf "%s\n%s\n" "vmess://${uri_vmess_cf}" "vmess://${uri_vmess}"
+    echo ""
 
-  echo "VMess (旧版分享格式)"
-  local json_vmess_cf="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"${path}wss\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri_vmess_2dust_cf="$(printf %s "${json_vmess_cf}" | base64 --wrap=0)"
-  local json_vmess="{\"add\":\"${sni}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"${path}wss\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri_vmess_2dust="$(printf %s "${json_vmess}" | base64 --wrap=0)"
-  printf "%s\n%s\n" "vmess://${uri_vmess_2dust_cf}" "vmess://${uri_vmess_2dust}"
-  echo ""
+    echo "VMess (旧版分享格式)"
+    local json_vmess_cf="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"${path}wss\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local uri_vmess_2dust_cf="$(printf %s "${json_vmess_cf}" | base64 --wrap=0)"
+    local json_vmess="{\"add\":\"${sni}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"${path}wss\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local uri_vmess_2dust="$(printf %s "${json_vmess}" | base64 --wrap=0)"
+    printf "%s\n%s\n" "vmess://${uri_vmess_2dust_cf}" "vmess://${uri_vmess_2dust}"
+    echo ""
 
-  echo "Trojan"
-  local uri_trojan="${uuid}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
-  printf "%s\n\n" "trojan://${uri_trojan}"
-  echo ""
+    echo "Trojan"
+    local uri_trojan="${uuid}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
+    printf "%s\n\n" "trojan://${uri_trojan}"
+    echo ""
 
-  echo "Trojan-Go"
-  local uri_trojango="${uuid}@${sni}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
-  local uri_trojango_cf="${uuid}@${cf_node}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
-  printf "%s\n" "trojan-go://${uri_trojango_cf}" "trojan-go://${uri_trojango}"
-  echo ""
+    echo "Trojan-Go"
+    local uri_trojango="${uuid}@${sni}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
+    local uri_trojango_cf="${uuid}@${cf_node}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
+    printf "%s\n" "trojan-go://${uri_trojango_cf}" "trojan-go://${uri_trojango}"
+    echo ""
 
-  echo "Shadowsocks"
-  local user_ss="$(printf %s "aes-128-gcm:${uuid}" | base64 --wrap=0)"
-  local uri_ss="${user_ss}@${sni}:443/?plugin=`urlEncode "v2ray-plugin;tls;host=${sni};path=${path}"`#`urlEncode "${sni} (SS)"`"
-  printf "%s\n" "ss://${uri_ss}"
+    echo "Shadowsocks"
+    local user_ss="$(printf %s "aes-128-gcm:${uuid}" | base64 --wrap=0)"
+    local uri_ss="${user_ss}@${sni}:443/?plugin=`urlEncode "v2ray-plugin;tls;host=${sni};path=${path}"`#`urlEncode "${sni} (SS)"`"
+    printf "%s\n" "ss://${uri_ss}"
 
-  #colorEcho ${YELLOW} "===============配 置 文 件==============="
-  #echo "VLESS"
-  #printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vless} | sed -e 's/-//g' | head -c 13"`/client.json"
+    #colorEcho ${YELLOW} "===============配 置 文 件==============="
+    #echo "VLESS"
+    #printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vless} | sed -e 's/-//g' | head -c 13"`/client.json"
 
-  #echo "VMess"
-  #printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vmess} | sed -e 's/-//g' | head -c 13"`/client.json"
+    #echo "VMess"
+    #printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vmess} | sed -e 's/-//g' | head -c 13"`/client.json"
 
-  #echo "Trojan"
-  #printf "%s\n\n" "https://${sni}/`printf %s ${passwd_trojan} | head -c 9`/client.json"
+    #echo "Trojan"
+    #printf "%s\n\n" "https://${sni}/`printf %s ${passwd_trojan} | head -c 9`/client.json"
 
-  #echo "Trojan-Go"
-  #printf "%s\n\n" "https://${sni}/`printf %s "${passwd_trojan}${path_trojan}" | head -c 13`/client.json"
-  colorEcho ${YELLOW} "========================================"
+    #echo "Trojan-Go"
+    #printf "%s\n\n" "https://${sni}/`printf %s "${passwd_trojan}${path_trojan}" | head -c 13`/client.json"
+    colorEcho ${YELLOW} "========================================"
+  fi
 }
 
 gen_config_v2ray() {
@@ -916,7 +918,7 @@ rm_v2gun() {
 show_menu() {
   echo ""
   echo "----------安装代理----------"
-  echo "1) 安装 VLESS + VMess + Trojan-Go"
+  echo "1) 安装 VLESS + VMess + Trojan"
   echo "2) 修复证书 / 更换域名"
   echo "3) 自定义 Cloudflare 节点"
   echo "----------显示配置----------"
