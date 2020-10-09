@@ -599,7 +599,7 @@ set_v2ray() {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
       },
-      "tag": "$3"
+      "tag": "$4"
     },
     {
       "port": 3565,
@@ -814,7 +814,6 @@ fix_cert() {
     get_cert "${V2_DOMAIN}"
 
     write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
-    write_json /etc/trojan-go/config.json ".websocket.host" "\"${V2_DOMAIN}\""
 
     ${sudoCmd} systemctl restart trojan-go
 
@@ -899,6 +898,31 @@ install_v2ray() {
     show_links
   else
     colorEcho ${RED} "证书签发失败, 请运行修复证书"
+  fi
+}
+
+edit_cf_node() {
+  if [ -f "/usr/local/bin/v2ray" ]; then
+  local cf_node_current="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
+  read -p "输入新的 CF 节点地址 [留空则使用现有值 ${cf_node_current}]: " cf_node_new
+  printf "%s\n" "输入编号使用建议值"
+  printf "1. %s\n" "icook.hk"
+  printf "2. %s\n" "www.digitalocean.com"
+  printf "3. %s\n" "www.garmin.com"
+  printf "4. %s\n" "amp.cloudflare.com"
+  case "${cf_node_new}" in
+    "1") cf_node_new="icook.hk" ;;
+    "2") cf_node_new="www.digitalocean.com" ;;
+    "3") cf_node_new="www.garmin.com" ;;
+    "4") cf_node_new="amp.cloudflare.com" ;;
+  esac
+  if [ -z "${cf_node_new}" ]; then
+    cf_node_new="${cf_node_current}"
+  fi
+  write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[1].tag" "\"${cf_node_new}}\""
+  sleep 1
+  printf "%s\n" "CF 节点己变更为 ${cf_node_new}"
+  show_links
   fi
 }
 
