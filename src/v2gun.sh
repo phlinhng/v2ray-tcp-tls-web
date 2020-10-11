@@ -403,12 +403,12 @@ preinstall() {
 
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx -y # ubuntu / centos
   # debian
-  if [[ ! "$(commnad -v nginx)" ]]; then
+  if [[ ! "$(command -v nginx)" ]]; then
     ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx-full -y
   fi
 
 
-  if [[ ! "$(commnad -v nginx)" ]]; then
+  if [[ ! "$(command -v nginx)" ]]; then
     echo "Fetching nginx failed, trying building from source"
     cd $(mktemp -d)
     wget https://nginx.org/download/nginx-1.18.0.tar.gz
