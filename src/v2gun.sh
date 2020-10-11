@@ -413,7 +413,7 @@ preinstall() {
     cd $(mktemp -d)
     wget https://nginx.org/download/nginx-1.18.0.tar.gz
     tar -xvf nginx-1.18.0.tar.gz
-    cd nginx-1.18.0.tar
+    cd nginx-1.18.0
     ${sudoCmd} ./configure
     ${sudoCmd} make
     ${sudoCmd} make install
