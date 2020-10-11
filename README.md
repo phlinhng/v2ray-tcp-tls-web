@@ -35,10 +35,11 @@ bash ~/v2gun.sh
 | VLESS | WSS  + Mux | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | VMess | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | VMess | WSS + Mux | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Trojan | TLS | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Trojan | TLS + Mux | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Trojan | WSS + Mux | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Trojan | TLS | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Trojan | TLS + Mux | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| Trojan | WSS + Mux | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| Shadowsocks | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 11 protocols combinations with 17 connection methods in total.
 

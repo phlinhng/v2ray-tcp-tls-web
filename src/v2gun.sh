@@ -3,8 +3,8 @@ export LC_ALL=C
 export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
-branch="v2gun-dev"
-VERSION="2.0.5-dev"
+branch="v3gun"
+VERSION="2.1.0-dev"
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
@@ -32,36 +32,46 @@ identify_the_operating_system_and_architecture() {
   if [[ "$(uname)" == 'Linux' ]]; then
     case "$(uname -m)" in
       'i386' | 'i686')
-        MACHINE_V2="32"
-        MACHINE_TJ="386"
+        MACHINE='32'
         ;;
       'amd64' | 'x86_64')
-        MACHINE_V2="64"
-        MACHINE_TJ="amd64"
+        MACHINE='64'
         ;;
       'armv5tel')
-        MACHINE_V2="arm32-v5"
-        MACHINE_TJ="armv5"
+        MACHINE='arm32-v5'
         ;;
       'armv6l')
-        MACHINE_V2="arm32-v6"
-        MACHINE_TJ="armv6"
+        MACHINE='arm32-v6'
         ;;
       'armv7' | 'armv7l')
-        MACHINE_TJ="armv7a"
+        MACHINE='arm32-v7a'
         ;;
       'armv8' | 'aarch64')
-        MACHINE_TJ="armv8"
+        MACHINE='arm64-v8a'
+        ;;
+      'mips')
+        MACHINE='mips32'
+        ;;
+      'mipsle')
+        MACHINE='mips32le'
         ;;
       'mips64')
-        MACHINE_TJ="mips64"
+        MACHINE='mips64'
         ;;
       'mips64le')
-        MACHINE_TJ="mips64le"
+        MACHINE='mips64le'
         ;;
-      *)
-        echo "error: The architecture is not supported."
-        exit 1
+      'ppc64')
+        MACHINE='ppc64'
+        ;;
+      'ppc64le')
+        MACHINE='ppc64le'
+        ;;
+      'riscv64')
+        MACHINE='riscv64'
+        ;;
+      's390x')
+        MACHINE='s390x'
         ;;
     esac
     if [[ ! -f '/etc/os-release' ]]; then
@@ -142,10 +152,12 @@ build_web() {
 checkIP() {
   local realIP4="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/ip4_api`)"
   local realIP6="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/ip6_api`)"
-  local resolvedIP4="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
-  local resolvedIP6="$(ping6 $1 -c 1 | head -n 1 | grep  -oE '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' | head -n 1)"
+  local resolvedIP44="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
+  local resolvedIP46="$(ping6 $1 -c 1 | head -n 1 | grep  -oE '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' | head -n 1)"
+  local resolvedIP64="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
+  local resolvedIP66="$(ping6 $1 -c 1 | head -n 1 | grep  -oE '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' | head -n 1)"
 
-  if [[ "${realIP4}" == "${resolvedIP4}" ]] || [[ "${realIP4}" == "${resolvedIP6}" ]] || [[ "${realIP6}" == "${resolvedIP4}" ]] || [[ "${realIP6}" == "${resolvedIP6}" ]]; then
+  if [[ "${realIP4}" == "${resolvedIP44}" ]] || [[ "${realIP4}" == "${resolvedIP46}" ]] || [[ "${realIP4}" == "${resolvedIP64}" ]] || [[ "${realIP4}" == "${resolvedIP66}" ]] || [[ "${realIP6}" == "${resolvedIP44}" ]] || [[ "${realIP6}" == "${resolvedIP46}" ]] || [[ "${realIP6}" == "${resolvedIP64}" ]] || [[ "${realIP6}" == "${resolvedIP66}" ]]; then
     return 0
   else
     return 1
@@ -153,60 +165,64 @@ checkIP() {
 }
 
 show_links() {
-  local sni="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].tag')"
-  local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
-  local uuid_vless="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.clients[0].id')"
-  local uuid_vless_ws="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].settings.clients[0].id')"
-  local path_vless_ws="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].streamSettings.wsSettings.path')"
-  local uuid_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[2].settings.clients[0].id')"
-  local path_vmess="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[2].streamSettings.wsSettings.path')"
-  local passwd_trojan="$(read_json /etc/trojan-go/config.json '.password[0]')"
-  local path_trojan="$(read_json /etc/trojan-go/config.json '.websocket.path')"
-  local passwd_ss="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[3].settings.password')"
-  local path_ss="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[3].streamSettings.wsSettings.path')"
+  if [ -f "/usr/local/bin/v2ray" ]; then
+    local uuid="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.clients[0].id')"
+    local path="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[2].streamSettings.wsSettings.path')"
+    local sni="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].tag')"
+    local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
+    # path ss+ws: /[base], path vless+ws: /[base]ws, path vmess+ws: /[base]wss, path trojan+ws: /[base]tj
 
-  colorEcho ${YELLOW} "===============分 享 链 接==============="
+    colorEcho ${YELLOW} "===============分 享 链 接==============="
 
-  echo "VLESS"
-  printf "(TCP) %s:443 %s\n" "${sni}" "${uuid_vless}"
-  printf "(WSS) %s:443 %s %s\n\n" "${sni}" "${uuid_vless_ws}" "${path_vless_ws}"
+    echo "VLESS"
+    printf "(TCP) %s:443 %s\n" "${sni}" "${uuid}"
+    printf "(WSS) %s:443 %s %s\n" "${sni}" "${uuid}" "${path}ws"
+    echo ""
 
-  echo "VMess (新版)"
-  local uri_vmess="ws+tls:${uuid_vmess}@${cf_node}:443/?path=`urlEncode "${path_vmess}"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
-  printf "%s\n\n" "vmess://${uri_vmess}"
+    echo "VMess (新版分享格式)"
+    local uri_vmess_cf="ws+tls:${uuid}@${cf_node}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
+    local uri_vmess_cf="ws+tls:${uuid}@${sni}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
+    printf "%s\n%s\n" "vmess://${uri_vmess_cf}" "vmess://${uri_vmess}"
+    echo ""
 
-  echo "VMess (旧版)"
-  local json_vmess="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid_vmess}\",\"net\":\"ws\",\"path\":\"${path_vmess}\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
-  local uri_vmess_2dust="$(printf %s "${json_vmess}" | base64 --wrap=0)"
-  printf "%s\n\n" "vmess://${uri_vmess_2dust}"
+    echo "VMess (旧版分享格式)"
+    local json_vmess_cf="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"${path}wss\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local uri_vmess_2dust_cf="$(printf %s "${json_vmess_cf}" | base64 --wrap=0)"
+    local json_vmess="{\"add\":\"${sni}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"${path}wss\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
+    local uri_vmess_2dust="$(printf %s "${json_vmess}" | base64 --wrap=0)"
+    printf "%s\n%s\n" "vmess://${uri_vmess_2dust_cf}" "vmess://${uri_vmess_2dust}"
+    echo ""
 
-  echo "Trojan"
-  local uri_trojan="${passwd_trojan}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
-  printf "%s\n\n" "trojan://${uri_trojan}"
+    echo "Trojan"
+    local uri_trojan="${uuid}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
+    printf "%s\n\n" "trojan://${uri_trojan}"
+    echo ""
 
-  echo "Trojan-Go"
-  local uri_trojango="${passwd_trojan}@${cf_node}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path_trojan}"`#`urlEncode "${sni} (Trojan-Go)"`"
-  printf "%s\n\n" "trojan-go://${uri_trojango}"
+    echo "Trojan-Go"
+    local uri_trojango="${uuid}@${sni}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
+    local uri_trojango_cf="${uuid}@${cf_node}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
+    printf "%s\n" "trojan-go://${uri_trojango_cf}" "trojan-go://${uri_trojango}"
+    echo ""
 
-  echo "Shadowsocks"
-  local user_ss="$(printf %s "aes-128-gcm:${passwd_ss}" | base64 --wrap=0)"
-  local user_ss="$(printf %s "aes-128-gcm:${passwd_ss}" | base64 --wrap=0)"
-  local uri_ss="${user_ss}@${sni}:443/?plugin=`urlEncode "v2ray-plugin;tls;host=${sni};path=${path_ss}"`#`urlEncode "${sni} (SS)"`"
-  printf "%s\n" "ss://${uri_ss}"
+    echo "Shadowsocks"
+    local user_ss="$(printf %s "aes-128-gcm:${uuid}" | base64 --wrap=0)"
+    local uri_ss="${user_ss}@${sni}:443/?plugin=`urlEncode "v2ray-plugin;tls;host=${sni};path=${path}"`#`urlEncode "${sni} (SS)"`"
+    printf "%s\n" "ss://${uri_ss}"
 
-  #colorEcho ${YELLOW} "===============配 置 文 件==============="
-  #echo "VLESS"
-  #printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vless} | sed -e 's/-//g' | head -c 13"`/client.json"
+    #colorEcho ${YELLOW} "===============配 置 文 件==============="
+    #echo "VLESS"
+    #printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vless} | sed -e 's/-//g' | head -c 13"`/client.json"
 
-  #echo "VMess"
-  #printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vmess} | sed -e 's/-//g' | head -c 13"`/client.json"
+    #echo "VMess"
+    #printf "%s\n\n" "https://${sni}/`printf %s "${uuid_vmess} | sed -e 's/-//g' | head -c 13"`/client.json"
 
-  #echo "Trojan"
-  #printf "%s\n\n" "https://${sni}/`printf %s ${passwd_trojan} | head -c 9`/client.json"
+    #echo "Trojan"
+    #printf "%s\n\n" "https://${sni}/`printf %s ${passwd_trojan} | head -c 9`/client.json"
 
-  #echo "Trojan-Go"
-  #printf "%s\n\n" "https://${sni}/`printf %s "${passwd_trojan}${path_trojan}" | head -c 13`/client.json"
-  colorEcho ${YELLOW} "========================================"
+    #echo "Trojan-Go"
+    #printf "%s\n\n" "https://${sni}/`printf %s "${passwd_trojan}${path_trojan}" | head -c 13`/client.json"
+    colorEcho ${YELLOW} "========================================"
+  fi
 }
 
 gen_config_v2ray() {
@@ -376,22 +392,28 @@ preinstall() {
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y 2>/dev/null # centos
   ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git wget unzip -y
-  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} jq -y
-  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx -y
 
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} jq -y
   # install jq mannualy if the package management didn't
-  if [[ ! "$(commnad -v jq)" ]]; then
+  if [[ ! "$(command -v jq)" ]]; then
     echo "Fetching jq failed, trying manual installation"
     ${sudoCmd} curl -L https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -o /usr/bin/jq
     ${sudoCmd} $(which chmod) +x /usr/bin/jq
   fi
 
-  if [[ ! "$(commnad -v nginx)" ]]; then
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx -y # ubuntu / centos
+  # debian
+  if [[ ! "$(command -v nginx)" ]]; then
+    ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} nginx-full -y
+  fi
+
+
+  if [[ ! "$(command -v nginx)" ]]; then
     echo "Fetching nginx failed, trying building from source"
     cd $(mktemp -d)
     wget https://nginx.org/download/nginx-1.18.0.tar.gz
     tar -xvf nginx-1.18.0.tar.gz
-    cd nginx-1.18.0.tar
+    cd nginx-1.18.0
     ${sudoCmd} ./configure
     ${sudoCmd} make
     ${sudoCmd} make install
@@ -415,60 +437,86 @@ get_cert() {
   --reloadcmd "chmod 644 /etc/ssl/v2ray/fullchain.pem; chmod 644 /etc/ssl/v2ray/key.pem; systemctl restart v2ray"
 }
 
-get_trojan() {
-  if [ ! -d "/usr/bin/trojan-go" ]; then
-    colorEcho ${BLUE} "trojan-go is not installed. start installation"
+set_v2ray_systemd() {
+  ${sudoCmd} cat > "/etc/systemd/system/v2ray.service" <<-EOF
+[Unit]
+Description=V2Ray Service
+Documentation=https://www.v2fly.org/
+After=network.target nss-lookup.target
 
-    colorEcho ${BLUE} "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
-    echo "${latest_version}"
-    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${MACHINE_TJ}.zip"
+[Service]
+User=nobody
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+Environment=V2RAY_LOCATION_ASSET=/usr/local/share/v2ray/
+ExecStart=/usr/local/bin/v2ray -confdir /usr/local/etc/v2ray
+Restart=on-failure
+RestartPreventExitStatus=23
 
-    ${sudoCmd} mkdir -p "/etc/trojan-go"
-
-    cd $(mktemp -d)
-    wget -nv "${trojango_link}" -O trojan-go.zip
-    unzip -q trojan-go.zip && rm -rf trojan-go.zip
-    ${sudoCmd} $(which mv) trojan-go /usr/bin/trojan-go
-    ${sudoCmd} $(which mv) geoip.dat /usr/bin/geoip.dat
-    ${sudoCmd} $(which mv) geosite.dat /usr/bin/geosite.dat
-
-    colorEcho ${BLUE} "Building trojan-go.service"
-    ${sudoCmd} $(which mv) example/trojan-go.service /etc/systemd/system/trojan-go.service
-
-    ${sudoCmd} systemctl daemon-reload
-    ${sudoCmd} systemctl enable trojan-go
-
-    colorEcho ${GREEN} "trojan-go is installed."
-  else
-    colorEcho ${BLUE} "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://api.github.com/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
-    echo "${latest_version}"
-    local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${MACHINE}.zip"
-
-    cd $(mktemp -d)
-    wget -nv "${trojango_link}" -O trojan-go.zip
-    unzip trojan-go.zip
-    ${sudoCmd} $(which mv) trojan-go /usr/bin/trojan-go
-    ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
-  fi
+[Install]
+WantedBy=multi-user.target
+EOF
 }
 
 get_v2ray() {
-  curl -sL https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | ${sudoCmd} bash
+  if [ ! -f "/usr/local/bin/v2ray" ]; then
+    colorEcho ${BLUE} "V2Ray is not installed. start installation"
+
+    colorEcho ${BLUE} "Getting the latest version of v2ray-core"
+    local latest_version="$(curl -s "https://api.github.com/repos/v2fly/v2ray-core/releases/latest" | jq '.tag_name' --raw-output)"
+    echo "${latest_version}"
+    local v2ray_link="https://github.com/v2fly/v2ray-core/releases/download/${latest_version}/v2ray-linux-${MACHINE}.zip"
+
+    ${sudoCmd} $(which mkdir) -p "/usr/local/etc/v2ray"
+    printf "Cretated: %s\n" "/usr/local/etc/v2ray"
+    for BASE in 00_log 01_api 02_dns 03_routing 04_policy 05_inbounds 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
+    ${sudoCmd} $(which mkdir) -p "/usr/local/share/v2ray"
+    printf "Cretated: %s\n" "/usr/local/share/v2ray"
+
+    cd $(mktemp -d)
+    wget -nv "${v2ray_link}" -O v2ray-core.zip
+    unzip -q v2ray-core.zip && $(which rm) -rf v2ray-core.zip
+    ${sudoCmd} $(which mv) v2ray /usr/local/bin/v2ray && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ray
+    printf "Installed: %s\n" "/usr/local/bin/v2ray"
+    ${sudoCmd} $(which mv) v2ctl /usr/local/bin/v2ctl && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ctl
+    printf "Installed: %s\n" "/usr/local/bin/v2ctl"
+    ${sudoCmd} $(which mv) geoip.dat /usr/local/share/v2ray/geoip.dat
+    printf "Installed: %s\n" "/usr/local/share/v2ray/geoip.dat"
+    ${sudoCmd} $(which mv) geosite.dat /usr/local/share/v2ray/geosite.dat
+    printf "Installed: %s\n" "/usr/local/share/v2ray/geosite.dat"
+
+    colorEcho ${BLUE} "Building v2ray.service"
+    set_v2ray_systemd
+
+    ${sudoCmd} systemctl daemon-reload
+
+    colorEcho ${GREEN} "V2Ray ${latest_version} is installed."
+  else
+    colorEcho ${BLUE} "Getting the latest version of v2ray-core"
+    local latest_version="$(curl -s "https://api.github.com/repos/v2fly/v2ray-core/releases/latest" | jq '.tag_name' --raw-output)"
+    echo "${latest_version}"
+    local v2ray_link="https://github.com/v2fly/v2ray-core/releases/download/${latest_version}/v2ray-linux-${MACHINE}.zip"
+
+    cd $(mktemp -d)
+    wget -nv "${v2ray_link}" -O v2ray-core.zip
+    unzip -q v2ray-core.zip && $(which rm) -rf v2ray-core.zip
+    ${sudoCmd} $(which mv) v2ray /usr/local/bin/v2ray && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ray
+    printf "Installed: %s\n" "/usr/local/bin/v2ray"
+    ${sudoCmd} $(which mv) v2ctl /usr/local/bin/v2ctl && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ctl
+    printf "Installed: %s\n" "/usr/local/bin/v2ctl"
+
+    ${sudoCmd} systemctl daemon-reload
+    colorEcho ${GREEN} "V2Ray ${latest_version} has been updated."
+  fi
 }
 
 set_v2ray() {
-  # $1: uuid for vless+tcp
-  # $2: uuid for vmess+ws
-  # $3: path for vmess+ws
-  # $4: sni
-  # $5: url of cf node
-  # $6: path for trojan-go+ws
-  # $7: uuid for vless+ws
-  # $8: path for vless+ws
-  # $9: password for ss+v2ray-plugin
-  # $10: path for ss+v2ray-plugin
+  # $1: uuid for all (in trojan and ss uuid == passowrd)
+  # $2: base path
+  # $3: sni
+  # $4: url of cf node
+  # 3564: trojan, 3565: ss, 3566: vmess+wss, 3567: vless+wss, 3568: trojan+ws
   ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
 {
   "inbounds": [
@@ -485,24 +533,25 @@ set_v2ray() {
         "decryption": "none",
         "fallbacks": [
           {
-            "dest": 3567
+            "dest": 3564
           },
           {
-            "path": "$8",
+            "path": "/$2",
             "dest": 3565,
             "xver": 1
           },
           {
-            "path": "$3",
+            "path": "/$2ws",
             "dest": 3566,
             "xver": 1
           },
           {
-            "path": "$6",
-            "dest": 3567
+            "path": "/$2wss",
+            "dest": 3567,
+            "xver": 1
           },
           {
-            "path": "$10",
+            "path": "/$2tj",
             "dest": 3568
           }
         ]
@@ -524,16 +573,63 @@ set_v2ray() {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
       },
+      "tag": "$3"
+    },
+    {
+      "port": 3564,
+      "listen": "127.0.0.1",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "$1"
+          }
+        ],
+        "fallbacks": [
+          {
+            "dest": 80
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "none"
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [ "http", "tls" ]
+      },
       "tag": "$4"
     },
     {
       "port": 3565,
       "listen": "127.0.0.1",
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "aes-128-gcm",
+        "password": "$1",
+        "network": "tcp"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "path": "/$2"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [ "http", "tls" ]
+      }
+    },
+    {
+      "port": 3566,
+      "listen": "127.0.0.1",
       "protocol": "vless",
       "settings": {
         "clients": [
           {
-            "id": "$7"
+            "id": "$1"
           }
         ],
         "decryption": "none"
@@ -543,17 +639,16 @@ set_v2ray() {
         "security": "none",
         "wsSettings": {
           "acceptProxyProtocol": true,
-          "path": "$8"
+          "path": "/$2ws"
         }
       },
       "sniffing": {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
-      },
-      "tag": "$5"
+      }
     },
     {
-      "port": 3566,
+      "port": 3567,
       "listen": "127.0.0.1",
       "protocol": "vmess",
       "settings": {
@@ -569,7 +664,7 @@ set_v2ray() {
         "security": "none",
         "wsSettings": {
           "acceptProxyProtocol": true,
-          "path": "$3"
+          "path": "/$2wss"
         }
       },
       "sniffing": {
@@ -580,16 +675,20 @@ set_v2ray() {
     {
       "port": 3568,
       "listen": "127.0.0.1",
-      "protocol": "shadowsocks",
+      "protocol": "trojan",
       "settings": {
-        "method": "aes-128-gcm",
-        "password": "$9"
+        "clients": [
+          {
+            "password": "$1"
+          }
+        ]
       },
       "streamSettings": {
         "network": "ws",
         "security": "none",
         "wsSettings": {
-          "path": "$10"
+          "acceptProxyProtocol": true,
+          "path": "/$2tj"
         }
       },
       "sniffing": {
@@ -602,37 +701,6 @@ set_v2ray() {
 EOF
   ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/03_routing.json -O /usr/local/etc/v2ray/03_routing.json
   ${sudoCmd} wget -q https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/06_outbounds.json -O /usr/local/etc/v2ray/06_outbounds.json
-}
-
-set_trojan() {
-  # $1: password
-  # $2: ws path
-  # $3: sni
-  ${sudoCmd} cat > "/etc/trojan-go/config.json" <<-EOF
-{
-  "run_type": "server",
-  "local_addr": "127.0.0.1",
-  "local_port": 3567,
-  "remote_addr": "127.0.0.1",
-  "remote_port": 80,
-  "log_level": 3,
-  "password": [
-    "$1"
-  ],
-  "transport_plugin": {
-    "enabled": true,
-    "type": "plaintext"
-  },
-  "websocket": {
-    "enabled": true,
-    "path": "$2",
-    "host": "$3"
-  },
-  "router": {
-    "enabled": false
-  }
-}
-EOF
 }
 
 set_redirect() {
@@ -746,9 +814,6 @@ fix_cert() {
     get_cert "${V2_DOMAIN}"
 
     write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
-    write_json /etc/trojan-go/config.json ".websocket.host" "\"${V2_DOMAIN}\""
-
-    ${sudoCmd} systemctl restart trojan-go
 
     if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
       colorEcho ${GREEN} "证书修复成功!"
@@ -782,32 +847,17 @@ install_v2ray() {
   # set time syncronise service
   ${sudoCmd} timedatectl set-ntp true
 
-  ${sudoCmd} $(which mkdir) -p "/usr/local/etc/v2ray"
-  for BASE in 00_log 01_api 02_dns 03_routing 04_policy 05_inbounds 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
-  export JSONS_PATH="/usr/local/etc/v2ray" # for multiple configuration files
-
   get_v2ray
-  ${sudoCmd} $(which rm) -f /etc/systemd/system/v2ray.service.d/10-donot_touch_single_conf.conf
-
-  get_trojan
 
   # set crontab to auto update geoip.dat and geosite.dat
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/share/v2ray/geoip.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/share/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
-  local uuid_vless="$(cat '/proc/sys/kernel/random/uuid')"
-  local uuid_vless_ws="$(cat '/proc/sys/kernel/random/uuid')"
-  local path_vless_ws="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  local uuid_vmess="$(cat '/proc/sys/kernel/random/uuid')"
-  local path_vmess="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
+  local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+  local path="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c $((10+$RANDOM%10)))"
   local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
-  local passwd_trojan="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  local path_trojan="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  local passwd_ss="$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
-  local path_ss="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c 12)"
 
-  set_v2ray "${uuid_vless}" "${uuid_vmess}" "${path_vmess}" "${V2_DOMAIN}" "${cf_node}" "${path_trojan}" "${uuid_vless_ws}" "${path_vless_ws}" "${passwd_ss}" "${path_ss}"
-  set_trojan "${passwd_trojan}" "${path_trojan}" "${V2_DOMAIN}"
+  set_v2ray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}"
 
   ${sudoCmd} $(which mkdir) -p /etc/ssl/v2ray
 
@@ -835,9 +885,6 @@ install_v2ray() {
   ${sudoCmd} systemctl enable nginx
   ${sudoCmd} systemctl restart nginx 2>/dev/null ## restart nginx to enable new config
 
-  ${sudoCmd} systemctl enable trojan-go
-  ${sudoCmd} systemctl restart trojan-go ## restart trojan-go to enable new config
-
   ${sudoCmd} systemctl enable v2ray
   ${sudoCmd} systemctl restart v2ray 2>/dev/null ## restart v2ray to enable new config
 
@@ -845,10 +892,35 @@ install_v2ray() {
   get_cert "${V2_DOMAIN}"
 
   if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-    colorEcho ${GREEN} "安装 VLESS + VMess + Trojan-Go 成功!"
+    colorEcho ${GREEN} "安装 VLESS + VMess + Trojan 成功!"
     show_links
   else
     colorEcho ${RED} "证书签发失败, 请运行修复证书"
+  fi
+}
+
+edit_cf_node() {
+  if [ -f "/usr/local/bin/v2ray" ]; then
+  local cf_node_current="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
+  read -p "输入新的 CF 节点地址 [留空则使用现有值 ${cf_node_current}]: " cf_node_new
+  printf "%s\n" "输入编号使用建议值"
+  printf "1. %s\n" "icook.hk"
+  printf "2. %s\n" "www.digitalocean.com"
+  printf "3. %s\n" "www.garmin.com"
+  printf "4. %s\n" "amp.cloudflare.com"
+  case "${cf_node_new}" in
+    "1") cf_node_new="icook.hk" ;;
+    "2") cf_node_new="www.digitalocean.com" ;;
+    "3") cf_node_new="www.garmin.com" ;;
+    "4") cf_node_new="amp.cloudflare.com" ;;
+  esac
+  if [ -z "${cf_node_new}" ]; then
+    cf_node_new="${cf_node_current}"
+  fi
+  write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[1].tag" "\"${cf_node_new}}\""
+  sleep 1
+  printf "%s\n" "CF 节点己变更为 ${cf_node_new}"
+  show_links
   fi
 }
 
@@ -868,13 +940,13 @@ rm_v2gun() {
 show_menu() {
   echo ""
   echo "----------安装代理----------"
-  echo "1) 安装 VLESS + VMess + Trojan-Go"
+  echo "1) 安装 VLESS + VMess + Trojan"
   echo "2) 修复证书 / 更换域名"
+  echo "3) 自定义 Cloudflare 节点"
   echo "----------显示配置----------"
   echo "3) 显示链接"
   echo "----------组件管理----------"
-  echo "4) 更新 v2ray-core"
-  echo "5) 更新 trojan-go"
+  echo "5) 更新 v2ray-core"
   echo "----------实用工具----------"
   echo "6) VPS 工具箱 (含 BBR 脚本)"
   echo "----------卸载脚本----------"
@@ -896,9 +968,9 @@ menu() {
     case "${opt}" in
       "1") install_v2ray && continue_prompt ;;
       "2") fix_cert && continue_prompt ;;
-      "3") show_links && continue_prompt ;;
-      "4") get_v2ray && continue_prompt ;;
-      "5") get_trojan && continue_prompt ;;
+      "3") edit_cf_node && continue_prompt ;;
+      "4") show_links && continue_prompt ;;
+      "5") get_v2ray && continue_prompt ;;
       "6") vps_tools ;;
       "7") rm_v2gun ;;
       *) break ;;
