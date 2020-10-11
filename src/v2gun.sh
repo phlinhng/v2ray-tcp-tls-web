@@ -815,8 +815,6 @@ fix_cert() {
 
     write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
 
-    ${sudoCmd} systemctl restart trojan-go
-
     if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
       colorEcho ${GREEN} "证书修复成功!"
       show_links
