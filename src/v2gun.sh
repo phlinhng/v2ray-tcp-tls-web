@@ -464,7 +464,7 @@ get_v2ray() {
     colorEcho ${BLUE} "V2Ray is not installed. start installation"
 
     colorEcho ${BLUE} "Getting the latest version of v2ray-core"
-    local latest_version="$(curl -s "https://api.github.com/repos/v2fly/v2ray-core/release/latest" | jq '.tag_name' --raw-output)"
+    local latest_version="$(curl -s "https://api.github.com/repos/v2fly/v2ray-core/releases/latest" | jq '.tag_name' --raw-output)"
     echo "${latest_version}"
     local v2ray_link="https://github.com/v2fly/v2ray-core/releases/download/${latest_version}/v2ray-linux-${MACHINE}.zip"
 
