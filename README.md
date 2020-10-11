@@ -34,7 +34,7 @@ bash ~/v2gun.sh
 | VMess | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Trojan | TLS | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| Shadowsocks | WSS | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| Shadowsocks | WSS | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 12 protocols combinations with 179 connection methods in total.
 
