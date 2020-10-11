@@ -3,8 +3,8 @@ export LC_ALL=C
 export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
-branch="v3gun"
-VERSION="2.1.0-dev"
+branch="v2gun-dev"
+VERSION="2.1.0"
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"

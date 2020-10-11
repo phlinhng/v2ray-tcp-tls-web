@@ -41,7 +41,7 @@ bash ~/v2gun.sh
 | Trojan | WSS + Mux | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | Shadowsocks | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-11 protocols combinations with 17 connection methods in total.
+12 protocols combinations with 19 connection methods in total.
 
 ## Related work
 + [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor): subscription manager
