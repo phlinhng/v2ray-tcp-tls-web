@@ -395,7 +395,7 @@ preinstall() {
 
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} jq -y
   # install jq mannualy if the package management didn't
-  if [[ ! "$(commnad -v jq)" ]]; then
+  if [[ ! "$(command -v jq)" ]]; then
     echo "Fetching jq failed, trying manual installation"
     ${sudoCmd} curl -L https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -o /usr/bin/jq
     ${sudoCmd} $(which chmod) +x /usr/bin/jq
@@ -438,7 +438,7 @@ get_cert() {
 }
 
 set_v2ray_systemd() {
-  ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
+  ${sudoCmd} cat > "/etc/systemd/system/v2ray.service" <<-EOF
 [Unit]
 Description=V2Ray Service
 Documentation=https://www.v2fly.org/
