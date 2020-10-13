@@ -53,7 +53,7 @@ uninstall() {
 # remove v2ray
 colorEcho ${BLUE} "Stopping v2ray service."
 ${sudoCmd} systemctl stop v2ray
-${sudoCmd} systemctl stop disable
+${sudoCmd} systemctl disable v2ray
 uninstall "/etc/systemd/system/v2ray.service"
 colorEcho ${BLUE} "Removing v2ray binaries."
 uninstall "/usr/local/bin/v2ray"
