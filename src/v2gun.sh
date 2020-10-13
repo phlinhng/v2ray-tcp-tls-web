@@ -536,22 +536,22 @@ set_v2ray() {
             "dest": 3564
           },
           {
-            "path": "/$2",
+            "path": "$2",
             "dest": 3565,
             "xver": 1
           },
           {
-            "path": "/$2ws",
+            "path": "$2ws",
             "dest": 3566,
             "xver": 1
           },
           {
-            "path": "/$2wss",
+            "path": "$2wss",
             "dest": 3567,
             "xver": 1
           },
           {
-            "path": "/$2tj",
+            "path": "$2tj",
             "dest": 3568
           }
         ]
