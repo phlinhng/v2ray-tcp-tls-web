@@ -174,18 +174,18 @@ show_links() {
 
     colorEcho ${YELLOW} "===============分 享 链 接==============="
 
-    echo "VLESS"
+    colorEcho ${BLUE} "VLESS"
     printf "(TCP) %s:443 %s\n" "${sni}" "${uuid}"
     printf "(WSS) %s:443 %s %s\n" "${sni}" "${uuid}" "${path}ws"
     echo ""
 
-    echo "VMess (新版分享格式)"
+    colorEcho ${BLUE} "VMess (新版分享格式)"
     local uri_vmess_cf="ws+tls:${uuid}@${cf_node}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
-    local uri_vmess_cf="ws+tls:${uuid}@${sni}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
+    local uri_vmess="ws+tls:${uuid}@${sni}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
     printf "%s\n%s\n" "vmess://${uri_vmess_cf}" "vmess://${uri_vmess}"
     echo ""
 
-    echo "VMess (旧版分享格式)"
+    colorEcho ${BLUE} "VMess (旧版分享格式)"
     local json_vmess_cf="{\"add\":\"${cf_node}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"${path}wss\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
     local uri_vmess_2dust_cf="$(printf %s "${json_vmess_cf}" | base64 --wrap=0)"
     local json_vmess="{\"add\":\"${sni}\",\"aid\":\"1\",\"host\":\"${sni}\",\"id\":\"${uuid}\",\"net\":\"ws\",\"path\":\"${path}wss\",\"port\":\"443\",\"ps\":\"${sni} (WSS)\",\"tls\":\"tls\",\"type\":\"none\",\"v\":\"2\"}"
@@ -193,18 +193,18 @@ show_links() {
     printf "%s\n%s\n" "vmess://${uri_vmess_2dust_cf}" "vmess://${uri_vmess_2dust}"
     echo ""
 
-    echo "Trojan"
+    colorEcho ${BLUE} "Trojan"
     local uri_trojan="${uuid}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
     printf "%s\n\n" "trojan://${uri_trojan}"
     echo ""
 
-    echo "Trojan-Go"
+    colorEcho ${BLUE} "Trojan-Go"
     local uri_trojango="${uuid}@${sni}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
     local uri_trojango_cf="${uuid}@${cf_node}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
     printf "%s\n" "trojan-go://${uri_trojango_cf}" "trojan-go://${uri_trojango}"
     echo ""
 
-    echo "Shadowsocks"
+    colorEcho ${BLUE} "Shadowsocks"
     local user_ss="$(printf %s "aes-128-gcm:${uuid}" | base64 --wrap=0)"
     local uri_ss="${user_ss}@${sni}:443/?plugin=`urlEncode "v2ray-plugin;tls;host=${sni};path=${path}"`#`urlEncode "${sni} (SS)"`"
     printf "%s\n" "ss://${uri_ss}"
@@ -614,7 +614,7 @@ set_v2ray() {
         "network": "ws",
         "security": "none",
         "wsSettings": {
-          "path": "/$2"
+          "path": "$2"
         }
       },
       "sniffing": {
@@ -639,7 +639,7 @@ set_v2ray() {
         "security": "none",
         "wsSettings": {
           "acceptProxyProtocol": true,
-          "path": "/$2ws"
+          "path": "$2ws"
         }
       },
       "sniffing": {
@@ -654,7 +654,7 @@ set_v2ray() {
       "settings": {
         "clients": [
           {
-            "id": "$2",
+            "id": "$1",
             "alterId": 2
           }
         ]
@@ -664,7 +664,7 @@ set_v2ray() {
         "security": "none",
         "wsSettings": {
           "acceptProxyProtocol": true,
-          "path": "/$2wss"
+          "path": "$2wss"
         }
       },
       "sniffing": {
@@ -688,7 +688,7 @@ set_v2ray() {
         "security": "none",
         "wsSettings": {
           "acceptProxyProtocol": true,
-          "path": "/$2tj"
+          "path": "$2tj"
         }
       },
       "sniffing": {
@@ -902,12 +902,12 @@ install_v2ray() {
 edit_cf_node() {
   if [ -f "/usr/local/bin/v2ray" ]; then
   local cf_node_current="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
-  read -p "输入新的 CF 节点地址 [留空则使用现有值 ${cf_node_current}]: " cf_node_new
   printf "%s\n" "输入编号使用建议值"
   printf "1. %s\n" "icook.hk"
   printf "2. %s\n" "www.digitalocean.com"
   printf "3. %s\n" "www.garmin.com"
   printf "4. %s\n" "amp.cloudflare.com"
+  read -p "输入新的 CF 节点地址 [留空则使用现有值 ${cf_node_current}]: " cf_node_new
   case "${cf_node_new}" in
     "1") cf_node_new="icook.hk" ;;
     "2") cf_node_new="www.digitalocean.com" ;;
@@ -917,7 +917,7 @@ edit_cf_node() {
   if [ -z "${cf_node_new}" ]; then
     cf_node_new="${cf_node_current}"
   fi
-  write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[1].tag" "\"${cf_node_new}}\""
+  write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[1].tag" "\"${cf_node_new}\""
   sleep 1
   printf "%s\n" "CF 节点己变更为 ${cf_node_new}"
   show_links
