@@ -506,7 +506,7 @@ get_v2ray() {
     ${sudoCmd} $(which mv) v2ctl /usr/local/bin/v2ctl && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ctl
     printf "Installed: %s\n" "/usr/local/bin/v2ctl"
 
-    ${sudoCmd} systemctl daemon-reload
+    ${sudoCmd} systemctl restart v2ray
     colorEcho ${GREEN} "V2Ray ${latest_version} has been updated."
   fi
 }
