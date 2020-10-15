@@ -166,10 +166,10 @@ checkIP() {
 
 show_links() {
   if [ -f "/usr/local/bin/v2ray" ]; then
-    local uuid="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.clients[0].id')"
-    local path="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[2].streamSettings.wsSettings.path')"
-    local sni="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].tag')"
-    local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
+    local uuid="$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].settings.clients[0].id')"
+    local path="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].streamSettings.wsSettings.path')"
+    local sni="$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')"
+    local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].tag')"
     # path ss+ws: /[base], path vless+ws: /[base]ws, path vmess+ws: /[base]wss, path trojan+ws: /[base]tj
 
     colorEcho ${YELLOW} "===============分 享 链 接==============="
@@ -470,7 +470,7 @@ get_v2ray() {
 
     ${sudoCmd} $(which mkdir) -p "/usr/local/etc/v2ray"
     printf "Cretated: %s\n" "/usr/local/etc/v2ray"
-    for BASE in 00_log 01_api 02_dns 03_routing 04_policy 05_inbounds 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
+    for BASE in 00_log 01_api 02_dns 03_routing 04_policy 06_outbounds 07_transport 08_stats 09_reverse; do echo '{}' > "/usr/local/etc/v2ray/$BASE.json"; done
     ${sudoCmd} $(which mkdir) -p "/usr/local/share/v2ray"
     printf "Cretated: %s\n" "/usr/local/share/v2ray"
 
@@ -517,7 +517,7 @@ set_v2ray() {
   # $3: sni
   # $4: url of cf node
   # 3564: trojan, 3565: ss, 3566: vmess+wss, 3567: vless+wss, 3568: trojan+ws
-  ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds.json" <<-EOF
+  ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds_vless.json" <<-EOF
 {
   "inbounds": [
     {
@@ -574,7 +574,13 @@ set_v2ray() {
         "destOverride": [ "http", "tls" ]
       },
       "tag": "$3"
-    },
+    }
+  ]
+}
+EOF
+  ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds_trojan.json" <<-EOF
+{
+  "inbounds": [
     {
       "port": 3564,
       "listen": "127.0.0.1",
@@ -600,7 +606,13 @@ set_v2ray() {
         "destOverride": [ "http", "tls" ]
       },
       "tag": "$4"
-    },
+    }
+  ]
+}
+EOF
+  ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds_ss.json" <<-EOF
+{
+  "inbounds": [
     {
       "port": 3565,
       "listen": "127.0.0.1",
@@ -621,7 +633,13 @@ set_v2ray() {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
       }
-    },
+    }
+  ]
+}
+EOF
+  ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds_vless_ws.json" <<-EOF
+{
+  "inbounds": [
     {
       "port": 3566,
       "listen": "127.0.0.1",
@@ -646,7 +664,13 @@ set_v2ray() {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
       }
-    },
+    }
+  ]
+}
+EOF
+  ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds_vmess_ws.json" <<-EOF
+{
+  "inbounds": [
     {
       "port": 3567,
       "listen": "127.0.0.1",
@@ -671,7 +695,13 @@ set_v2ray() {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
       }
-    },
+    }
+  ]
+}
+EOF
+  ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds_trojan_ws.json" <<-EOF
+{
+  "inbounds": [
     {
       "port": 3568,
       "listen": "127.0.0.1",
@@ -901,7 +931,7 @@ install_v2ray() {
 
 edit_cf_node() {
   if [ -f "/usr/local/bin/v2ray" ]; then
-  local cf_node_current="$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[1].tag')"
+  local cf_node_current="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].tag')"
   printf "%s\n" "输入编号使用建议值"
   printf "1. %s\n" "icook.hk"
   printf "2. %s\n" "www.digitalocean.com"
@@ -917,7 +947,7 @@ edit_cf_node() {
   if [ -z "${cf_node_new}" ]; then
     cf_node_new="${cf_node_current}"
   fi
-  write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[1].tag" "\"${cf_node_new}\""
+  write_json /usr/local/etc/v2ray/05_inbounds_ss.json ".inbounds[0].tag" "\"${cf_node_new}\""
   sleep 1
   printf "%s\n" "CF 节点己变更为 ${cf_node_new}"
   show_links
