@@ -167,9 +167,9 @@ checkIP() {
 show_links() {
   if [ -f "/usr/local/bin/v2ray" ]; then
     local uuid="$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].settings.clients[0].id')"
-    local path="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].streamSettings.wsSettings.path')"
+    local path="$(read_json /usr/local/etc/v2ray/05_inbounds_trojan.json '.inbounds[0].streamSettings.wsSettings.path')"
     local sni="$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')"
-    local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].tag')"
+    local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds_trojan.json '.inbounds[0].tag')"
     # path ss+ws: /[base], path vless+ws: /[base]ws, path vmess+ws: /[base]wss, path trojan+ws: /[base]tj
 
     colorEcho ${YELLOW} "===============分 享 链 接==============="
@@ -825,7 +825,7 @@ fix_cert() {
       fi
     done
 
-    ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds.json '.inbounds[0].settings.tag').key
+    ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag').key
 
     colorEcho ${BLUE} "Re-setting nginx"
     set_nginx "${V2_DOMAIN}"
@@ -842,7 +842,7 @@ fix_cert() {
     colorEcho ${BLUE} "Re-issuing certificates for ${V2_DOMAIN}"
     get_cert "${V2_DOMAIN}"
 
-    write_json /usr/local/etc/v2ray/05_inbounds.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
+    write_json /usr/local/etc/v2ray/05_inbounds_vless.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
 
     if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
       colorEcho ${GREEN} "证书修复成功!"
@@ -930,7 +930,7 @@ install_v2ray() {
 
 edit_cf_node() {
   if [ -f "/usr/local/bin/v2ray" ]; then
-  local cf_node_current="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].tag')"
+  local cf_node_current="$(read_json /usr/local/etc/v2ray/05_inbounds_trojan.json '.inbounds[0].tag')"
   printf "%s\n" "输入编号使用建议值"
   printf "1. %s\n" "icook.hk"
   printf "2. %s\n" "www.digitalocean.com"
@@ -946,7 +946,7 @@ edit_cf_node() {
   if [ -z "${cf_node_new}" ]; then
     cf_node_new="${cf_node_current}"
   fi
-  write_json /usr/local/etc/v2ray/05_inbounds_ss.json ".inbounds[0].tag" "\"${cf_node_new}\""
+  write_json /usr/local/etc/v2ray/05_inbounds_trojan.json ".inbounds[0].tag" "\"${cf_node_new}\""
   sleep 1
   printf "%s\n" "CF 节点己变更为 ${cf_node_new}"
   show_links
