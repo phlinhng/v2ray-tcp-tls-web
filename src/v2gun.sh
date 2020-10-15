@@ -167,7 +167,7 @@ checkIP() {
 show_links() {
   if [ -f "/usr/local/bin/v2ray" ]; then
     local uuid="$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].settings.clients[0].id')"
-    local path="$(read_json /usr/local/etc/v2ray/05_inbounds_trojan.json '.inbounds[0].streamSettings.wsSettings.path')"
+    local path="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].streamSettings.wsSettings.path')"
     local sni="$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')"
     local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds_trojan.json '.inbounds[0].tag')"
     # path ss+ws: /[base], path vless+ws: /[base]ws, path vmess+ws: /[base]wss, path trojan+ws: /[base]tj
