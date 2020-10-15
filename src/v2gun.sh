@@ -537,8 +537,7 @@ set_v2ray() {
           },
           {
             "path": "$2",
-            "dest": 3565,
-            "xver": 1
+            "dest": 3565
           },
           {
             "path": "$2ws",
