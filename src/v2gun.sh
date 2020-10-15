@@ -930,7 +930,7 @@ install_v2ray() {
 
 edit_cf_node() {
   if [ -f "/usr/local/bin/v2ray" ]; then
-  local cf_node_current="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].tag')"
+  local cf_node_current="$(read_json /usr/local/etc/v2ray/05_inbounds_trojan.json '.inbounds[0].tag')"
   printf "%s\n" "输入编号使用建议值"
   printf "1. %s\n" "icook.hk"
   printf "2. %s\n" "www.digitalocean.com"
@@ -946,7 +946,7 @@ edit_cf_node() {
   if [ -z "${cf_node_new}" ]; then
     cf_node_new="${cf_node_current}"
   fi
-  write_json /usr/local/etc/v2ray/05_inbounds_ss.json ".inbounds[0].tag" "\"${cf_node_new}\""
+  write_json /usr/local/etc/v2ray/05_inbounds_trojan.json ".inbounds[0].tag" "\"${cf_node_new}\""
   sleep 1
   printf "%s\n" "CF 节点己变更为 ${cf_node_new}"
   show_links
