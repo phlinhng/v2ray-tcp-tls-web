@@ -30,14 +30,9 @@ bash ~/v2gun.sh
 | VLESS | TLS | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
 | VLESS | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | VMess | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-<<<<<<< HEAD
-| Trojan | TLS | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-=======
 | Trojan | TLS | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | Shadowsocks | WSS | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
->>>>>>> v2gun-dev
 
 12 protocols combinations with 19 connection methods in total.
 
