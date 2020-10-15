@@ -206,7 +206,7 @@ show_links() {
 
     colorEcho ${BLUE} "Shadowsocks"
     local user_ss="$(printf %s "aes-128-gcm:${uuid}" | base64 --wrap=0)"
-    local uri_ss="${user_ss}@${sni}:443/?plugin=`urlEncode "v2ray-plugin;tls;host=${sni};path=${path};mux=0"`#`urlEncode "${sni} (SS)"`"
+    local uri_ss="${user_ss}@${sni}:443/?plugin=`urlEncode "v2ray-plugin;tls;mode=websocket;host=${sni};path=${path};mux=0"`#`urlEncode "${sni} (SS)"`"
     printf "%s\n" "ss://${uri_ss}"
 
     #colorEcho ${YELLOW} "===============配 置 文 件==============="
