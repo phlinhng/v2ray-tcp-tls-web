@@ -537,7 +537,8 @@ set_v2ray() {
           },
           {
             "path": "$2",
-            "dest": 3565
+            "dest": 3565,
+            "xver": 1
           },
           {
             "path": "$2ws",
@@ -625,6 +626,7 @@ EOF
         "network": "ws",
         "security": "none",
         "wsSettings": {
+          "acceptProxyProtocol": true,
           "path": "$2"
         }
       },
