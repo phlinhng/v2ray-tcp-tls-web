@@ -195,7 +195,7 @@ show_links() {
 
     colorEcho ${BLUE} "Trojan"
     local uri_trojan="${uuid}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
-    printf "%s\n\n" "trojan://${uri_trojan}"
+    printf "%s\n" "trojan://${uri_trojan}"
     echo ""
 
     colorEcho ${BLUE} "Trojan-Go"
