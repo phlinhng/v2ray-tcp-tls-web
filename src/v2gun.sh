@@ -152,12 +152,10 @@ build_web() {
 checkIP() {
   local realIP4="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/ip4_api`)"
   local realIP6="$(curl -s `curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/ip6_api`)"
-  local resolvedIP44="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
-  local resolvedIP46="$(ping6 $1 -c 1 | head -n 1 | grep  -oE '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' | head -n 1)"
-  local resolvedIP64="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
-  local resolvedIP66="$(ping6 $1 -c 1 | head -n 1 | grep  -oE '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' | head -n 1)"
+  local resolvedIP4="$(ping $1 -c 1 | head -n 1 | grep  -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)"
+  local resolvedIP6="$(ping6 $1 -c 1 | head -n 1 | grep  -oE '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))' | head -n 1)"
 
-  if [[ "${realIP4}" == "${resolvedIP44}" ]] || [[ "${realIP4}" == "${resolvedIP46}" ]] || [[ "${realIP4}" == "${resolvedIP64}" ]] || [[ "${realIP4}" == "${resolvedIP66}" ]] || [[ "${realIP6}" == "${resolvedIP44}" ]] || [[ "${realIP6}" == "${resolvedIP46}" ]] || [[ "${realIP6}" == "${resolvedIP64}" ]] || [[ "${realIP6}" == "${resolvedIP66}" ]]; then
+  if [[ "${realIP4}" == "${resolvedIP4}" ]] || [[ "${realIP6}" == "${resolvedIP6}" ]]; then
     return 0
   else
     return 1
@@ -180,8 +178,9 @@ show_links() {
     echo ""
 
     colorEcho ${BLUE} "VMess (新版分享格式)"
-    local uri_vmess_cf="ws+tls:${uuid}@${cf_node}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
-    local uri_vmess="ws+tls:${uuid}@${sni}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
+    # https://github.com/v2ray/discussion/issues/720
+    local uri_vmess_cf="ws+tls:${uuid}-1@${cf_node}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
+    local uri_vmess="ws+tls:${uuid}-1@${sni}:443/?path=`urlEncode "${path}wss"`&host=${sni}&tlsAllowInsecure=false&tlsServerName=${sni}#`urlEncode "${sni} (WSS)"`"
     printf "%s\n%s\n" "vmess://${uri_vmess_cf}" "vmess://${uri_vmess}"
     echo ""
 
@@ -512,10 +511,11 @@ get_v2ray() {
 }
 
 set_v2ray() {
-  # $1: uuid for all (in trojan and ss uuid == passowrd)
+  # $1: uuid for all except vless ws (in trojan and ss uuid == passowrd)
   # $2: base path
   # $3: sni
   # $4: url of cf node
+  # $5: uuid for vless ws
   # 3564: trojan, 3565: ss, 3566: vmess+wss, 3567: vless+wss, 3568: trojan+ws
   ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds_vless.json" <<-EOF
 {
@@ -552,7 +552,8 @@ set_v2ray() {
           },
           {
             "path": "$2tj",
-            "dest": 3568
+            "dest": 3568,
+            "xver": 1
           }
         ]
       },
@@ -648,7 +649,7 @@ EOF
       "settings": {
         "clients": [
           {
-            "id": "$1"
+            "id": "$5"
           }
         ],
         "decryption": "none"
@@ -885,10 +886,11 @@ install_v2ray() {
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/share/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+  local uuid_vless_ws="$(cat '/proc/sys/kernel/random/uuid')"
   local path="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c $((10+$RANDOM%10)))"
   local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
 
-  set_v2ray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}"
+  set_v2ray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}" "${uuid_vless_ws}"
 
   ${sudoCmd} $(which mkdir) -p /etc/ssl/v2ray
 
