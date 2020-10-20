@@ -515,7 +515,6 @@ set_v2ray() {
   # $2: base path
   # $3: sni
   # $4: url of cf node
-  # $5: uuid for vless ws
   # 3564: trojan, 3565: ss, 3566: vmess+wss, 3567: vless+wss, 3568: trojan+ws
   ${sudoCmd} cat > "/usr/local/etc/v2ray/05_inbounds_vless.json" <<-EOF
 {
@@ -634,7 +633,8 @@ EOF
       "sniffing": {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
-      }
+      },
+      "tag": "ss_ws"
     }
   ]
 }
@@ -649,7 +649,7 @@ EOF
       "settings": {
         "clients": [
           {
-            "id": "$5"
+            "id": "$1"
           }
         ],
         "decryption": "none"
@@ -665,7 +665,8 @@ EOF
       "sniffing": {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
-      }
+      },
+      "tag": "vless_ws"
     }
   ]
 }
@@ -696,7 +697,8 @@ EOF
       "sniffing": {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
-      }
+      },
+      "tag": "vmess_ws"
     }
   ]
 }
@@ -726,7 +728,8 @@ EOF
       "sniffing": {
         "enabled": true,
         "destOverride": [ "http", "tls" ]
-      }
+      },
+      "tag": "trojan_ws"
     }
   ]
 }
@@ -886,11 +889,10 @@ install_v2ray() {
   (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/share/v2ray/geosite.dat >/dev/null >/dev/null") | ${sudoCmd} crontab -
 
   local uuid="$(cat '/proc/sys/kernel/random/uuid')"
-  local uuid_vless_ws="$(cat '/proc/sys/kernel/random/uuid')"
   local path="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c $((10+$RANDOM%10)))"
   local cf_node="$(curl -s https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
 
-  set_v2ray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}" "${uuid_vless_ws}"
+  set_v2ray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}"
 
   ${sudoCmd} $(which mkdir) -p /etc/ssl/v2ray
 
