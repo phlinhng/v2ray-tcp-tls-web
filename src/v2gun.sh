@@ -177,6 +177,10 @@ show_links() {
     local user_ss="$(printf %s "aes-128-gcm:${uuid}" | base64 --wrap=0)"
     local uri_ss="${user_ss}@${sni}:443/?plugin=`urlEncode "v2ray-plugin;tls;mode=websocket;host=${sni};path=${path};mux=0"`#`urlEncode "${sni} (SS)"`"
     printf "%s\n" "ss://${uri_ss}"
+    echo ""
+
+    colorEcho ${BLUE} "NaiveProxy"
+    printf "%s\n" "https://user@${sni}:${uuid}@${sni}"
 
     colorEcho ${YELLOW} "========================================"
   fi
@@ -213,7 +217,7 @@ get_acmesh() {
 
 get_cert() {
   colorEcho ${BLUE} "Issuing certificate"
-  ${sudoCmd} /root/.acme.sh/acme.sh --issue --nginx -d "$1" --keylength ec-256
+  ${sudoCmd} /root/.acme.sh/acme.sh --issue -d "$1" -w /var/www/html --keylength ec-256
 
   # install certificate
   colorEcho ${BLUE} "Installing certificate"
@@ -639,7 +643,7 @@ set_caddy() {
       basic_auth $2 $3
       hide_ip
       hide_via
-      probe_resistance { $1:443 }
+      probe_resistance $1
     }
     file_server { root /var/www/html }
   }
@@ -687,11 +691,18 @@ fix_cert() {
       fi
     done
 
+    local uuid="$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].settings.clients[0].id')"
+    local path="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].streamSettings.wsSettings.path')"
+
     ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag').key
 
-    colorEcho ${BLUE} "Re-setting nginx"
-    set_nginx "${V2_DOMAIN}"
-    ${sudoCmd} systemctl restart nginx 2>/dev/null
+    colorEcho ${BLUE} "Re-setting caddy"
+    set_caddy "${V2_DOMAIN}" "user@${V2_DOMAIN}" "${uuid}"
+    ${sudoCmd} systemctl restart caddy 2>/dev/null
+
+    colorEcho ${BLUE} "Re-setting trojan-go"
+    set_trojan "${uuid}" "${path}tj" "${V2_DOMAIN}"
+    ${sudoCmd} systemctl restart trojan-go 2>/dev/null
 
     colorEcho ${BLUE} "Re-setting v2ray"
     # temporary cert
@@ -700,6 +711,8 @@ fix_cert() {
     ${sudoCmd} chmod 644 /etc/ssl/v2ray/fullchain.pem
 
     ${sudoCmd} systemctl restart v2ray 2>/dev/null
+
+    sleep 5
 
     colorEcho ${BLUE} "Re-issuing certificates for ${V2_DOMAIN}"
     get_cert "${V2_DOMAIN}"
