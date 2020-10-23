@@ -198,8 +198,8 @@ show_links() {
     echo ""
 
     colorEcho ${BLUE} "Trojan-Go"
-    local uri_trojango="${uuid}@${sni}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
-    local uri_trojango_cf="${uuid}@${cf_node}:443?&sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
+    local uri_trojango="${uuid}@${sni}:443?sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
+    local uri_trojango_cf="${uuid}@${cf_node}:443?sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
     printf "%s\n" "trojan-go://${uri_trojango_cf}" "trojan-go://${uri_trojango}"
     echo ""
 
