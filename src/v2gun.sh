@@ -579,7 +579,7 @@ get_naiveproxy() {
     cd $(mktemp -d)
     wget -nv "${naive_link}" -O naive.tar.xz
     tar Jxvf naive.tar.xz && $(which rm) -rf naive.tar.xz
-    cd "naiveproxy-${latest_version}-linux-${V2_MACHINE}"
+    cd "naiveproxy-${latest_version}-linux-${NP_MACHINE}"
     ${sudoCmd} $(which mv) naive /usr/local/bin/naive && ${sudoCmd} $(which chmod) +x /usr/local/bin/naive
     printf "Installed: %s\n" "/usr/local/bin/naive"
 
@@ -598,7 +598,7 @@ get_naiveproxy() {
     cd $(mktemp -d)
     wget -nv "${naive_link}" -O naive.tar.xz
     tar Jxvf naive.tar.xz && $(which rm) -rf naive.tar.xz
-    cd "naiveproxy-${latest_version}-linux-${V2_MACHINE}"
+    cd "naiveproxy-${latest_version}-linux-${NP_MACHINE}"
     ${sudoCmd} $(which mv) naive /usr/local/bin/naive && ${sudoCmd} $(which chmod) +x /usr/local/bin/naive
     printf "Installed: %s\n" "/usr/local/bin/naive"
 
