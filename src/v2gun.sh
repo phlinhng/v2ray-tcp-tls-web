@@ -162,15 +162,17 @@ show_links() {
     printf "%s\n%s\n" "vmess://${uri_vmess_2dust_cf}" "vmess://${uri_vmess_2dust}"
     echo ""
 
-    colorEcho ${BLUE} "Trojan"
+    colorEcho ${BLUE} "Trojan TCP"
     local uri_trojan="${uuid}@${sni}:443?peer=${sni}&sni=${sni}#`urlEncode "${sni} (Trojan)"`"
     printf "%s\n" "trojan://${uri_trojan}"
     echo ""
 
-    colorEcho ${BLUE} "Trojan-Go"
+    colorEcho ${BLUE} "Trojan WSS"
     local uri_trojango="${uuid}@${sni}:443?sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
     local uri_trojango_cf="${uuid}@${cf_node}:443?sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
     printf "%s\n" "trojan-go://${uri_trojango_cf}" "trojan-go://${uri_trojango}"
+    colorEcho ${YELLOW} "因 Trojan-Go 分享链接格式尚未定案，若您的客户端无法解析此链接，请手动填写连接信息"
+    printf "%s:443 %s %s" "${sni}" "${uuid}" "${path}tj"
     echo ""
 
     colorEcho ${BLUE} "Shadowsocks"
@@ -240,7 +242,7 @@ get_trojan() {
     cd $(mktemp -d)
     wget -nv "${trojango_link}" -O trojan-go.zip
     unzip -q trojan-go.zip && rm -rf trojan-go.zip
-    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go && ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
     ${sudoCmd} mv geoip.dat -O /usr/bin/geoip.dat
     ${sudoCmd} mv geosite.dat -O /usr/bin/geosite.dat
 
@@ -259,8 +261,9 @@ get_trojan() {
 
     cd $(mktemp -d)
     wget -nv "${trojango_link}" -O trojan-go.zip
-    unzip trojan-go.zip
-    ${sudoCmd} mv trojan-go /usr/bin/trojan-go
+    unzip trojan-go.zip && rm -rf trojan-go.zip
+    ${sudoCmd} mv trojan-go /usr/bin/trojan-go && ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
+    colorEcho ${GREEN} "trojan-go has been updated."
   fi
 }
 
@@ -317,6 +320,7 @@ get_v2ray() {
     set_v2ray_systemd
 
     ${sudoCmd} systemctl daemon-reload
+    ${sudoCmd} systemctl enable v2ray
 
     colorEcho ${GREEN} "V2Ray ${latest_version} is installed."
   else
@@ -660,19 +664,18 @@ get_caddy() {
     ${sudoCmd} $(which mkdir) -p "/usr/local/bin/caddy"
     printf "Cretated: %s\n" "/usr/local/bin/caddy"
 
-    ${sudoCmd} wget -nv "${caddy_link}" -O /usr/local/bin/caddy/caddy && chmod +x /usr/local/bin/caddy/caddy
+    ${sudoCmd} wget -nv "${caddy_link}" -O /usr/local/bin/caddy/caddy && $(which chmod) +x /usr/local/bin/caddy/caddy
     printf "Installed: %s\n" "/usr/local/bin/caddy/caddy"
 
     colorEcho ${BLUE} "Building caddy.service"
     set_caddy_systemd
 
     ${sudoCmd} systemctl daemon-reload
+    ${sudoCmd} systemctl enable caddy
 
     colorEcho ${GREEN} "Caddy 2 is installed."
   fi
 }
-
-
 
 fix_cert() {
   if [ -f "/usr/local/bin/v2ray" ]; then
