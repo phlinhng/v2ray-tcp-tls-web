@@ -642,7 +642,8 @@ set_caddy() {
 $1:80 {
   redir https://$1{uri}
 }
-127.0.01:8080 {
+$1:8080 {
+  bind 127.0.0.1
   route {
     forward_proxy {
       basic_auth user@$1 $2
@@ -894,8 +895,10 @@ menu() {
       "3") edit_cf_node && continue_prompt ;;
       "4") show_links && continue_prompt ;;
       "5") get_v2ray && continue_prompt ;;
-      "6") vps_tools ;;
-      "7") rm_v2gun ;;
+      "6") get_trojan && continue_prompt ;;
+      "7") get_naiveproxy && continue_prompt ;;
+      "8") vps_tools ;;
+      "9") rm_v2gun ;;
       *) break ;;
     esac
   done
