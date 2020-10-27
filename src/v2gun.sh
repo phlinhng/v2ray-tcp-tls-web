@@ -879,7 +879,7 @@ show_menu() {
 }
 
 menu() {
-  colorEcho ${YELLOW} "V2Ray & Trojan automated script v${VERSION}"
+  colorEcho ${YELLOW} "Proxy tools automated script v${VERSION}"
   colorEcho ${YELLOW} "author: phlinhng"
 
   #check_status
