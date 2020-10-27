@@ -106,6 +106,7 @@ if [ -f "/usr/local/bin/caddy" ]; then
   uninstall /usr/local/etc/caddy
   colorEcho ${BLUE} "Removing caddy user."
   ${sudoCmd} userdel caddy
+  ${sudoCmd} groupdel caddy
   colorEcho ${GREEN} "Removed caddy successfully."
 fi
 
