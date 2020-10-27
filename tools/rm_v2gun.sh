@@ -96,13 +96,16 @@ if [ -f "/usr/local/bin/naive" ]; then
 fi
 
 # remove caddy
-if [ -d "/usr/local/bin/caddy" ]; then
+if [ -f "/usr/local/bin/caddy" ]; then
   colorEcho ${BLUE} "Shutting down caddy service."
   ${sudoCmd} systemctl stop caddy
   ${sudoCmd} systemctl disable caddy
   uninstall /etc/systemd/system/caddy.service
   colorEcho ${BLUE} "Removing caddy binaries & files."
   uninstall /usr/local/bin/caddy
+  uninstall /usr/local/etc/caddy
+  colorEcho ${BLUE} "Removing caddy user."
+  ${sudoCmd }userdel caddy
   colorEcho ${GREEN} "Removed caddy successfully."
 fi
 
