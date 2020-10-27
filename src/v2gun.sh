@@ -619,13 +619,16 @@ Documentation=https://caddyserver.com/
 After=network.target nss-lookup.target
 
 [Service]
-User=nobody
+User=www-data
+Group=www-data
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 ExecStart=/usr/local/bin/caddy/caddy start
-Restart=on-failure
-RestartPreventExitStatus=23
+ExecReload=$(which kill) -USR1 $MAINPID
+ProtectHome=true
+ProtectSystem=full
+Restart=on-abnormal
 
 [Install]
 WantedBy=multi-user.target
@@ -666,6 +669,11 @@ get_caddy() {
 
     ${sudoCmd} wget -nv "${caddy_link}" -O /usr/local/bin/caddy/caddy && $(which chmod) +x /usr/local/bin/caddy/caddy
     printf "Installed: %s\n" "/usr/local/bin/caddy/caddy"
+
+    colorEcho ${BLUE} "Creating user for caddy"
+
+    ${sudoCmd} groupadd -g 33 www-data
+    ${sudoCmd} useradd -g www-data --no-user-group --home-dir /var/www --no-create-home --shell /usr/sbin/nologin --system --uid 33 www-data
 
     colorEcho ${BLUE} "Building caddy.service"
     set_caddy_systemd
