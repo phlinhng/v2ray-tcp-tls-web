@@ -591,7 +591,7 @@ get_naiveproxy() {
     set_naive_systemd
 
     ${sudoCmd} systemctl daemon-reload
-    ${sudoCmd} enable naive
+    ${sudoCmd} systemctl enable naive
 
     colorEcho ${GREEN} "NaiveProxy ${latest_version} is installed."
   else
