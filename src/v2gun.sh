@@ -625,7 +625,7 @@ Group=www-data
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
-ExecStart=/usr/local/bin/caddy/caddy start
+ExecStart=/usr/local/bin/caddy --config /usr/local/etc/caddy/config.json
 ExecReload=$(which kill) -USR1 $MAINPID
 ProtectHome=true
 ProtectSystem=full
@@ -648,10 +648,10 @@ set_caddy() {
   tls off
   route {
     forward_proxy {
-      basic_auth $2 $3
+      basic_auth user@$1 $2
       hide_ip
       hide_via
-      probe_resistance $1
+      probe_resistance unsplash.com:443
     }
     file_server { root /var/www/html }
   }
@@ -709,7 +709,7 @@ fix_cert() {
     ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag').key
 
     colorEcho ${BLUE} "Re-setting caddy"
-    set_caddy "${V2_DOMAIN}" "user@${V2_DOMAIN}" "${uuid}"
+    set_caddy "${V2_DOMAIN}" "${uuid}"
     ${sudoCmd} systemctl restart caddy 2>/dev/null
 
     colorEcho ${BLUE} "Re-setting trojan-go"
@@ -781,7 +781,7 @@ install_v2ray() {
   colorEcho ${BLUE} "Setting trojan"
   set_trojan "${uuid}" "${path}tj" "${V2_DOMAIN}"
   colorEcho ${BLUE} "Setting caddy"
-  set_caddy "${V2_DOMAIN}" "user@${V2_DOMAIN}" "${uuid}"
+  set_caddy "${V2_DOMAIN}" "${uuid}"
 
   ${sudoCmd} $(which mkdir) -p /etc/ssl/v2ray
 
