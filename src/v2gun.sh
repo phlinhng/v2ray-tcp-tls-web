@@ -639,10 +639,10 @@ EOF
 
 set_caddy() {
   ${sudoCmd} cat > "/usr/local/etc/caddy/Caddyfile"<<-EOF
-$1:80 {
+http://$1:80 {
   redir https://$1{uri}
 }
-$1:8080 {
+http://$1:8080 {
   bind 127.0.0.1
   route {
     forward_proxy {
