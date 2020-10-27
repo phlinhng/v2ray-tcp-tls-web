@@ -172,7 +172,7 @@ show_links() {
     local uri_trojango_cf="${uuid}@${cf_node}:443?sni=${sni}&type=ws&host=${sni}&path=`urlEncode "${path}tj"`#`urlEncode "${sni} (Trojan-Go)"`"
     printf "%s\n" "trojan-go://${uri_trojango_cf}" "trojan-go://${uri_trojango}"
     colorEcho ${YELLOW} "因 Trojan-Go 分享链接格式尚未定案，若您的客户端无法解析此链接，请手动填写连接信息"
-    printf "%s:443 %s %s" "${sni}" "${uuid}" "${path}tj"
+    printf "%s:443 %s %s\n" "${sni}" "${uuid}" "${path}tj"
     echo ""
 
     colorEcho ${BLUE} "Shadowsocks"
