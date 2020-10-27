@@ -243,8 +243,8 @@ get_trojan() {
     wget -nv "${trojango_link}" -O trojan-go.zip
     unzip -q trojan-go.zip && rm -rf trojan-go.zip
     ${sudoCmd} mv trojan-go /usr/bin/trojan-go && ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
-    ${sudoCmd} mv geoip.dat -O /usr/bin/geoip.dat
-    ${sudoCmd} mv geosite.dat -O /usr/bin/geosite.dat
+    ${sudoCmd} mv geoip.dat /usr/bin/geoip.dat
+    ${sudoCmd} mv geosite.dat /usr/bin/geosite.dat
 
     colorEcho ${BLUE} "Building trojan-go.service"
     ${sudoCmd} mv example/trojan-go.service /etc/systemd/system/trojan-go.service
@@ -574,7 +574,7 @@ get_naiveproxy() {
     colorEcho ${BLUE} "Getting the latest version of naiveproxy"
     local latest_version="$(curl -s "https://api.github.com/repos/klzgrad/naiveproxy/releases/latest" | jq '.tag_name' --raw-output)"
     echo "${latest_version}"
-    local naive_link="https://github.com/klzgrad/naiveproxy/releases/download/${latest_version}/naiveproxy-${latest_version}-linux-${V2_MACHINE}.tar.xz"
+    local naive_link="https://github.com/klzgrad/naiveproxy/releases/download/${latest_version}/naiveproxy-${latest_version}-linux-${NP_MACHINE}.tar.xz"
 
     ${sudoCmd} $(which mkdir) -p "/usr/local/etc/naive"
     set_naive
@@ -597,7 +597,7 @@ get_naiveproxy() {
     colorEcho ${BLUE} "Getting the latest version of naiveproxy"
     local latest_version="$(curl -s "https://api.github.com/repos/klzgrad/naiveproxy/releases/latest" | jq '.tag_name' --raw-output)"
     echo "${latest_version}"
-    local naive_link="https://github.com/klzgrad/naiveproxy/releases/download/${latest_version}/naiveproxy-${latest_version}-linux-${V2_MACHINE}.tar.xz"
+    local naive_link="https://github.com/klzgrad/naiveproxy/releases/download/${latest_version}/naiveproxy-${latest_version}-linux-${NP_MACHINE}.tar.xz"
 
     cd $(mktemp -d)
     wget -nv "${naive_link}" -O naive.tar.xz
