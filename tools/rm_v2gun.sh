@@ -134,6 +134,4 @@ ${sudoCmd} bash /root/.acme.sh/acme.sh --uninstall
 uninstall /root/.acme.sh
 colorEcho ${GREEN} "Removed acme.sh successfully."
 
-${sudoCmd} ${systemPackage} autoremove -y --purge 2>/dev/null
-
 colorEcho ${BLUE} "卸载完成"
