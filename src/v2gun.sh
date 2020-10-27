@@ -615,21 +615,22 @@ get_naiveproxy() {
 set_caddy_systemd() {
   ${sudoCmd} cat > "/etc/systemd/system/caddy.service" <<-EOF
 [Unit]
-Description=Caddy - Fast, multi-platform web server with automatic HTTPS
-Documentation=https://caddyserver.com/
-After=network.target nss-lookup.target
+Description=Caddy
+Documentation=https://caddyserver.com/docs/
+After=network.target network-online.target
+Requires=network-online.target
 
 [Service]
-User=www-data
-Group=www-data
-CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-NoNewPrivileges=true
-ExecStart=/usr/local/bin/caddy --config /usr/local/etc/caddy/config.json
-ExecReload=$(which kill) -USR1 $MAINPID
-ProtectHome=true
+User=caddy
+Group=caddy
+ExecStart=/usr/local/bin/caddy run --environ --config /usr/local/etc/caddy/Caddyfile
+ExecReload=/usr/local/bin/caddy reload --config /usr/local/etc/caddy/Caddyfile
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+LimitNPROC=512
+PrivateTmp=true
 ProtectSystem=full
-Restart=on-abnormal
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 
 [Install]
 WantedBy=multi-user.target
@@ -637,15 +638,11 @@ EOF
 }
 
 set_caddy() {
-  ${sudoCmd} cat > "/usr/local/bin/caddy/Caddyfile"<<-EOF
-:80, $1{
-  tls off
-  route {
-    redir https://$1{uri}
-  }
+  ${sudoCmd} cat > "/usr/local/etc/caddy/Caddyfile"<<-EOF
+$1:80 {
+  redir https://$1{uri}
 }
-:8080, $1{
-  tls off
+127.0.01:8080 {
   route {
     forward_proxy {
       basic_auth user@$1 $2
@@ -665,16 +662,16 @@ get_caddy() {
 
     local caddy_link="https://github.com/charlieethan/build/releases/download/v2.2.1/caddy-linux-${CY_MACHINE}"
 
-    ${sudoCmd} $(which mkdir) -p "/usr/local/bin/caddy"
-    printf "Cretated: %s\n" "/usr/local/bin/caddy"
+    ${sudoCmd} $(which mkdir) -p "/usr/local/etc/caddy"
+    printf "Cretated: %s\n" "/usr/local/etc/caddy"
 
-    ${sudoCmd} wget -nv "${caddy_link}" -O /usr/local/bin/caddy/caddy && $(which chmod) +x /usr/local/bin/caddy/caddy
-    printf "Installed: %s\n" "/usr/local/bin/caddy/caddy"
+    ${sudoCmd} wget -nv "${caddy_link}" -O /usr/local/bin/caddy && $(which chmod) +x /usr/local/bin/caddy
+    printf "Installed: %s\n" "/usr/local/bin/caddy"
 
     colorEcho ${BLUE} "Creating user for caddy"
 
-    ${sudoCmd} groupadd -g 33 www-data
-    ${sudoCmd} useradd -g www-data --no-user-group --home-dir /var/www --no-create-home --shell /usr/sbin/nologin --system --uid 33 www-data
+    ${sudoCmd} useradd --system --gid caddy --create-home --home-dir /var/lib/caddy \
+    --shell /usr/sbin/nologin --comment "Caddy web server" caddy
 
     colorEcho ${BLUE} "Building caddy.service"
     set_caddy_systemd
