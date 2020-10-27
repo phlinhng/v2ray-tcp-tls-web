@@ -240,7 +240,7 @@ get_trojan() {
     ${sudoCmd} mkdir -p "/etc/trojan-go"
 
     cd $(mktemp -d)
-    wget -nv "${trojango_link}" -O trojan-go.zip
+    wget "${trojango_link}" -O trojan-go.zip
     unzip -q trojan-go.zip && rm -rf trojan-go.zip
     ${sudoCmd} mv trojan-go /usr/bin/trojan-go && ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
     ${sudoCmd} mv geoip.dat /usr/bin/geoip.dat
@@ -260,7 +260,7 @@ get_trojan() {
     local trojango_link="https://github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${V2_MACHINE}.zip"
 
     cd $(mktemp -d)
-    wget -nv "${trojango_link}" -O trojan-go.zip
+    wget "${trojango_link}" -O trojan-go.zip
     unzip trojan-go.zip && rm -rf trojan-go.zip
     ${sudoCmd} mv trojan-go /usr/bin/trojan-go && ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
     colorEcho ${GREEN} "trojan-go has been updated."
@@ -305,7 +305,7 @@ get_v2ray() {
     printf "Cretated: %s\n" "/usr/local/share/v2ray"
 
     cd $(mktemp -d)
-    wget -nv "${v2ray_link}" -O v2ray-core.zip
+    wget "${v2ray_link}" -O v2ray-core.zip
     unzip -q v2ray-core.zip && $(which rm) -rf v2ray-core.zip
     ${sudoCmd} $(which mv) v2ray /usr/local/bin/v2ray && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ray
     printf "Installed: %s\n" "/usr/local/bin/v2ray"
@@ -330,7 +330,7 @@ get_v2ray() {
     local v2ray_link="https://github.com/v2fly/v2ray-core/releases/download/${latest_version}/v2ray-linux-${V2_MACHINE}.zip"
 
     cd $(mktemp -d)
-    wget -nv "${v2ray_link}" -O v2ray-core.zip
+    wget "${v2ray_link}" -O v2ray-core.zip
     unzip -q v2ray-core.zip && $(which rm) -rf v2ray-core.zip
     ${sudoCmd} $(which mv) v2ray /usr/local/bin/v2ray && ${sudoCmd} $(which chmod) +x /usr/local/bin/v2ray
     printf "Installed: %s\n" "/usr/local/bin/v2ray"
@@ -581,7 +581,7 @@ get_naiveproxy() {
     printf "Cretated: %s\n" "/usr/local/etc/naive/config.json"
 
     cd $(mktemp -d)
-    wget -nv "${naive_link}" -O naive.tar.xz
+    wget "${naive_link}" -O naive.tar.xz
     tar Jxvf naive.tar.xz && $(which rm) -rf naive.tar.xz
     cd "naiveproxy-${latest_version}-linux-${NP_MACHINE}"
     ${sudoCmd} $(which mv) naive /usr/local/bin/naive && ${sudoCmd} $(which chmod) +x /usr/local/bin/naive
@@ -601,7 +601,7 @@ get_naiveproxy() {
     local naive_link="https://github.com/klzgrad/naiveproxy/releases/download/${latest_version}/naiveproxy-${latest_version}-linux-${NP_MACHINE}.tar.xz"
 
     cd $(mktemp -d)
-    wget -nv "${naive_link}" -O naive.tar.xz
+    wget "${naive_link}" -O naive.tar.xz
     tar Jxvf naive.tar.xz && $(which rm) -rf naive.tar.xz
     cd "naiveproxy-${latest_version}-linux-${NP_MACHINE}"
     ${sudoCmd} $(which mv) naive /usr/local/bin/naive && ${sudoCmd} $(which chmod) +x /usr/local/bin/naive
@@ -666,10 +666,12 @@ get_caddy() {
     ${sudoCmd} $(which mkdir) -p "/usr/local/etc/caddy"
     printf "Cretated: %s\n" "/usr/local/etc/caddy"
 
-    ${sudoCmd} wget -nv "${caddy_link}" -O /usr/local/bin/caddy && $(which chmod) +x /usr/local/bin/caddy
+    ${sudoCmd} wget "${caddy_link}" -O /usr/local/bin/caddy && $(which chmod) +x /usr/local/bin/caddy
     printf "Installed: %s\n" "/usr/local/bin/caddy"
 
     colorEcho ${BLUE} "Creating user for caddy"
+
+    ${sudoCmd} groupadd --system caddy
 
     ${sudoCmd} useradd --system --gid caddy --create-home --home-dir /var/lib/caddy \
     --shell /usr/sbin/nologin --comment "Caddy web server" caddy
