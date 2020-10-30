@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
-branch="naive"
+branch="vless"
 VERSION="2.2.0"
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
