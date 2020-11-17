@@ -836,8 +836,8 @@ install_v2ray() {
   else
     get_cert_alt "${V2_DOMAIN}"
     if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-    colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
-    show_links
+      colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
+      show_links
     else
       colorEcho ${RED} "证书签发失败, 请运行修复证书"
     fi
