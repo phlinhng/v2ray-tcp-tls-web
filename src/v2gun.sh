@@ -188,6 +188,18 @@ show_links() {
   fi
 }
 
+test_ipv4_conn() {
+  local res=$(curl -L -s -w "%{http_code}" https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/vless/LICENSE -o /dev/null)
+  if [[ ${res} != "200" ]];then
+    colorEcho ${YELLOW} "Can't access githubusercontent, try Google Public DNS64"
+    ${sudoCmd} $(which cp) /etc/resolv.conf /etc/resolv.conf.bak
+    ${sudoCmd} $(which rm) -rf /etc/resolv.conf
+    echo "nameserver 2001:4860:4860::6464" | ${sudoCmd} tee -a /etc/resolv.conf
+    echo "nameserver 2001:4860:4860::64" | ${sudoCmd} tee -a /etc/resolv.conf
+    colorEcho ${BLUE} "Nameserver successfully changed. The original settings was backuped as /etc/resolv.conf.bak"
+  fi
+}
+
 preinstall() {
   # turning off selinux
   ${sudoCmd} setenforce 0 2>/dev/null
@@ -204,6 +216,9 @@ preinstall() {
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git socat wget unzip xz-utils -y
 
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} jq -y
+
+  test_ipv4_conn
+
   # install jq mannualy if the package management didn't
   if [[ ! "$(command -v jq)" ]]; then
     echo "Fetching jq failed, trying manual installation"
