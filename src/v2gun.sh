@@ -570,7 +570,7 @@ EOF
 set_naive() {
   ${sudoCmd} cat > "/usr/local/etc/naive/config.json" <<-EOF
 {
-  "listen": "http://127.0.0.1:8080",
+  "listen": "http://127.0.0.1:8081",
   "padding": "true"
 }
 EOF
@@ -680,6 +680,7 @@ http://$1:8080 {
       hide_ip
       hide_via
       probe_resistance unsplash.com:443
+      upstream http://127.0.0.1:8081
     }
     file_server { root /var/www/html }
   }
