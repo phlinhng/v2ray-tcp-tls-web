@@ -201,7 +201,7 @@ preinstall() {
   # get dependencies
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y 2>/dev/null # centos
   ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
-  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git wget unzip xz-utils -y
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git socat wget unzip xz-utils -y
 
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} jq -y
   # install jq mannualy if the package management didn't
@@ -226,6 +226,21 @@ get_cert() {
   ${sudoCmd} /root/.acme.sh/acme.sh --install-cert --ecc -d "$1" \
   --key-file /etc/ssl/v2ray/key.pem --fullchain-file /etc/ssl/v2ray/fullchain.pem \
   --reloadcmd "chmod 644 /etc/ssl/v2ray/fullchain.pem; chmod 644 /etc/ssl/v2ray/key.pem; systemctl restart v2ray"
+}
+
+get_cert_alt() {
+  # use standalone mode to issue cert
+  ${sudoCmd} stop caddy 2>/dev/null
+  colorEcho ${BLUE} "Issuing certificate"
+  ${sudoCmd} /root/.acme.sh/acme.sh --issue -d "$1" --standalone --keylength ec-256
+
+  # install certificate
+  colorEcho ${BLUE} "Installing certificate"
+  ${sudoCmd} /root/.acme.sh/acme.sh --install-cert --ecc -d "$1" \
+  --key-file /etc/ssl/v2ray/key.pem --fullchain-file /etc/ssl/v2ray/fullchain.pem \
+  --reloadcmd "chmod 644 /etc/ssl/v2ray/fullchain.pem; chmod 644 /etc/ssl/v2ray/key.pem; systemctl restart v2ray"
+
+  ${sudoCmd} restart caddy 2>/dev/null
 }
 
 get_trojan() {
@@ -819,7 +834,13 @@ install_v2ray() {
     colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
     show_links
   else
-    colorEcho ${RED} "证书签发失败, 请运行修复证书"
+    get_cert_alt "${V2_DOMAIN}"
+    if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
+    colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
+    show_links
+    else
+      colorEcho ${RED} "证书签发失败, 请运行修复证书"
+    fi
   fi
 }
 
