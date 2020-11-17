@@ -194,8 +194,12 @@ test_ipv4_conn() {
     colorEcho ${YELLOW} "Can't access githubusercontent, try Google Public DNS64"
     ${sudoCmd} $(which cp) /etc/resolv.conf /etc/resolv.conf.bak
     ${sudoCmd} $(which rm) -rf /etc/resolv.conf
-    echo "nameserver 2001:4860:4860::6464" | ${sudoCmd} tee -a /etc/resolv.conf
-    echo "nameserver 2001:4860:4860::64" | ${sudoCmd} tee -a /etc/resolv.conf
+    ${sudoCmd} chattr -i /etc/resolv.conf 2>/dev/null
+    echo "nameserver 2a01:4f8:c2c:123f::1" | ${sudoCmd} tee -a /etc/resolv.conf
+    echo "nameserver 2a01:4f9:c010:3f02::1" | ${sudoCmd} tee -a /etc/resolv.conf
+    echo "nameserver 2a00:1098:2b::1" | ${sudoCmd} tee -a /etc/resolv.conf
+    echo "nameserver 2a00:1098:2c::1" | ${sudoCmd} tee -a /etc/resolv.conf
+    ${sudoCmd} chattr +i /etc/resolv.conf
     colorEcho ${BLUE} "Nameserver successfully changed. The original settings was backuped as /etc/resolv.conf.bak"
   fi
 }
