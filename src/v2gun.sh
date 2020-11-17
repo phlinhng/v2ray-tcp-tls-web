@@ -766,7 +766,14 @@ fix_cert() {
       colorEcho ${GREEN} "证书修复成功!"
       show_links
     else
-      colorEcho ${RED} "证书签发失败, 請运行修复证书"
+      get_cert_alt "${V2_DOMAIN}"
+      if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
+        colorEcho ${GREEN} "证书修复成功!"
+        show_links
+      else
+        colorEcho ${RED} "证书签发失败, 请重试"
+        exit 1
+      fi
     fi
   else
     colorEcho ${YELLOW} "请先安装 V2Ray"
@@ -844,7 +851,13 @@ install_v2ray() {
   sleep 5
 
   get_acmesh
-  get_cert "${V2_DOMAIN}"
+
+  if [ -f "/usr/local/bin/v2ray" ]; then
+    get_cert "${V2_DOMAIN}"
+  else
+    colorEcho ${RED} "v2ray-core 下载失败, 可能会影响证书申请, 请先确保您的机器能访问 githubusercontent 再运行本脚本"
+    exit 1
+  fi
 
   if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
     colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
