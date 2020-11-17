@@ -21,7 +21,7 @@ bash ~/v2gun.sh
 + VMess over WSS on Cloudflare powered by v2ray-core and Cloudflare
 + Trojan (protocol) and muxing powered by trojan-go (implementaion)
 + Trojan over WSS on Cloudflare powered by trojan-go and Cloudflare
-+ HTTP Website backend powered by nginx
++ HTTP Website backend powered by caddy2
 
 ## Supported Protocols
 | Protocol | Transport | Mux | Direct | CDN | Qv2ray | Shadowrocket | Clash | v2rayN(G) |
