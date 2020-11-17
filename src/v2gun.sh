@@ -213,7 +213,7 @@ preinstall() {
   # get dependencies
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y 2>/dev/null # centos
   ${sudoCmd} ${PACKAGE_MANAGEMENT_UPDATE} -y
-  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git socat wget unzip xz-utils -y
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl git libnss3 socat wget unzip xz-utils -y
 
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} jq -y
 
