@@ -191,7 +191,7 @@ show_links() {
 test_ipv4_conn() {
   local res=$(curl -L -s -w "%{http_code}" https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/vless/LICENSE -o /dev/null)
   if [[ ${res} != "200" ]];then
-    colorEcho ${YELLOW} "Can't access githubusercontent, try Google Public DNS64"
+    colorEcho ${YELLOW} "Can't access githubusercontent, try NAT64"
     ${sudoCmd} $(which cp) /etc/resolv.conf /etc/resolv.conf.bak
     ${sudoCmd} $(which rm) -rf /etc/resolv.conf
     ${sudoCmd} chattr -i /etc/resolv.conf 2>/dev/null
