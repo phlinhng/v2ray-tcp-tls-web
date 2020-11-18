@@ -263,7 +263,7 @@ get_cert_alt() {
 }
 
 get_trojan() {
-  if [ ! -d "/usr/bin/trojan-go" ]; then
+  if [ ! -f "/usr/bin/trojan-go" ]; then
     colorEcho ${BLUE} "trojan-go is not installed. start installation"
 
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
@@ -276,7 +276,7 @@ get_trojan() {
     cd $(mktemp -d)
     wget -q --show-progress "${trojango_link}" -O trojan-go.zip
     unzip -q trojan-go.zip && rm -rf trojan-go.zip
-    ${sudoCmd} $(which mv) trojan-go /usr/bin/trojan-go && ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
+    ${sudoCmd} $(which mv) trojan-go /usr/bin/trojan-go && ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
     ${sudoCmd} $(which mv) geoip.dat /usr/bin/geoip.dat
     ${sudoCmd} $(which mv) geosite.dat /usr/bin/geosite.dat
 
@@ -296,7 +296,7 @@ get_trojan() {
     cd $(mktemp -d)
     wget -q --show-progress "${trojango_link}" -O trojan-go.zip
     unzip trojan-go.zip && rm -rf trojan-go.zip
-    ${sudoCmd} $(which mv) trojan-go /usr/bin/trojan-go && ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
+    ${sudoCmd} $(which mv) trojan-go /usr/bin/trojan-go && ${sudoCmd} $(which chmod) +x /usr/bin/trojan-go
     colorEcho ${GREEN} "trojan-go has been updated."
   fi
 }
@@ -693,7 +693,7 @@ EOF
 }
 
 get_caddy() {
-  if [ ! -d "/usr/local/bin/caddy" ]; then
+  if [ ! -f "/usr/local/bin/caddy" ]; then
     colorEcho ${BLUE} "Caddy 2 is not installed. start installation"
 
     local caddy_link="https://github.com/charlieethan/build/releases/download/v2.2.1/caddy-linux-${CY_MACHINE}"
