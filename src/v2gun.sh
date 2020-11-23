@@ -672,6 +672,9 @@ WantedBy=multi-user.target
 EOF
 }
 
+# naiveproxy support is still under experiment
+# forward_proxy only works with 443 port according to caddy2's document. will try to figure out this
+# https://github.com/caddyserver/forwardproxy/tree/caddy2
 set_caddy() {
   ${sudoCmd} cat > "/usr/local/etc/caddy/Caddyfile"<<-EOF
 http://$1:80 {
@@ -681,7 +684,7 @@ http://$1:8080 {
   bind 127.0.0.1
   route {
     forward_proxy {
-      basicauth user $2
+      basic_auth user $2
       hide_ip
       hide_via
       probe_resistance unsplash.com:443
