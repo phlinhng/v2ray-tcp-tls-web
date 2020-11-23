@@ -182,7 +182,7 @@ show_links() {
     echo ""
 
     colorEcho ${BLUE} "NaiveProxy"
-    printf "%s\n" "naive+https://user@${sni}:${uuid}@${sni}"
+    printf "%s\n" "naive+https://user:${uuid}@${sni}:443"
 
     colorEcho ${YELLOW} "========================================"
   fi
@@ -681,7 +681,7 @@ http://$1:8080 {
   bind 127.0.0.1
   route {
     forward_proxy {
-      basic_auth user@$1 $2
+      basicauth user $2
       hide_ip
       hide_via
       probe_resistance unsplash.com:443
