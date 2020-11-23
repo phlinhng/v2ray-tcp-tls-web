@@ -182,7 +182,7 @@ show_links() {
     echo ""
 
     colorEcho ${BLUE} "NaiveProxy"
-    printf "%s\n" "https://user@${sni}:${uuid}@${sni}"
+    printf "%s\n" "naive+https://user@${sni}:${uuid}@${sni}"
 
     colorEcho ${YELLOW} "========================================"
   fi
