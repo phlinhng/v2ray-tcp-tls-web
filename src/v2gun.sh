@@ -4,7 +4,7 @@ export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
 branch="vless"
-VERSION="2.1.5"
+VERSION="2.1.6"
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
@@ -233,16 +233,16 @@ preinstall() {
 
 get_acmesh() {
   colorEcho ${BLUE} "Installing acme.sh"
-  curl -fsSL https://get.acme.sh | ${sudoCmd} bash
+  curl -fsSL https://get.acme.sh | bash
 }
 
 get_cert() {
   colorEcho ${BLUE} "Issuing certificate"
-  ${sudoCmd} /root/.acme.sh/acme.sh --issue -d "$1" -w /var/www/html --keylength ec-256
+  ~/.acme.sh/acme.sh --issue -d "$1" -w /var/www/html --keylength ec-256
 
   # install certificate
   colorEcho ${BLUE} "Installing certificate"
-  ${sudoCmd} /root/.acme.sh/acme.sh --install-cert --ecc -d "$1" \
+  ${sudoCmd} ~/.acme.sh/acme.sh --install-cert --ecc --force -d "$1" \
   --key-file /etc/ssl/v2ray/key.pem --fullchain-file /etc/ssl/v2ray/fullchain.pem \
   --reloadcmd "chmod 644 /etc/ssl/v2ray/fullchain.pem; chmod 644 /etc/ssl/v2ray/key.pem; systemctl restart v2ray"
 }
