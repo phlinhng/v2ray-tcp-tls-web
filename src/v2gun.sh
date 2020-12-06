@@ -716,7 +716,7 @@ fix_cert() {
     local path="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].streamSettings.wsSettings.path')"
     local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].tag')"
 
-    ~/.acme.sh/acme.sh --remove -d $(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')_ecc --ecc
+    ~/.acme.sh/acme.sh --remove -d $(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag') --ecc
     ${sudoCmd} $(which rm) -rf ~/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')_ecc
 
     colorEcho ${BLUE} "Re-setting v2ray"
