@@ -26,7 +26,7 @@ bash ~/v2gun.sh
 ## Supported Protocols
 | Protocol | Transport | Mux | Direct | CDN | Qv2ray | Shadowrocket | Clash | v2rayN(G) |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| VLESS | XTLS | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ |
+| VLESS | XTLS | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
 | VLESS | TLS | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
 | VLESS | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | VMess | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
