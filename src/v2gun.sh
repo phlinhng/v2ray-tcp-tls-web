@@ -4,7 +4,7 @@ export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
 branch="vless"
-VERSION="2.1.6"
+VERSION="2.1.7"
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   sudoCmd="sudo"
@@ -188,22 +188,6 @@ show_links() {
   fi
 }
 
-test_ipv4_conn() {
-  local res=$(curl -L -s -w "%{http_code}" https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/vless/LICENSE -o /dev/null)
-  if [[ ${res} != "200" ]];then
-    colorEcho ${YELLOW} "Can't access githubusercontent, try NAT64"
-    ${sudoCmd} $(which cp) /etc/resolv.conf /etc/resolv.conf.bak
-    ${sudoCmd} $(which rm) -rf /etc/resolv.conf
-    ${sudoCmd} chattr -i /etc/resolv.conf 2>/dev/null
-    echo "nameserver 2a01:4f8:c2c:123f::1" | ${sudoCmd} tee -a /etc/resolv.conf
-    echo "nameserver 2a01:4f9:c010:3f02::1" | ${sudoCmd} tee -a /etc/resolv.conf
-    echo "nameserver 2a00:1098:2b::1" | ${sudoCmd} tee -a /etc/resolv.conf
-    echo "nameserver 2a00:1098:2c::1" | ${sudoCmd} tee -a /etc/resolv.conf
-    ${sudoCmd} chattr +i /etc/resolv.conf
-    colorEcho ${BLUE} "Nameserver successfully changed. The original settings was backuped as /etc/resolv.conf.bak"
-  fi
-}
-
 preinstall() {
   # turning off selinux
   ${sudoCmd} setenforce 0 2>/dev/null
@@ -221,19 +205,20 @@ preinstall() {
 
   ${sudoCmd} ${PACKAGE_MANAGEMENT_INSTALL} jq -y
 
-  test_ipv4_conn
-
   # install jq mannualy if the package management didn't
   if [[ ! "$(command -v jq)" ]]; then
     echo "Fetching jq failed, trying manual installation"
     ${sudoCmd} curl -L https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -o /usr/bin/jq
     ${sudoCmd} $(which chmod) +x /usr/bin/jq
   fi
+
+  curl -fsSL https://get.acme.sh | bash
 }
 
-get_acmesh() {
-  colorEcho ${BLUE} "Installing acme.sh"
-  curl -fsSL https://get.acme.sh | bash
+get_cert_standalone() {
+  # use standalone mode to issue cert
+  colorEcho ${BLUE} "Issuing certificate"
+  ${sudoCmd} /root/.acme.sh/acme.sh --issue -d "$1" --standalone --keylength ec-256
 }
 
 get_cert() {
@@ -245,21 +230,6 @@ get_cert() {
   ${sudoCmd} ~/.acme.sh/acme.sh --install-cert --ecc --force -d "$1" \
   --key-file /etc/ssl/v2ray/key.pem --fullchain-file /etc/ssl/v2ray/fullchain.pem \
   --reloadcmd "chmod 644 /etc/ssl/v2ray/fullchain.pem; chmod 644 /etc/ssl/v2ray/key.pem; systemctl restart v2ray"
-}
-
-get_cert_alt() {
-  # use standalone mode to issue cert
-  ${sudoCmd} stop caddy 2>/dev/null
-  colorEcho ${BLUE} "Issuing certificate"
-  ${sudoCmd} /root/.acme.sh/acme.sh --issue -d "$1" --standalone --keylength ec-256
-
-  # install certificate
-  colorEcho ${BLUE} "Installing certificate"
-  ${sudoCmd} /root/.acme.sh/acme.sh --install-cert --ecc -d "$1" \
-  --key-file /etc/ssl/v2ray/key.pem --fullchain-file /etc/ssl/v2ray/fullchain.pem \
-  --reloadcmd "chmod 644 /etc/ssl/v2ray/fullchain.pem; chmod 644 /etc/ssl/v2ray/key.pem; systemctl restart v2ray"
-
-  ${sudoCmd} restart caddy 2>/dev/null
 }
 
 get_trojan() {
@@ -744,44 +714,37 @@ fix_cert() {
 
     local uuid="$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].settings.clients[0].id')"
     local path="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].streamSettings.wsSettings.path')"
+    local cf_node="$(read_json /usr/local/etc/v2ray/05_inbounds_ss.json '.inbounds[0].tag')"
 
-    ${sudoCmd} $(which rm) -f /root/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')_ecc/$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag').key
+    ~/.acme.sh/acme.sh --remove -d $(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')_ecc --ecc
+    ${sudoCmd} $(which rm) -rf ~/.acme.sh/$(read_json /usr/local/etc/v2ray/05_inbounds_vless.json '.inbounds[0].tag')_ecc
+
+    colorEcho ${BLUE} "Re-setting v2ray"
+    set_v2ray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}"
 
     colorEcho ${BLUE} "Re-setting caddy"
     set_caddy "${V2_DOMAIN}" "${uuid}"
-    ${sudoCmd} systemctl restart caddy 2>/dev/null
 
     colorEcho ${BLUE} "Re-setting trojan-go"
     set_trojan "${uuid}" "${path}tj" "${V2_DOMAIN}"
-    ${sudoCmd} systemctl restart trojan-go 2>/dev/null
-
-    colorEcho ${BLUE} "Re-setting v2ray"
-    # temporary cert
-    ${sudoCmd} openssl req -new -newkey rsa:2048 -days 1 -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=${V2_DOMAIN}" -keyout /etc/ssl/v2ray/key.pem -out /etc/ssl/v2ray/fullchain.pem
-    ${sudoCmd} chmod 644 /etc/ssl/v2ray/key.pem
-    ${sudoCmd} chmod 644 /etc/ssl/v2ray/fullchain.pem
-
-    ${sudoCmd} systemctl restart v2ray 2>/dev/null
-
-    sleep 5
 
     colorEcho ${BLUE} "Re-issuing certificates for ${V2_DOMAIN}"
+    ${sudoCmd} systemctl stop caddy
+    get_cert_standalone "${V2_DOMAIN}"
+
+    ${sudoCmd} systemctl restart caddy 2>/dev/null
+    ${sudoCmd} systemctl restart trojan-go 2>/dev/null
+    ${sudoCmd} systemctl restart v2ray 2>/dev/null
     get_cert "${V2_DOMAIN}"
 
     write_json /usr/local/etc/v2ray/05_inbounds_vless.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
 
-    if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
+    if [ -f "~/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
       colorEcho ${GREEN} "证书修复成功!"
       show_links
     else
-      get_cert_alt "${V2_DOMAIN}"
-      if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-        colorEcho ${GREEN} "证书修复成功!"
-        show_links
-      else
-        colorEcho ${RED} "证书签发失败, 请重试"
-        exit 1
-      fi
+      colorEcho ${RED} "证书签发失败, 请重试"
+      exit 1
     fi
   else
     colorEcho ${YELLOW} "请先安装 V2Ray"
@@ -831,13 +794,11 @@ install_v2ray() {
 
   ${sudoCmd} $(which mkdir) -p /etc/ssl/v2ray
 
-  # temporary cert
-  ${sudoCmd} openssl req -new -newkey rsa:2048 -days 1 -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=${V2_DOMAIN}" -keyout /etc/ssl/v2ray/key.pem -out /etc/ssl/v2ray/fullchain.pem
-  ${sudoCmd} $(which chmod) 644 /etc/ssl/v2ray/key.pem
-  ${sudoCmd} $(which chmod) 644 /etc/ssl/v2ray/fullchain.pem
-
   colorEcho ${BLUE} "Building dummy web site"
   build_web
+
+  ${sudoCmd} systemctl stop caddy 2>/dev/null
+  get_cert_standalone "${V2_DOMAIN}"
 
   # activate services
   colorEcho ${BLUE} "Activating services"
@@ -856,28 +817,13 @@ install_v2ray() {
   ${sudoCmd} systemctl enable naive
   ${sudoCmd} systemctl restart naive 2>/dev/null
 
-  sleep 5
+  get_cert "${V2_DOMAIN}"
 
-  get_acmesh
-
-  if [ -f "/usr/local/bin/v2ray" ]; then
-    get_cert "${V2_DOMAIN}"
-  else
-    colorEcho ${RED} "v2ray-core 下载失败, 可能会影响证书申请, 请先确保您的机器能访问 githubusercontent 再运行本脚本"
-    exit 1
-  fi
-
-  if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
+  if [ -f "~/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
     colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
     show_links
   else
-    get_cert_alt "${V2_DOMAIN}"
-    if [ -f "/root/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-      colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
-      show_links
-    else
-      colorEcho ${RED} "证书签发失败, 请运行修复证书"
-    fi
+    colorEcho ${RED} "证书签发失败, 请运行修复证书"
   fi
 }
 
