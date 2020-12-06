@@ -218,7 +218,7 @@ preinstall() {
 get_cert_standalone() {
   # use standalone mode to issue cert
   colorEcho ${BLUE} "Issuing certificate"
-  ${sudoCmd} /root/.acme.sh/acme.sh --issue -d "$1" --standalone --keylength ec-256
+  ~/.acme.sh/acme.sh --issue -d "$1" --standalone --keylength ec-256
 }
 
 get_cert() {
