@@ -739,13 +739,8 @@ fix_cert() {
 
     write_json /usr/local/etc/v2ray/05_inbounds_vless.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
 
-    if [ -f "~/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-      colorEcho ${GREEN} "证书修复成功!"
-      show_links
-    else
-      colorEcho ${RED} "证书签发失败, 请重试"
-      exit 1
-    fi
+    colorEcho ${GREEN} "证书修复完成"
+    show_links
   else
     colorEcho ${YELLOW} "请先安装 V2Ray"
   fi
@@ -819,12 +814,8 @@ install_v2ray() {
 
   get_cert "${V2_DOMAIN}"
 
-  if [ -f "~/.acme.sh/${V2_DOMAIN}_ecc/fullchain.cer" ]; then
-    colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
-    show_links
-  else
-    colorEcho ${RED} "证书签发失败, 请运行修复证书"
-  fi
+  colorEcho ${GREEN} "安装 VLESS + VMess + Trojan + NaiveProxy 成功!"
+  show_links
 }
 
 edit_cf_node() {
