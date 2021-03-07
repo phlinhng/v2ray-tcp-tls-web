@@ -1,27 +1,27 @@
-# VLESS / VMess / Trojan-Go
-automated script for VLESS, VMess and Trojan-Go
+# VLESS / Trojan-Go / Shadowsocks
+automated script for xray-core and trojan-go
 
 ## Usage
 ```sh
-curl -fsSL https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/vless/src/v2gun.sh -o ~/v2gun.sh && bash ~/v2gun.sh
+curl -fsSL https://gh-raw.phlin.workers.dev/phlinhng/v2ray-tcp-tls-web/vless/src/xwall.sh -o ~/v2gun.sh && bash ~/xwall.sh
 ```
 To run the script again once downloaded, just use the following command:
 ```
-bash ~/v2gun.sh
+bash ~/xwall.sh
 ```
 
 ## Features
-1. VLESS / VMess / Trojan-Go all in one
-2. Higher offloading efficieny with v2ray-core as frontend
-3. Support Debian9+, Ubuntu 16+ and CentOS 7+ operation systems
-4. Support both IPv4 and IPv6
+1. Higher offloading efficieny with xray-core frontend
+2. Support Debian9+, Ubuntu 16+ and CentOS 7+ operation systems
+3. Support both IPv4 and IPv6
+4. BuyPass CA Certificates
 
 ## Architecture
-+ VLESS over TCP with [XTLS](https://github.com/XTLS/Go) powered by v2ray-core
-+ VMess over WSS on Cloudflare powered by v2ray-core and Cloudflare
++ VLESS over TCP with [XTLS](https://github.com/XTLS/Go) powered by [xray-core](https://github.com/XTLS/xray-core)
 + Trojan (protocol) and muxing powered by trojan-go (implementaion)
 + Trojan over WSS on Cloudflare powered by trojan-go and Cloudflare
-+ HTTP Website backend powered by caddy2
++ Shadowsocks over WSS powered by [xray-core](https://github.com/XTLS/xray-core)
++ HTTP Website backend powered by nginx
 
 ## Supported Protocols
 | Protocol | Transport | Mux | Direct | CDN | Qv2ray | Shadowrocket | Clash | v2rayN(G) |
@@ -29,16 +29,9 @@ bash ~/v2gun.sh
 | VLESS | XTLS | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
 | VLESS | TLS | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
 | VLESS | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| VMess | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Trojan | TLS | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | Shadowsocks | WSS | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-12 protocols combinations with 19 connection methods in total.
-
-## Related work
-+ [Shawdowrockets 訂閱鏈接編輯器](https://www.phlinhng.com/b64-url-editor): subscription manager
-+ [v2script](https://github.com/phlinhng/v2ray-tcp-tls-web/tree/master): v1.x version
 
 ## Telegram
 https://t.me/technologyshare
@@ -61,6 +54,7 @@ https://t.me/technologyshare
 + [@acmesh-official/acme.sh](https://github.com/acmesh-official/acme.sh)
 + [@nginx/nginx](https://github.com/nginx/nginx)
 + [@charlieethan/firewall-proxy](https://github.com/charlieethan/firewall-proxy)
++ [@XTLS/xray-core](https://github.com/XTLS/xray-core)
 
 ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/phlinhng/v2ray-tcp-tls-web.svg)](https://starchart.cc/phlinhng/v2ray-tcp-tls-web)

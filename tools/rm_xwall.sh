@@ -82,49 +82,6 @@ if [ -f "/usr/bin/trojan-go" ]; then
   colorEcho ${GREEN} "Removed trojan-go successfully."
 fi
 
-# remove naive
-if [ -f "/usr/local/bin/naive" ]; then
-  colorEcho ${BLUE} "Shutting down naiveproxy service."
-  ${sudoCmd} systemctl stop naive
-  ${sudoCmd} systemctl disable naive
-  uninstall /etc/systemd/system/naive.service
-  colorEcho ${BLUE} "Removing naiveproxy binaries."
-  uninstall /usr/local/bin/naive
-  colorEcho ${BLUE} "Removing naiveproxy files."
-  uninstall /usr/local/etc/naive
-  colorEcho ${GREEN} "Removed naiveproxy successfully."
-fi
-
-# remove caddy
-if [ -f "/usr/local/bin/caddy" ]; then
-  colorEcho ${BLUE} "Shutting down caddy service."
-  ${sudoCmd} systemctl stop caddy
-  ${sudoCmd} systemctl disable caddy
-  uninstall /etc/systemd/system/caddy.service
-  colorEcho ${BLUE} "Removing caddy binaries & files."
-  uninstall /usr/local/bin/caddy
-  uninstall /usr/local/etc/caddy
-  colorEcho ${BLUE} "Removing caddy user."
-  ${sudoCmd} userdel caddy
-  ${sudoCmd} groupdel caddy
-  colorEcho ${GREEN} "Removed caddy successfully."
-fi
-
-# remove nginx
-if [ -f "/etc/systemd/system/nginx.service" ]; then
-  colorEcho ${BLUE} "Shutting down nginx service."
-  ${sudoCmd} systemctl stop nginx
-  ${sudoCmd} systemctl disable nginx
-  uninstall /etc/systemd/system/nginx.service
-  colorEcho ${BLUE} "Removing nginx"
-  ${sudoCmd} ${systemPackage} remove nginx -y
-  ${sudoCmd} ${systemPackage} remove nginx-full -y
-  if [ -d "/usr/local/nginx" ]; then
-    uninstall /usr/local/nginx
-  fi
-  colorEcho ${GREEN} "Removed nginx successfully."
-fi
-
 colorEcho ${BLUE} "Removing dummy site."
 ${sudoCmd} $(which rm) -rf /var/www/html
 
