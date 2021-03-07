@@ -237,9 +237,9 @@ init_cert() {
 
 get_trojan() {
   if [ ! -f "/usr/bin/trojan-go" ]; then
-    colorEcho ${BLUE} "trojan-go is not installed. start installation"
+    echo "trojan-go is not installed. start installation"
 
-    colorEcho ${BLUE} "Getting the latest version of trojan-go"
+    echo "Getting the latest version of trojan-go"
     local latest_version="$(curl -s "https://${api_proxy}/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
     echo "${latest_version}"
     local trojango_link="https://${gh_proxy_release}/github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${TJ_MACHINE}.zip"
@@ -253,13 +253,13 @@ get_trojan() {
     $(which mv) geoip.dat /usr/bin/geoip.dat
     $(which mv) geosite.dat /usr/bin/geosite.dat
 
-    colorEcho ${BLUE} "Building trojan-go.service"
+    echo "Building trojan-go.service"
     mv example/trojan-go.service /etc/systemd/system/trojan-go.service
 
     systemctl daemon-reload
     systemctl enable trojan-go
 
-    colorEcho ${GREEN} "trojan-go is installed."
+    echo "trojan-go is installed."
   else
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
     local latest_version="$(curl -s "https://${api_proxy}/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
