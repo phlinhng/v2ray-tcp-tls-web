@@ -63,8 +63,8 @@ uninstall "/usr/local/etc/v2ray"
 uninstall"/usr/local/share/v2ray"
 uninstall "/var/log/v2ray"
 colorEcho ${BLUE} "Removing v2ray crontab."
-${sudoCmd} crontab -l | grep -v 'v2ray/geoip.dat' | ${sudoCmd} crontab -
-${sudoCmd} crontab -l | grep -v 'v2ray/geosite.dat' | ${sudoCmd} crontab -
+${sudoCmd} crontab -l | grep -v 'xray/geoip.dat' | ${sudoCmd} crontab -
+${sudoCmd} crontab -l | grep -v 'xray/geosite.dat' | ${sudoCmd} crontab -
 colorEcho ${GREEN} "Removed v2ray successfully."
 
 # remove trojan-go
@@ -83,7 +83,8 @@ if [ -f "/usr/bin/trojan-go" ]; then
 fi
 
 colorEcho ${BLUE} "Removing dummy site."
-${sudoCmd} $(which rm) -rf /var/www/html
+${sudoCmd} $(which rm) -rf /var/www/acme
+${sudoCmd} $(which rm) -rf /var/www/html/*
 
 # remove acme.sh
 colorEcho ${BLUE} "Removing acme.sh"

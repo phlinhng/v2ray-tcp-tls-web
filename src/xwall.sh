@@ -230,7 +230,7 @@ init_cert() {
     $(which mkdir) -p "/var/www/acme"
     printf "Cretated: %s\n" "/var/www/acme"
   fi
-  certbot register -m "$RANDOM@$1" --agree-tos--no-eff-email -n
+  certbot register -m "$RANDOM@$1" --agree-tos --no-eff-email -n
   certbot certonly --webroot -w "/var/www/acme" -d $1 --key-type ecdsa -n
   (crontab -l 2>/dev/null; echo "8 7 */4 * * certbot renew -n -q --post-hook \"systemctl restart xray\" >/dev/null >/dev/null") | crontab -
 }
@@ -392,8 +392,8 @@ set_xray() {
           "alpn": [ "http/1.1" ],
           "certificates": [
             {
-              "certificateFile": "/etc/ssl/xray/fullchain.pem",
-              "keyFile": "/etc/ssl/xray/key.pem"
+              "certificateFile": "/etc/letsencrypt/live/$3/fullchain.pem",
+              "keyFile": "/etc/letsencrypt/live/$3/privkey.pem"
             }
           ]
         }
@@ -628,9 +628,9 @@ install_xray() {
   colorEcho $LGREEN "完成: 设置 Trojan"
 
   colorEchoFlush $BLUE "设置 Nginx"
-  set_nginx_default
+  set_nginx_default | writeLog >> $log_path
   set_nginx "${V2_DOMAIN}"
-  systemctl restart nginx
+  systemctl restart nginx | writeLog >> $log_path
   colorEcho $LGREEN "完成: 设置 Nginx"
 
   colorEchoFlush $BLUE "申请 SSL 证书"
@@ -641,7 +641,6 @@ install_xray() {
   colorEchoFlush $BLUE "启动 systemd 进程"
   systemctl daemon-reload | writeLog >> $log_path
   systemctl reset-failed | writeLog >> $log_path
-
   systemctl restart trojan-go | writeLog >> $log_path
   systemctl restart xray | writeLog >> $log_path
 
@@ -650,27 +649,27 @@ install_xray() {
 }
 
 edit_cf_node() {
-  if [ -f "/usr/local/bin/v2ray" ]; then
-  local cf_node_current="$(read_json /usr/local/etc/xray/05_inbounds_ss.json '.inbounds[0].tag')"
-  printf "%s\n" "输入编号使用建议值"
-  printf "1. %s\n" "icook.hk"
-  printf "2. %s\n" "www.digitalocean.com"
-  printf "3. %s\n" "www.garmin.com"
-  printf "4. %s\n" "amp.cloudflare.com"
-  read -p "输入新的 CF 节点地址 [留空则使用现有值 ${cf_node_current}]: " cf_node_new
-  case "${cf_node_new}" in
-    "1") cf_node_new="icook.hk" ;;
-    "2") cf_node_new="www.digitalocean.com" ;;
-    "3") cf_node_new="www.garmin.com" ;;
-    "4") cf_node_new="amp.cloudflare.com" ;;
-  esac
-  if [ -z "${cf_node_new}" ]; then
-    cf_node_new="${cf_node_current}"
-  fi
-  write_json /usr/local/etc/xray/05_inbounds_ss.json ".inbounds[0].tag" "\"${cf_node_new}\""
-  sleep 1
-  printf "%s\n" "CF 节点己变更为 ${cf_node_new}"
-  show_links
+  if [ -f "/usr/local/bin/xray" ]; then
+    local cf_node_current="$(read_json /usr/local/etc/xray/05_inbounds_ss.json '.inbounds[0].tag')"
+    printf "%s\n" "输入编号使用建议值"
+    printf "1. %s\n" "icook.hk"
+    printf "2. %s\n" "www.digitalocean.com"
+    printf "3. %s\n" "www.garmin.com"
+    printf "4. %s\n" "amp.cloudflare.com"
+    read -p "输入新的 CF 节点地址 [留空则使用现有值 ${cf_node_current}]: " cf_node_new
+    case "${cf_node_new}" in
+      "1") cf_node_new="icook.hk" ;;
+      "2") cf_node_new="www.digitalocean.com" ;;
+      "3") cf_node_new="www.garmin.com" ;;
+      "4") cf_node_new="amp.cloudflare.com" ;;
+    esac
+    if [ -z "${cf_node_new}" ]; then
+      cf_node_new="${cf_node_current}"
+    fi
+    write_json /usr/local/etc/xray/05_inbounds_ss.json ".inbounds[0].tag" "\"${cf_node_new}\""
+    sleep 1
+    printf "%s\n" "CF 节点己变更为 ${cf_node_new}"
+    show_links
   fi
 }
 
@@ -683,7 +682,6 @@ rm_xwall() {
 
 show_menu() {
   echo ""
-  echo "1) 安装 VLESS + Trojan"
   if [ -f "/usr/local/bin/xray" ]; then
   echo "----------域名管理----------"
   echo "2) 修复证书 / 更换域名"
@@ -695,6 +693,8 @@ show_menu() {
   echo "6) 更新 trojan-go"
   echo "----------卸载脚本----------"
   echo "7) 卸载脚本与全部组件"
+  else
+  echo "1) 安装 VLESS + Trojan"
   fi
   echo ""
 }
