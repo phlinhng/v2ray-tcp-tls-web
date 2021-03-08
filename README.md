@@ -3,7 +3,7 @@ automated script for xray-core and trojan-go
 
 ## Usage
 ```sh
-curl -fsSL https://raw.staticdn.net/phlinhng/v2ray-tcp-tls-web/vless/src/xwall.sh -o ~/xwall.sh && bash ~/xwall.sh
+curl -fsSL https://raw.staticdn.net/phlinhng/v2ray-tcp-tls-web/main/src/xwall.sh -o ~/xwall.sh && bash ~/xwall.sh
 ```
 To run the script again once downloaded, just use the following command:
 ```
