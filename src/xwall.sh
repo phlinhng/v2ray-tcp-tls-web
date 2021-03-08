@@ -27,7 +27,8 @@ RED="0;31m"      # Error message
 GREEN="0;32m"    # Success message
 LGREEN="1;32m"   # Success message 2
 YELLOW="0;33m"   # Warning message
-BLUE="0;36m"     # Info message
+LYELLOW="1;33m"  # Info message 1
+BLUE="0;36m"     # Info message 2
 
 colorEcho(){
   # copied from v2ray official script
@@ -122,7 +123,7 @@ continue_prompt() {
 build_web() {
   if [ ! -f "/var/www/html/index.html" ]; then
     # choose and copy a random  template for dummy web pages
-    local template="$(curl -s https://${raw_proxy}/phlinhng/web-templates/master/list.txt | shuf -n  1)"
+    local template="$(curl -sL https://${raw_proxy}/phlinhng/web-templates/master/list.txt | shuf -n  1)"
     wget -q --show-progress https://${raw_proxy}/phlinhng/web-templates/master/${template} -O /tmp/template.zip
     mkdir -p /var/www/html
     unzip -q /tmp/template.zip -d /var/www/html
@@ -230,8 +231,9 @@ init_cert() {
     printf "Cretated: %s\n" "/var/www/acme"
   fi
   certbot register -m "$RANDOM@$1" --agree-tos --no-eff-email -n
-  certbot certonly --webroot -w "/var/www/acme" -d $1 --key-type ecdsa -n
-  (crontab -l 2>/dev/null; echo "8 7 */4 * * certbot renew -n -q --post-hook \"systemctl restart xray\" >/dev/null >/dev/null") | crontab -
+  # TODO: ecdsa cert will be available from cetbot 1.10+ with args "--key-type ecdsa"
+  certbot certonly --webroot -w "/var/www/acme" -d $1 -n -q
+  (crontab -l 2>/dev/null; echo "8 7 */4 * * certbot renew -n -q --post-hook \"systemctl restart xray\" >/dev/null 2>&1") | crontab -
 }
 
 get_trojan() {
@@ -267,7 +269,7 @@ get_trojan() {
 
     cd $(mktemp -d)
     wget -q --show-progress "${trojango_link}" -O trojan-go.zip
-    unzip trojan-go.zip && rm -rf trojan-go.zip
+    unzip -q trojan-go.zip && rm -rf trojan-go.zip
     $(which mv) trojan-go /usr/bin/trojan-go && $(which chmod) +x /usr/bin/trojan-go
     colorEcho ${GREEN} "trojan-go has been updated."
   fi
@@ -537,7 +539,7 @@ fix_cert() {
     while true; do
       read -rp "解析到本 VPS 的域名: " V2_DOMAIN
       if checkIP "${V2_DOMAIN}"; then
-        colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始修复证书"
+        colorEcho $LYELLOW "域名 ${V2_DOMAIN} 解析正确, 即将开始修复证书"
         break
       else
         colorEcho ${RED} "域名 ${V2_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
@@ -581,7 +583,7 @@ install_xray() {
   while true; do
     read -rp "解析到本 VPS 的域名: " V2_DOMAIN
     if checkIP "${V2_DOMAIN}"; then
-      colorEcho ${GREEN} "域名 ${V2_DOMAIN} 解析正确, 即将开始安装"
+      colorEcho $LYELLOW "域名 ${V2_DOMAIN} 解析正确, 即将开始安装"
       break
     else
       colorEcho ${RED} "域名 ${V2_DOMAIN} 解析有误 (yes: 强制继续, no: 重新输入, quit: 离开)"
@@ -616,7 +618,7 @@ install_xray() {
 
   local uuid="$(cat '/proc/sys/kernel/random/uuid')"
   local path="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c $((10+$RANDOM%10)))"
-  local cf_node="$(curl -s https://${raw_proxy}/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
+  local cf_node="$(curl -sL https://${raw_proxy}/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
 
   colorEchoFlush $BLUE "设置 XRay"
   set_xray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}"
@@ -633,7 +635,7 @@ install_xray() {
   colorEcho $LGREEN "完成: 设置 Nginx"
 
   colorEchoFlush $BLUE "申请 SSL 证书"
-  init_cert "${V2_DOMAIN}" | writeLog >> $log_path
+  init_cert "${V2_DOMAIN}" 2>&1 | writeLog >> $log_path
   colorEcho $LGREEN "完成: 申请 SSL 证书"
 
   # activate services
