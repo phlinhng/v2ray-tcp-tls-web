@@ -234,7 +234,7 @@ init_cert() {
   fi
   certbot register -m "$RANDOM@$1" --agree-tos --no-eff-email -n
   # TODO: ecdsa cert will be available from cetbot 1.10+ with args "--key-type ecdsa"
-  certbot certonly --webroot -w "/var/www/acme" -d $1 -n -q
+  certbot certonly --webroot -w "/var/www/acme" -d $1 -n
   (crontab -l 2>/dev/null; echo "8 7 */4 * * certbot renew -n -q --post-hook \"systemctl restart xray\" >/dev/null 2>&1") | crontab -
 }
 
@@ -558,8 +558,8 @@ fix_cert() {
     local cf_node="$(read_json /usr/local/etc/xray/05_inbounds_ss.json '.inbounds[0].tag')"
     local old_domain="$(read_json /usr/local/etc/xray/05_inbounds_vless.json '.inbounds[0].tag')"
 
-    certbot delete --cert-name ${old_domain} | writeLog >> $log_path
-    certbot certonly --webroot -w "/var/www/acme" -d ${V2_DOMAIN} --key-type ecdsa -n | writeLog >> $log_path
+    certbot delete --cert-name ${old_domain} -n 2>&1 | writeLog >> $log_path
+    certbot certonly --webroot -w "/var/www/acme" -d ${V2_DOMAIN} -n 2>&1 | writeLog >> $log_path
 
     set_xray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}"
     set_trojan "${uuid}" "${path}tj" "${V2_DOMAIN}"
