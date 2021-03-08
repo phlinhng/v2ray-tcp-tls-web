@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
-branch="xray-dev"
+branch="vless"
 VERSION="2.2.0"
 
 ip4_api="--ipv4 https://v4.ident.me/"
