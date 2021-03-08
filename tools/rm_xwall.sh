@@ -51,21 +51,41 @@ uninstall() {
 }
 
 # remove v2ray
-colorEcho ${BLUE} "Stopping v2ray service."
-${sudoCmd} systemctl stop v2ray
-${sudoCmd} systemctl disable v2ray
-uninstall "/etc/systemd/system/v2ray.service"
-colorEcho ${BLUE} "Removing v2ray binaries."
-uninstall "/usr/local/bin/v2ray"
-uninstall "/usr/local/bin/v2ctl"
-colorEcho ${BLUE} "Removing v2ray files."
-uninstall "/usr/local/etc/v2ray"
-uninstall"/usr/local/share/v2ray"
-uninstall "/var/log/v2ray"
-colorEcho ${BLUE} "Removing v2ray crontab."
-${sudoCmd} crontab -l | grep -v 'xray/geoip.dat' | ${sudoCmd} crontab -
-${sudoCmd} crontab -l | grep -v 'xray/geosite.dat' | ${sudoCmd} crontab -
-colorEcho ${GREEN} "Removed v2ray successfully."
+if [ -f "/usr/local/bin/v2ray" ]; then
+  colorEcho ${BLUE} "Stopping v2ray service."
+  ${sudoCmd} systemctl stop v2ray
+  ${sudoCmd} systemctl disable v2ray
+  uninstall "/etc/systemd/system/v2ray.service"
+  colorEcho ${BLUE} "Removing v2ray binaries."
+  uninstall "/usr/local/bin/v2ray"
+  uninstall "/usr/local/bin/v2ctl"
+  colorEcho ${BLUE} "Removing xray files."
+  uninstall "/usr/local/etc/v2ray"
+  uninstall"/usr/local/share/v2ray"
+  uninstall "/var/log/v2ray"
+  colorEcho ${BLUE} "Removing xray crontab."
+  ${sudoCmd} crontab -l | grep -v 'v2ray/geoip.dat' | ${sudoCmd} crontab -
+  ${sudoCmd} crontab -l | grep -v 'v2ray/geosite.dat' | ${sudoCmd} crontab -
+  colorEcho ${GREEN} "Removed xray successfully."
+fi
+
+# remove xray
+if [ -f "/usr/local/bin/xray" ]; then
+  colorEcho ${BLUE} "Stopping xray service."
+  ${sudoCmd} systemctl stop xray
+  ${sudoCmd} systemctl disable xray
+  uninstall "/etc/systemd/system/xray.service"
+  colorEcho ${BLUE} "Removing xray binaries."
+  uninstall "/usr/local/bin/xray"
+  colorEcho ${BLUE} "Removing xray files."
+  uninstall "/usr/local/etc/xray"
+  uninstall"/usr/local/share/xray"
+  uninstall "/var/log/xray"
+  colorEcho ${BLUE} "Removing xray crontab."
+  ${sudoCmd} crontab -l | grep -v 'xray/geoip.dat' | ${sudoCmd} crontab -
+  ${sudoCmd} crontab -l | grep -v 'xray/geosite.dat' | ${sudoCmd} crontab -
+  colorEcho ${GREEN} "Removed xray successfully."
+fi
 
 # remove trojan-go
 if [ -f "/usr/bin/trojan-go" ]; then
@@ -86,7 +106,43 @@ colorEcho ${BLUE} "Removing dummy site."
 ${sudoCmd} $(which rm) -rf /var/www/acme
 ${sudoCmd} $(which rm) -rf /var/www/html/*
 
+# remove naive
+if [ -f "/usr/local/bin/naive" ]; then
+  colorEcho ${BLUE} "Shutting down naiveproxy service."
+  ${sudoCmd} systemctl stop naive
+  ${sudoCmd} systemctl disable naive
+  uninstall /etc/systemd/system/naive.service
+  colorEcho ${BLUE} "Removing naiveproxy binaries."
+  uninstall /usr/local/bin/naive
+  colorEcho ${BLUE} "Removing naiveproxy files."
+  uninstall /usr/local/etc/naive
+  colorEcho ${GREEN} "Removed naiveproxy successfully."
+fi
+
+# remove caddy
+if [ -f "/usr/local/bin/caddy" ]; then
+  colorEcho ${BLUE} "Shutting down caddy service."
+  ${sudoCmd} systemctl stop caddy
+  ${sudoCmd} systemctl disable caddy
+  uninstall /etc/systemd/system/caddy.service
+  colorEcho ${BLUE} "Removing caddy binaries & files."
+  uninstall /usr/local/bin/caddy
+  uninstall /usr/local/etc/caddy
+  colorEcho ${BLUE} "Removing caddy user."
+  ${sudoCmd} userdel caddy
+  ${sudoCmd} groupdel caddy
+  colorEcho ${GREEN} "Removed caddy successfully."
+fi
+
 # remove acme.sh
+if [ -d "/root/.acme.sh" ] || [ -d "~/.acme.sh" ]; then
+  colorEcho ${BLUE} "Removing acme.sh"
+  ${sudoCmd} bash /root/.acme.sh/acme.sh --uninstall
+  uninstall /root/.acme.sh
+  colorEcho ${GREEN} "Removed acme.sh successfully."
+fi
+
+# remove cerbot
 colorEcho ${BLUE} "Removing certbot"
 ${sudoCmd} ${systemPackage} remove certbot -y
 uninstall /etc/letsencrypt
