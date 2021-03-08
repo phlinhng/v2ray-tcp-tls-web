@@ -136,7 +136,7 @@ build_web() {
 }
 
 checkIP() {
-  local realIP4="$(curl -s ${ip4_api} -m 5)"
+  local realIP4="$(curl -sL ${ip4_api} -m 5)"
   local resolvedIP4="$(curl https://cloudflare-dns.com/dns-query\?name\=$1\&type\=A -sSL -H 'accept: application/dns-json' | jq ".Answer[0].data" --raw-output)"
 
   [ ! -z "${realIP4}" ] && printf "%s %s\n" "detected IPv4 address:" "${realIP4}" | writeLog >> $log_path
@@ -146,7 +146,7 @@ checkIP() {
     echo "A record matched." | writeLog >> $log_path
     return 0
   else
-    local realIP6="$(curl -s ${ip6_api} -m 5)"
+    local realIP6="$(curl -sL ${ip6_api} -m 5)"
     local resolvedIP6="$(curl https://cloudflare-dns.com/dns-query\?name\=$1\&type\=AAAA -sSL -H 'accept: application/dns-json' | jq ".Answer[0].data" --raw-output)"
     [ ! -z "${realIP6}" ] && printf "%s %s\n" "detected IPv6 address:" "${realIP6}" | writeLog >> $log_path
     [ ! -z "${resolvedIP6}" ] && printf "%s %s\n" "found AAAA record:" "${resolvedIP6}" | writeLog >> $log_path
