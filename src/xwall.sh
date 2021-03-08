@@ -9,10 +9,9 @@ VERSION="2.2.0"
 ip4_api="--ipv4 https://v4.ident.me/"
 ip6_api="--ipv6 https://v6.ident.me/"
 
-gh_proxy="github.phlin.workers.dev"
-raw_proxy="gh-raw.phlin.workers.dev"
+raw_proxy="raw.staticdn.net"
 api_proxy="gh-api.phlin.workers.dev"
-gh_proxy_release="gh-proxy.phlin.workers.dev"
+gh_proxy="gh-proxy.phlin.workers.dev"
 
 log_path="/var/log/xwall.log"
 
@@ -124,10 +123,10 @@ build_web() {
   if [ ! -f "/var/www/html/index.html" ]; then
     # choose and copy a random  template for dummy web pages
     local template="$(curl -s https://${raw_proxy}/phlinhng/web-templates/master/list.txt | shuf -n  1)"
-    wget -q https://${raw_proxy}/phlinhng/web-templates/master/${template} -O /tmp/template.zip
+    wget -q --show-progress https://${raw_proxy}/phlinhng/web-templates/master/${template} -O /tmp/template.zip
     mkdir -p /var/www/html
     unzip -q /tmp/template.zip -d /var/www/html
-    wget -q https://${raw_proxy}/phlinhng/v2ray-tcp-tls-web/${branch}/custom/robots.txt -O /var/www/html/robots.txt
+    wget -q --show-progress https://${raw_proxy}/phlinhng/v2ray-tcp-tls-web/${branch}/custom/robots.txt -O /var/www/html/robots.txt
   else
     echo "Dummy website existed. Skip building."
   fi
@@ -159,7 +158,7 @@ checkIP() {
 }
 
 show_links() {
-  if [ -f "/usr/local/bin/v2ray" ]; then
+  if [ -f "/usr/local/bin/xray" ]; then
     local uuid="$(read_json /usr/local/etc/xray/05_inbounds_vless.json '.inbounds[0].settings.clients[0].id')"
     local path="$(read_json /usr/local/etc/xray/05_inbounds_ss.json '.inbounds[0].streamSettings.wsSettings.path')"
     local sni="$(read_json /usr/local/etc/xray/05_inbounds_vless.json '.inbounds[0].tag')"
@@ -211,16 +210,16 @@ show_links() {
 
 preinstall() {
   # turning off selinux
-  setenforce 0 2>/dev/null
+  setenforce 0
   echo "SELINUX=disable" > /etc/selinux/config
 
   # turning off firewall
-  systemctl stop firewalld 2>/dev/null
-  systemctl disable firewalld 2>/dev/null
-  ufw disable 2>/dev/null
+  systemctl stop firewalld
+  systemctl disable firewalld
+  ufw disable
 
   # get dependencies
-  ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y 2>/dev/null # centos
+  ${PACKAGE_MANAGEMENT_INSTALL} epel-release -y # centos
   ${PACKAGE_MANAGEMENT_UPDATE} -y
   ${PACKAGE_MANAGEMENT_INSTALL} coreutils curl wget unzip jq certbot nginx -y
 }
@@ -242,7 +241,7 @@ get_trojan() {
     echo "Getting the latest version of trojan-go"
     local latest_version="$(curl -s "https://${api_proxy}/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
     echo "${latest_version}"
-    local trojango_link="https://${gh_proxy_release}/github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${TJ_MACHINE}.zip"
+    local trojango_link="https://${gh_proxy}/github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${TJ_MACHINE}.zip"
 
     mkdir -p "/etc/trojan-go"
 
@@ -256,15 +255,15 @@ get_trojan() {
     echo "Building trojan-go.service"
     mv example/trojan-go.service /etc/systemd/system/trojan-go.service
 
-    systemctl daemon-reload
-    systemctl enable trojan-go
+    systemctl daemon-reload 2>&1 | writeLog >> $log_path
+    systemctl enable trojan-go 2>&1 | writeLog >> $log_path
 
     echo "trojan-go is installed."
   else
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
     local latest_version="$(curl -s "https://${api_proxy}/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
     echo "${latest_version}"
-    local trojango_link="https://${gh_proxy_release}/github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${TJ_MACHINE}.zip"
+    local trojango_link="https://${gh_proxy}/github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${TJ_MACHINE}.zip"
 
     cd $(mktemp -d)
     wget -q --show-progress "${trojango_link}" -O trojan-go.zip
@@ -275,7 +274,7 @@ get_trojan() {
 }
 
 set_xray_systemd() {
-  cat > "/etc/systemd/system/v2ray.service" <<-EOF
+  cat > "/etc/systemd/system/xray.service" <<-EOF
 [Unit]
 Description=Xray - A unified platform for anti-censorship
 Documentation=https://github.com/xtls
@@ -304,7 +303,7 @@ get_xray() {
     echo "Getting the latest version of xray-core"
     latest_version=`curl -s "https://${api_proxy}/repos/XTLS/Xray-core/releases/latest" | jq '.tag_name' --raw-output`
     echo "${latest_version}"
-    local xray_link="https://${gh_proxy_release}/github.com/XTLS/Xray-core/releases/download/${latest_version}/Xray-linux-${V2_MACHINE}.zip"
+    local xray_link="https://${gh_proxy}/github.com/XTLS/Xray-core/releases/download/${latest_version}/Xray-linux-${V2_MACHINE}.zip"
 
     $(which mkdir) -p "/usr/local/etc/xray"
     printf "Cretated: %s\n" "/usr/local/etc/xray"
@@ -324,15 +323,15 @@ get_xray() {
     echo "Building xray.service"
     set_xray_systemd
 
-    systemctl daemon-reload
-    systemctl enable xray
+    systemctl daemon-reload 2>&1 | writeLog >> $log_path
+    systemctl enable xray 2>&1 | writeLog >> $log_path
 
-    colorEcho ${GREEN} "XRay-Core ${latest_version} is installed."
+    echo "XRay-Core ${latest_version} is installed."
   else
     echo "Getting the latest version of xray-core"
     latest_version=`curl -s "https://${api_proxy}/repos/XTLS/Xray-core/releases/latest" | jq '.tag_name' --raw-output`
     echo "${latest_version}"
-    local xray_link="https://${gh_proxy_release}/https://github.com/XTLS/Xray-core/releases/download/${latest_version}/Xray-linux-${V2_MACHINE}.zip"
+    local xray_link="https://${gh_proxy}/github.com/XTLS/Xray-core/releases/download/${latest_version}/Xray-linux-${V2_MACHINE}.zip"
 
     cd $(mktemp -d)
     wget -q --show-progress "${xray_link}" -O xray-core.zip
@@ -575,6 +574,10 @@ fix_cert() {
 }
 
 install_xray() {
+  colorEchoFlush $BLUE "安装依赖包 coreutils curl wget unzip jq certbot nginx"
+  preinstall 2>&1 | writeLog >> $log_path
+  colorEcho $LGREEN "完成: 安装依赖包 coreutils curl wget unzip jq certbot nginx"
+
   while true; do
     read -rp "解析到本 VPS 的域名: " V2_DOMAIN
     if checkIP "${V2_DOMAIN}"; then
@@ -591,10 +594,6 @@ install_xray() {
   done
 
   echo "Start xray installation for domain ${V2_DOMAIN}" | writeLog >> $log_path
-
-  colorEchoFlush $BLUE "安装依赖包 coreutils curl wget unzip jq certbot nginx"
-  preinstall | writeLog >> $log_path
-  colorEcho $LGREEN "完成: 安装依赖包 coreutils curl wget unzip jq certbot nginx"
 
   colorEchoFlush $BLUE "获取 xray-core\r"
   get_xray | writeLog >> $log_path
@@ -634,15 +633,15 @@ install_xray() {
   colorEcho $LGREEN "完成: 设置 Nginx"
 
   colorEchoFlush $BLUE "申请 SSL 证书"
-  init_cert | writeLog >> $log_path
+  init_cert "${V2_DOMAIN}" | writeLog >> $log_path
   colorEcho $LGREEN "完成: 申请 SSL 证书"
 
   # activate services
   colorEchoFlush $BLUE "启动 systemd 进程"
   systemctl daemon-reload | writeLog >> $log_path
   systemctl reset-failed | writeLog >> $log_path
-  systemctl restart trojan-go | writeLog >> $log_path
-  systemctl restart xray | writeLog >> $log_path
+  systemctl restart trojan-go 2>&1 | writeLog >> $log_path
+  systemctl restart xray 2>&1 | writeLog >> $log_path
 
   colorEcho $LGREEN "安装 XRay + Trojan-Go 成功!"
   show_links
