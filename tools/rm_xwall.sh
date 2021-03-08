@@ -9,29 +9,24 @@ else
   sudoCmd=""
 fi
 
-#copied & modified from atrandys trojan scripts
-#copy from 秋水逸冰 ss scripts
-if [[ -f /etc/redhat-release ]]; then
-  release="centos"
-  systemPackage="yum"
-elif cat /etc/issue | grep -Eqi "debian"; then
-  release="debian"
-  systemPackage="apt-get"
-elif cat /etc/issue | grep -Eqi "ubuntu"; then
-  release="ubuntu"
-  systemPackage="apt-get"
-elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
-  release="centos"
-  systemPackage="yum"
-elif cat /proc/version | grep -Eqi "debian"; then
-  release="debian"
-  systemPackage="apt-get"
-elif cat /proc/version | grep -Eqi "ubuntu"; then
-  release="ubuntu"
-  systemPackage="apt-get"
-elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
-  release="centos"
-  systemPackage="yum"
+if [[ "$(command -v apt)" ]]; then
+  PACKAGE_MANAGEMENT_UPDATE='apt update'
+  PACKAGE_MANAGEMENT_INSTALL='apt install'
+  PACKAGE_MANAGEMENT_REMOVE='apt remove'
+elif [[ "$(command -v yum)" ]]; then
+  PACKAGE_MANAGEMENT_UPDATE='yum update'
+  PACKAGE_MANAGEMENT_INSTALL='yum install'
+  PACKAGE_MANAGEMENT_REMOVE='yum remove'
+elif [[ "$(command -v dnf)" ]]; then
+  PACKAGE_MANAGEMENT_UPDATE='dnf update'
+  PACKAGE_MANAGEMENT_INSTALL='dnf install'
+  PACKAGE_MANAGEMENT_REMOVE='dnf remove'
+elif [[ "$(command -v zypper)" ]]; then
+  PACKAGE_MANAGEMENT_INSTALL='zypper install'
+  PACKAGE_MANAGEMENT_REMOVE='zypper remove'
+elif [[ "$(command -v pacman)" ]]; then
+  PACKAGE_MANAGEMENT_INSTALL='pacman -S'
+  PACKAGE_MANAGEMENT_REMOVE='pacman -R'
 fi
 
 # copied from v2ray official script
@@ -49,25 +44,6 @@ uninstall() {
   ${sudoCmd} $(which rm) -rf $1
   printf "Removed: %s\n" $1
 }
-
-# remove v2ray
-if [ -f "/usr/local/bin/v2ray" ]; then
-  colorEcho ${BLUE} "Stopping v2ray service."
-  ${sudoCmd} systemctl stop v2ray
-  ${sudoCmd} systemctl disable v2ray
-  uninstall "/etc/systemd/system/v2ray.service"
-  colorEcho ${BLUE} "Removing v2ray binaries."
-  uninstall "/usr/local/bin/v2ray"
-  uninstall "/usr/local/bin/v2ctl"
-  colorEcho ${BLUE} "Removing xray files."
-  uninstall "/usr/local/etc/v2ray"
-  uninstall"/usr/local/share/v2ray"
-  uninstall "/var/log/v2ray"
-  colorEcho ${BLUE} "Removing xray crontab."
-  ${sudoCmd} crontab -l | grep -v 'v2ray/geoip.dat' | ${sudoCmd} crontab -
-  ${sudoCmd} crontab -l | grep -v 'v2ray/geosite.dat' | ${sudoCmd} crontab -
-  colorEcho ${GREEN} "Removed xray successfully."
-fi
 
 # remove xray
 if [ -f "/usr/local/bin/xray" ]; then
@@ -106,47 +82,13 @@ colorEcho ${BLUE} "Removing dummy site."
 ${sudoCmd} $(which rm) -rf /var/www/acme
 ${sudoCmd} $(which rm) -rf /var/www/html/*
 
-# remove naive
-if [ -f "/usr/local/bin/naive" ]; then
-  colorEcho ${BLUE} "Shutting down naiveproxy service."
-  ${sudoCmd} systemctl stop naive
-  ${sudoCmd} systemctl disable naive
-  uninstall /etc/systemd/system/naive.service
-  colorEcho ${BLUE} "Removing naiveproxy binaries."
-  uninstall /usr/local/bin/naive
-  colorEcho ${BLUE} "Removing naiveproxy files."
-  uninstall /usr/local/etc/naive
-  colorEcho ${GREEN} "Removed naiveproxy successfully."
-fi
-
-# remove caddy
-if [ -f "/usr/local/bin/caddy" ]; then
-  colorEcho ${BLUE} "Shutting down caddy service."
-  ${sudoCmd} systemctl stop caddy
-  ${sudoCmd} systemctl disable caddy
-  uninstall /etc/systemd/system/caddy.service
-  colorEcho ${BLUE} "Removing caddy binaries & files."
-  uninstall /usr/local/bin/caddy
-  uninstall /usr/local/etc/caddy
-  colorEcho ${BLUE} "Removing caddy user."
-  ${sudoCmd} userdel caddy
-  ${sudoCmd} groupdel caddy
-  colorEcho ${GREEN} "Removed caddy successfully."
-fi
-
-# remove acme.sh
-if [ -d "/root/.acme.sh" ] || [ -d "~/.acme.sh" ]; then
-  colorEcho ${BLUE} "Removing acme.sh"
-  ${sudoCmd} bash /root/.acme.sh/acme.sh --uninstall
-  uninstall /root/.acme.sh
+# remove cerbot
+if [ -d "etc/letsencrypt" ]; then
+  colorEcho ${BLUE} "Removing certbot"
+  ${sudoCmd} ${PACKAGE_MANAGEMENT_REMOVE} certbot -y
+  uninstall /etc/letsencrypt
+  ${sudoCmd} crontab -l | grep -v 'certbot' | ${sudoCmd} crontab -
   colorEcho ${GREEN} "Removed acme.sh successfully."
 fi
-
-# remove cerbot
-colorEcho ${BLUE} "Removing certbot"
-${sudoCmd} ${systemPackage} remove certbot -y
-uninstall /etc/letsencrypt
-${sudoCmd} crontab -l | grep -v 'certbot' | ${sudoCmd} crontab -
-colorEcho ${GREEN} "Removed acme.sh successfully."
 
 colorEcho ${BLUE} "卸载完成"
