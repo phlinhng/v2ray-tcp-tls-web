@@ -686,18 +686,19 @@ show_menu() {
   echo ""
   if [ -f "/usr/local/bin/xray" ]; then
   echo "----------域名管理----------"
-  echo "2) 修复证书 / 更换域名"
-  echo "3) 自定义 Cloudflare 节点"
+  echo "1) 修复证书 / 更换域名"
+  echo "2) 自定义 Cloudflare 节点"
   echo "----------显示配置----------"
-  echo "4) 显示链接"
+  echo "3) 显示链接"
   echo "----------组件管理----------"
-  echo "5) 更新 xray-core"
-  echo "6) 更新 trojan-go"
+  echo "4) 更新 xray-core"
+  echo "5) 更新 trojan-go"
   echo "----------卸载脚本----------"
-  echo "7) 卸载脚本与全部组件"
+  echo "6) 卸载脚本与全部组件"
   else
-  echo "1) 安装 VLESS + Trojan"
+  echo "0) 安装 VLESS + Trojan"
   fi
+  echo "7) 退出"
   echo ""
 }
 
@@ -713,13 +714,13 @@ menu() {
     show_menu
     read -rp "选择操作 [输入任意值退出]: " opt
     case "${opt}" in
-      "1") install_xray && continue_prompt ;;
-      "2") fix_cert && continue_prompt ;;
-      "3") edit_cf_node && continue_prompt ;;
-      "4") show_links && continue_prompt ;;
-      "5") get_xray && continue_prompt ;;
-      "6") get_trojan && continue_prompt ;;
-      "7") rm_xwall ;;
+      "0") install_xray && continue_prompt ;;
+      "1") fix_cert && continue_prompt ;;
+      "2") edit_cf_node && continue_prompt ;;
+      "3") show_links && continue_prompt ;;
+      "4") get_xray && continue_prompt ;;
+      "5") get_trojan && continue_prompt ;;
+      "6") rm_xwall ;;
       *) break ;;
     esac
   done
