@@ -3,7 +3,7 @@ export LC_ALL=C
 export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
-branch="vless"
+branch="main"
 VERSION="2.2.0"
 
 ip4_api="--ipv4 https://v4.ident.me/"
@@ -12,6 +12,8 @@ ip6_api="--ipv6 https://v6.ident.me/"
 raw_proxy="raw.staticdn.net"
 api_proxy="gh-api.phlin.workers.dev"
 gh_proxy="gh-proxy.phlin.workers.dev"
+
+cf_node_default="icook.tw"
 
 log_path="/var/log/xwall.log"
 
@@ -127,7 +129,7 @@ build_web() {
     wget -q --show-progress https://${raw_proxy}/phlinhng/web-templates/master/${template} -O /tmp/template.zip
     mkdir -p /var/www/html
     unzip -q /tmp/template.zip -d /var/www/html
-    wget -q --show-progress https://${raw_proxy}/phlinhng/v2ray-tcp-tls-web/${branch}/custom/robots.txt -O /var/www/html/robots.txt
+    echo -ne "User-agent: *\nDisallow: /\n" > /var/www/html/robots.txt
   else
     echo "Dummy website existed. Skip building."
   fi
@@ -618,10 +620,9 @@ install_xray() {
 
   local uuid="$(cat '/proc/sys/kernel/random/uuid')"
   local path="/$(cat '/proc/sys/kernel/random/uuid' | sed -e 's/-//g' | tr '[:upper:]' '[:lower:]' | head -c $((10+$RANDOM%10)))"
-  local cf_node="$(curl -sL https://${raw_proxy}/phlinhng/v2ray-tcp-tls-web/${branch}/custom/cf_node)"
 
   colorEchoFlush $BLUE "设置 XRay"
-  set_xray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node}"
+  set_xray "${uuid}" "${path}" "${V2_DOMAIN}" "${cf_node_default}"
   colorEcho $LGREEN "完成: 设置 XRay"
 
   colorEchoFlush $BLUE "设置 Trojan"
