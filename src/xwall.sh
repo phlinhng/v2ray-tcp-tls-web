@@ -137,7 +137,7 @@ build_web() {
 
 checkIP() {
   local realIP4="$(curl -sL ${ip4_api} -m 5)"
-  local resolvedIP4="$(curl -sSL https://cloudflare-dns.com/dns-query\?name\=$1\&type\=A -H 'accept: application/dns-json' | jq ".Answer | .[] | select(.type == 1)" | jq ".data" --raw-output)"
+  local resolvedIP4="$(curl -sSL https://cloudflare-dns.com/dns-query\?name\=$1\&type\=A -H 'accept: application/dns-json' | jq ".Answer | .[] | select(.type == 1) | .data" --raw-output)"
 
   [ ! -z "${realIP4}" ] && printf "%s %s\n" "detected IPv4 address:" "${realIP4}" | writeLog >> $log_path
   ([ ! -z "${resolvedIP4}" ] && [ "${resolvedIP4}" != "null" ]) && printf "%s %s\n" "found A record:" "${resolvedIP4}" | writeLog >> $log_path
@@ -147,7 +147,7 @@ checkIP() {
     return 0
   else
     local realIP6="$(curl -sL ${ip6_api} -m 5)"
-    local resolvedIP6="$(curl -sSL https://cloudflare-dns.com/dns-query\?name\=$1\&type\=AAAA -H 'accept: application/dns-json' | jq ".Answer | .[] | select(.type == 28)" | jq ".data" --raw-output)"
+    local resolvedIP6="$(curl -sSL https://cloudflare-dns.com/dns-query\?name\=$1\&type\=AAAA -H 'accept: application/dns-json' | jq ".Answer | .[] | select(.type == 28) | .data" --raw-output)"
     [ ! -z "${realIP6}" ] && printf "%s %s\n" "detected IPv6 address:" "${realIP6}" | writeLog >> $log_path
     ([ ! -z "${resolvedIP6}" ] && [ "${resolvedIP6}" != "null" ]) && printf "%s %s\n" "found AAAA record:" "${resolvedIP6}" | writeLog >> $log_path
     if [[ "${realIP6}" == "${resolvedIP6}" ]]; then
