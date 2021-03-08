@@ -525,7 +525,7 @@ EOF
 }
 
 set_nginx() {
-  rm /etc/nginx/conf.d/vless_fallback.conf
+  rm -f /etc/nginx/conf.d/vless_fallback.conf
   cat > /etc/nginx/conf.d/vless_fallback.conf <<-EOF
 server {
     listen 127.0.0.1:80;
