@@ -87,9 +87,10 @@ ${sudoCmd} $(which rm) -rf /var/www/acme
 ${sudoCmd} $(which rm) -rf /var/www/html/*
 
 # remove acme.sh
-colorEcho ${BLUE} "Removing acme.sh"
-${sudoCmd} bash /root/.acme.sh/acme.sh --uninstall
-uninstall /root/.acme.sh
+colorEcho ${BLUE} "Removing certbot"
+${sudoCmd} ${systemPackage} remove certbot -y
+uninstall /etc/letsencrypt
+${sudoCmd} crontab -l | grep -v 'certbot' | ${sudoCmd} crontab -
 colorEcho ${GREEN} "Removed acme.sh successfully."
 
 colorEcho ${BLUE} "卸载完成"

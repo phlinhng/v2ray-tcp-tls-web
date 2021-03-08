@@ -309,10 +309,10 @@ get_xray() {
     $(which mkdir) -p "/usr/local/etc/xray"
     printf "Cretated: %s\n" "/usr/local/etc/xray"
     $(which mkdir) -p "/usr/local/share/xray"
-    printf "Cretated: %s\n" "/usr/local/share/v2ray"
+    printf "Cretated: %s\n" "/usr/local/share/xray"
 
     cd $(mktemp -d)
-    wget -q --show-progress "${v2ray_link}" -O xray-core.zip
+    wget -q --show-progress "${xray_link}" -O xray-core.zip
     unzip -q xray-core.zip && $(which rm) -rf xray-core.zip
     $(which mv) xray /usr/local/bin/xray && $(which chmod) +x /usr/local/bin/xray
     printf "Installed: %s\n" "/usr/local/bin/xray"
@@ -563,7 +563,7 @@ fix_cert() {
     set_nginx "${V2_DOMAIN}"
     systemctl restart nginx 2>/dev/null
     systemctl restart trojan-go 2>/dev/null
-    systemctl restart v2ray 2>/dev/null
+    systemctl restart xray 2>/dev/null
 
     write_json /usr/local/etc/xray/05_inbounds_vless.json ".inbounds[0].tag" "\"${V2_DOMAIN}\""
 
@@ -674,7 +674,7 @@ edit_cf_node() {
 }
 
 rm_xwall() {
-  if [ -f "/usr/local/bin/v2ray" ]; then
+  if [ -f "/usr/local/bin/xray" ]; then
     wget -q https://${raw_proxy}/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_xwall.sh -O /tmp/rm_xwall.sh && bash /tmp/rm_xwall.sh
     exit 0
   fi
