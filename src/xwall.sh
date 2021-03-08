@@ -241,7 +241,7 @@ get_trojan() {
     echo "trojan-go is not installed. start installation"
 
     echo "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://${api_proxy}/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    local latest_version="$(curl -sL "https://${api_proxy}/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
     echo "${latest_version}"
     local trojango_link="https://${gh_proxy}/github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${TJ_MACHINE}.zip"
 
@@ -263,7 +263,7 @@ get_trojan() {
     echo "trojan-go is installed."
   else
     colorEcho ${BLUE} "Getting the latest version of trojan-go"
-    local latest_version="$(curl -s "https://${api_proxy}/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
+    local latest_version="$(curl -sL "https://${api_proxy}/repos/p4gefau1t/trojan-go/releases" | jq '.[0].tag_name' --raw-output)"
     echo "${latest_version}"
     local trojango_link="https://${gh_proxy}/github.com/p4gefau1t/trojan-go/releases/download/${latest_version}/trojan-go-linux-${TJ_MACHINE}.zip"
 
@@ -303,7 +303,7 @@ get_xray() {
     echo "XRay-Core is not installed. start installation"
 
     echo "Getting the latest version of xray-core"
-    latest_version=`curl -s "https://${api_proxy}/repos/XTLS/Xray-core/releases/latest" | jq '.tag_name' --raw-output`
+    latest_version=`curl -sL "https://${api_proxy}/repos/XTLS/Xray-core/releases/latest" | jq '.tag_name' --raw-output`
     echo "${latest_version}"
     local xray_link="https://${gh_proxy}/github.com/XTLS/Xray-core/releases/download/${latest_version}/Xray-linux-${V2_MACHINE}.zip"
 
@@ -331,7 +331,7 @@ get_xray() {
     echo "XRay-Core ${latest_version} is installed."
   else
     echo "Getting the latest version of xray-core"
-    latest_version=`curl -s "https://${api_proxy}/repos/XTLS/Xray-core/releases/latest" | jq '.tag_name' --raw-output`
+    latest_version=`curl -sL "https://${api_proxy}/repos/XTLS/Xray-core/releases/latest" | jq '.tag_name' --raw-output`
     echo "${latest_version}"
     local xray_link="https://${gh_proxy}/github.com/XTLS/Xray-core/releases/download/${latest_version}/Xray-linux-${V2_MACHINE}.zip"
 
