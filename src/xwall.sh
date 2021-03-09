@@ -548,12 +548,12 @@ fix_cert() {
         read -rp "若您确定域名解析正确, 可以继续进行修复作业. 强制继续? (yes/no/quit) " forceConfirm
         case "${forceConfirm}" in
           [yY]|[yY][eE][sS] ) break ;;
-          [qQ]|[qQ][uU][iI][tT] ) return 1 ;;
+          [qQ]|[qQ][uU][iI][tT] ) return 0;;
         esac
       fi
     done
 
-    [ -z "${V2_DOMAIN}" ] && return 1;
+    [ -z "${V2_DOMAIN}" ] && return 0;
 
     local uuid="$(read_json /usr/local/etc/xray/05_inbounds_vless.json '.inbounds[0].settings.clients[0].id')"
     local path="$(read_json /usr/local/etc/xray/05_inbounds_ss.json '.inbounds[0].streamSettings.wsSettings.path')"
@@ -692,7 +692,7 @@ show_menu() {
   echo "2) 自定义 Cloudflare 节点"
   echo "----------显示配置----------"
   echo "3) 显示链接"
-  echo "----------组件管理----------"
+  echo "----------更新管理----------"
   echo "4) 更新 xray-core"
   echo "5) 更新 trojan-go"
   echo "----------卸载脚本----------"
