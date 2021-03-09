@@ -4,7 +4,7 @@ export LANG=en_US
 export LANGUAGE=en_US.UTF-8
 
 branch="main"
-VERSION="2.2.0"
+VERSION="2.2.1"
 
 ip4_api="--ipv4 https://v4.ident.me/"
 ip6_api="--ipv6 https://v6.ident.me/"
@@ -548,10 +548,12 @@ fix_cert() {
         read -rp "若您确定域名解析正确, 可以继续进行修复作业. 强制继续? (yes/no/quit) " forceConfirm
         case "${forceConfirm}" in
           [yY]|[yY][eE][sS] ) break ;;
-          [qQ]|[qQ][uU][iI][tT] ) return 0 ;;
+          [qQ]|[qQ][uU][iI][tT] ) return 1 ;;
         esac
       fi
     done
+
+    [ -z "${V2_DOMAIN}" ] && return 1;
 
     local uuid="$(read_json /usr/local/etc/xray/05_inbounds_vless.json '.inbounds[0].settings.clients[0].id')"
     local path="$(read_json /usr/local/etc/xray/05_inbounds_ss.json '.inbounds[0].streamSettings.wsSettings.path')"
