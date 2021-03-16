@@ -173,7 +173,6 @@ show_links() {
     #https://github.com/XTLS/Xray-core/issues/91
     local uri_vless="${uuid}@${sni}:443?security=xtls&flow=rprx-xtls-direct#`urlEncode "${sni} (VLESS)"`"
     printf "%s\n" "vless://${uri_vless}"
-    printf "(WSS) %s:443 %s %s\n" "${sni}" "${uuid}" "${path}ws"
     echo ""
 
     colorEcho ${BLUE} "Trojan TLS"
@@ -190,7 +189,7 @@ show_links() {
     colorEcho ${YELLOW} "===============分 享 链 接 (CDN)==============="
     colorEcho ${BLUE} "VLESS WSS"
     #https://github.com/XTLS/Xray-core/issues/91
-    local uri_vless_wss="${uuid}@${cf_node}:443?type=ws&security=tls&host=${sni}&path=`urlEncode ${path}ws`&sni=${sni}#`urlEncode "${sni} (VLESS+WSS)"`"
+    local uri_vless_wss="${uuid}@${cf_node}:443?type=ws&security=tls&host=${sni}&path=`urlEncode ${path}ws?ed=2048`&sni=${sni}#`urlEncode "${sni} (VLESS+WSS)"`"
     printf "%s\n" "vless://${uri_vless_wss}"
     echo ""
 
