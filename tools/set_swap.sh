@@ -35,11 +35,11 @@ if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
   ${sudoCmd} swapon /swapfile
 
   # make swap permanent
-  echo "/swapfile swap swap defaults 0 0" | ${sudoCmd} tee -a /etc/fstab  >/dev/null
+  echo "/swapfile swap swap defaults 0 0" | ${sudoCmd} tee -a /etc/fstab
 
   # set swap percentage
-  ${sudoCmd} sysctl vm.swappiness=10
-  echo "vm.swappiness=10" | ${sudoCmd} tee -a /etc/sysctl.conf >/dev/null
+  ${sudoCmd} sysctl -w "vm.swappiness=10"
+  echo "vm.swappiness=10" | ${sudoCmd} tee -a /etc/sysctl.conf
 
   free -h
   colorEcho ${GREEN} "设置Swap成功"
