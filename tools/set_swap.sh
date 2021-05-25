@@ -39,6 +39,7 @@ if [[ ! $(cat /proc/swaps | wc -l) -gt 1 ]]; then
 
   # set swap percentage
   ${sudoCmd} sysctl -w "vm.swappiness=10"
+  # make systctl permanent
   echo "vm.swappiness=10" | ${sudoCmd} tee -a /etc/sysctl.conf
 
   free -h
