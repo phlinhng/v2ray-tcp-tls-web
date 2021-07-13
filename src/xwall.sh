@@ -100,6 +100,10 @@ write_json() {
   jq -r "$2 = $3" $1 > /tmp/tmp.$$.json && mv /tmp/tmp.$$.json $1 && sleep 1
 } ## write_json [path-to-file] [key] [value]
 
+raw_to_jsdelivr() {
+  printf %s "$1" | sed -E "s~raw.githubusercontent.com/(.+)/(.+)/(.+)/(.+)~cdn.jsdelivr.net/gh/\1/\2@\3/\4~g"
+}
+
 urlEncode() {
   printf %s "$1" | jq -s -R -r @uri
 }
@@ -125,8 +129,8 @@ continue_prompt() {
 build_web() {
   if [ ! -f "/var/www/html/index.html" ]; then
     # choose and copy a random  template for dummy web pages
-    local template="$(curl -sL https://${raw_proxy}/phlinhng/web-templates/master/list.txt | shuf -n  1)"
-    wget -q --show-progress https://${raw_proxy}/phlinhng/web-templates/master/${template} -O /tmp/template.zip
+    local template="$(curl -sL `raw_to_jsdelivr "https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt"` | shuf -n  1)"
+    wget -q --show-progress `raw_to_jsdelivr "https://raw.githubusercontent.com/phlinhng/web-templates/master/${template}" -O /tmp/template.zip
     mkdir -p /var/www/html
     unzip -q /tmp/template.zip -d /var/www/html
     echo -ne "User-agent: *\nDisallow: /\n" > /var/www/html/robots.txt
@@ -471,8 +475,8 @@ EOF
   ]
 }
 EOF
-  wget -q https://${raw_proxy}/phlinhng/v2ray-tcp-tls-web/${branch}/config/03_routing.json -O /usr/local/etc/xray/03_routing.json
-  wget -q https://${raw_proxy}/phlinhng/v2ray-tcp-tls-web/${branch}/config/06_outbounds.json -O /usr/local/etc/xray/06_outbounds.json
+  wget -q `raw_to_jsdelivr "https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/03_routing.json"` -O /usr/local/etc/xray/03_routing.json
+  wget -q `raw_to_jsdelivr "https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/config/06_outbounds.json"` -O /usr/local/etc/xray/06_outbounds.json
 }
 
 set_trojan() {
@@ -611,8 +615,8 @@ install_xray() {
 
   # set crontab to auto update geoip.dat and geosite.dat
   colorEchoFlush $BLUE "设置 geoip/geosite 更新任务\r"
-  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://${raw_proxy}/Loyalsoldier/v2ray-rules-dat/release/geoip.dat -O /usr/local/share/xray/geoip.dat >/dev/null >/dev/null") | crontab -
-  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q https://${raw_proxy}/Loyalsoldier/v2ray-rules-dat/release/geosite.dat -O /usr/local/share/xray/geosite.dat >/dev/null >/dev/null") | crontab -
+  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q `raw_to_jsdelivr "https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat"` -O /usr/local/share/xray/geoip.dat >/dev/null >/dev/null") | crontab -
+  (crontab -l 2>/dev/null; echo "0 7 * * * wget -q `raw_to_jsdelivr "https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat"` -O /usr/local/share/xray/geosite.dat >/dev/null >/dev/null") | crontab -
   echo "geoip/geosite crontab set" | writeLog >> $log_path
   colorEcho $LGREEN "完成: 设置 geoip/geosite 更新任务"
 
@@ -679,7 +683,7 @@ edit_cf_node() {
 
 rm_xwall() {
   if [ -f "/usr/local/bin/xray" ]; then
-    wget -q https://${raw_proxy}/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_xwall.sh -O /tmp/rm_xwall.sh && bash /tmp/rm_xwall.sh
+    wget -q `raw_to_jsdelivr" https://raw.githubusercontent.com/phlinhng/v2ray-tcp-tls-web/${branch}/tools/rm_xwall.sh"` -O /tmp/rm_xwall.sh && bash /tmp/rm_xwall.sh
     exit 0
   fi
 }
