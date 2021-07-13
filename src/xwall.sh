@@ -9,7 +9,6 @@ VERSION="2.2.1"
 ip4_api="--ipv4 https://v4.ident.me/"
 ip6_api="--ipv6 https://v6.ident.me/"
 
-raw_proxy="raw.staticdn.net"
 api_proxy="gh-api.phlin.workers.dev"
 gh_proxy="gh-proxy.phlin.workers.dev"
 
@@ -130,7 +129,7 @@ build_web() {
   if [ ! -f "/var/www/html/index.html" ]; then
     # choose and copy a random  template for dummy web pages
     local template="$(curl -sL `raw_to_jsdelivr "https://raw.githubusercontent.com/phlinhng/web-templates/master/list.txt"` | shuf -n  1)"
-    wget -q --show-progress `raw_to_jsdelivr "https://raw.githubusercontent.com/phlinhng/web-templates/master/${template}" -O /tmp/template.zip
+    wget -q --show-progress `raw_to_jsdelivr "https://raw.githubusercontent.com/phlinhng/web-templates/master/${template}"` -O /tmp/template.zip
     mkdir -p /var/www/html
     unzip -q /tmp/template.zip -d /var/www/html
     echo -ne "User-agent: *\nDisallow: /\n" > /var/www/html/robots.txt
