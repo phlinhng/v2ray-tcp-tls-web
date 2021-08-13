@@ -18,7 +18,7 @@ bash ~/xwall.sh
 
 ## Architecture
 + VLESS over TCP with [XTLS](https://github.com/XTLS/Go) powered by [xray-core](https://github.com/XTLS/xray-core)
-+ Trojan (protocol) and muxing powered by trojan-go (implementaion)
++ Trojan (protocol) and muxing powered by [trojan-go](https://github.com/p4gefau1t/trojan-go) (implementaion)
 + Trojan over WSS on Cloudflare powered by trojan-go and Cloudflare
 + Shadowsocks over WSS powered by [xray-core](https://github.com/XTLS/xray-core)
 + HTTP Website backend powered by nginx
@@ -32,9 +32,6 @@ bash ~/xwall.sh
 | Trojan | TLS | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Trojan | WSS | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | Shadowsocks | WSS | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-## Telegram
-https://t.me/technologyshare
 
 ## Credit
 + [Project V](https://www.v2fly.org/)
